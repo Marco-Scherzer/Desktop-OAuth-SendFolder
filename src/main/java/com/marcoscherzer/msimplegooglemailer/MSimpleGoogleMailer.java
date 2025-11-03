@@ -33,6 +33,7 @@ import org.apache.commons.codec.binary.Base64;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -50,7 +51,7 @@ public final class MSimpleGoogleMailer {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public MSimpleGoogleMailer(MSimpleKeyStore keystore, String applicationName) throws Exception {
-
+        checkStoreForExistingClientTokenOrReadItFromDirectoryAndDeleteFile(keystore);
 
         if (applicationName == null || applicationName.isBlank()) {
             throw new IllegalArgumentException("Application name must not be empty.");
@@ -61,6 +62,7 @@ public final class MSimpleGoogleMailer {
 
         String clientId = keystore.getToken("google-client-id");
         String clientSecret = keystore.getToken("google-client-secret");
+
         String accessToken = keystore.getToken("google-access-token");
         String refreshToken = keystore.getToken("google-refresh-token");
 
@@ -86,6 +88,36 @@ public final class MSimpleGoogleMailer {
         this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
                 .setApplicationName(applicationName)
                 .build();
+    }
+
+    /**
+     * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private static void checkStoreForExistingClientTokenOrReadItFromDirectoryAndDeleteFile(MSimpleKeyStore store) throws Exception {
+        File jsonFile = new File(System.getProperty("user.dir"), "client_secret.json");
+
+        if (jsonFile.exists()) {
+            JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+            GoogleClientSecrets secrets = GoogleClientSecrets.load(jsonFactory, new FileReader(jsonFile));
+
+            String clientId = secrets.getDetails().getClientId();
+            String clientSecret = secrets.getDetails().getClientSecret();
+
+            if (clientId != null && clientSecret != null) {
+                store.addToken("google-client-id", clientId).addToken("google-client-secret", clientSecret);
+                if (!jsonFile.delete()) {
+                    System.err.println("Warnung: client_secret.json konnte nicht gelöscht werden.");
+                } else {
+                    System.out.println("client_secret.json erfolgreich importiert und gelöscht.");
+                }
+            } else {
+                throw new IllegalStateException("client_secret.json enthält keine gültigen Daten.");
+            }
+        } else {
+            if (store.getToken("google-client-id") == null || store.getToken("google-client-secret") == null) {
+                throw new IllegalStateException("Kein client_secret.json gefunden und keine Client-Daten im Keystore. Bitte client_secret.json in " + System.getProperty("user.dir") + " ablegen.");
+            }
+        }
     }
 
     /**

@@ -18,6 +18,7 @@ public class MSimpleGoogleMailerService {
     private static SSLServerSocket serverSocket;
     private static BufferedReader reader;
     private static SSLSocket conSocket;
+    private static MSimpleKeyStore store;
 
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -26,18 +27,20 @@ public class MSimpleGoogleMailerService {
         try {
             //String pw = MConsoleUtil.promptPassword("Bitte Start Passwort eingeben:");
             String pw = "mypassword";
-            MSimpleKeyStore store = new MSimpleKeyStore(System.getProperty("user.dir") + "\\mystore.jks", pw);
+            String fromAdress ="Marco.Scherzer@outlook.com"; String toAdress =fromAdress;
 
-            checkStoreForExistingClientTokenOrReadItFromDirectoryAndDeleteFile(store);
+            store = new MSimpleKeyStore(System.getProperty("user.dir") + "\\mystore.jks", pw);
 
             MSimpleGoogleMailer mailer = new MSimpleGoogleMailer(store, "BackupMailer");
 
-            serverSocket = new MServerSocketConfig().createSocket(7777, 1);
+            serverSocket = new MServerSocketConfig().createSocket(store,7777, 1);
             Runtime.getRuntime().addShutdownHook(new Thread(() -> { exit(); }));
             
             while (true) {
-                    conSocket = (SSLSocket) serverSocket.accept();
-                    reader = new BufferedReader(new InputStreamReader(conSocket.getInputStream()));
+                conSocket = (SSLSocket) serverSocket.accept();
+                System.out.println("Verbindung akzeptiert von: " + conSocket.getInetAddress());
+                System.out.println("SSLSession: " + conSocket.getSession().getProtocol());
+                reader = new BufferedReader(new InputStreamReader(conSocket.getInputStream()));
                     StringBuilder messageBuilder = new StringBuilder();
                     String line;
                     while ((line = reader.readLine()) != null) {
@@ -45,7 +48,7 @@ public class MSimpleGoogleMailerService {
                     }
                     String message = messageBuilder.toString().trim();
                     System.out.println("Nachricht empfangen:\n" + message);
-                    MOutgoingMail mail = new MOutgoingMail("fromAdress","toAdress", "Mail").appendMessageText(message);
+                    MOutgoingMail mail = new MOutgoingMail(fromAdress,toAdress, "Mail").appendMessageText(message);
                     mailer.send(mail);
             }
 
@@ -57,35 +60,7 @@ public class MSimpleGoogleMailerService {
         }
     }
 
-    /**
-     * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-public static void checkStoreForExistingClientTokenOrReadItFromDirectoryAndDeleteFile(MSimpleKeyStore store) throws Exception {
-    File jsonFile = new File(System.getProperty("user.dir"), "client_secret.json");
 
-    if (jsonFile.exists()) {
-        JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-        GoogleClientSecrets secrets = GoogleClientSecrets.load(jsonFactory, new FileReader(jsonFile));
-
-        String clientId = secrets.getDetails().getClientId();
-        String clientSecret = secrets.getDetails().getClientSecret();
-
-        if (clientId != null && clientSecret != null) {
-            store.addToken("google-client-id", clientId).addToken("google-client-secret", clientSecret);
-            if (!jsonFile.delete()) {
-                System.err.println("Warnung: client_secret.json konnte nicht gelöscht werden.");
-            } else {
-                System.out.println("client_secret.json erfolgreich importiert und gelöscht.");
-            }
-        } else {
-            throw new IllegalStateException("client_secret.json enthält keine gültigen Daten.");
-        }
-    } else {
-        if (store.getToken("google-client-id") == null || store.getToken("google-client-secret") == null) {
-            throw new IllegalStateException("Kein client_secret.json gefunden und keine Client-Daten im Keystore. Bitte client_secret.json in " + System.getProperty("user.dir") + " ablegen.");
-        }
-    }
-}
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */

@@ -1,6 +1,8 @@
 package com.marcoscherzer.msimplegooglemailer;
 
 
+import java.io.Console;
+import java.util.Scanner;
 import java.util.regex.Pattern;
 
 /**
@@ -8,6 +10,16 @@ import java.util.regex.Pattern;
  */
 public class MUtil {
 
+    public static final String promptPassword(String promptText) {
+        Console console = System.console();
+        if (console != null) {
+            char[] passwordChars = console.readPassword("%s", promptText);
+            return new String(passwordChars);
+        } else {
+            System.out.print(promptText);
+            return new Scanner(System.in).nextLine();
+        }
+    }
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */

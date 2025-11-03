@@ -1,7 +1,6 @@
-/**
+package com.marcoscherzer.msimplegooglemailer; /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-package com.marcoscherzer.msimplegooglemailer;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -12,9 +11,11 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
+
 public final class MSimpleKeyStore {
 
     private final String keystorePath;
@@ -36,10 +37,6 @@ public final class MSimpleKeyStore {
         } else {
             keyStore.load(null, keystorePassword.toCharArray());
         }
-    }
-
-    public KeyStore getKeyStore() {
-        return keyStore;
     }
 
     /**

@@ -1,5 +1,4 @@
 package com.marcoscherzer.msimplegooglemailer;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,4 +57,5 @@ public final class MOutgoingMail {
     public final String getMessageText() {
         return messageText.toString();
     }
+
 }
