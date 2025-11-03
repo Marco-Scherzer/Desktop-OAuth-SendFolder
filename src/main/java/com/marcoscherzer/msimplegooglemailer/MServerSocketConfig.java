@@ -38,8 +38,9 @@ import javax.net.ssl.TrustManagerFactory;
             SSLServerSocket serverSocket=((SSLServerSocket)sslContext.getServerSocketFactory().createServerSocket(port,backlog,InetAddress.getLoopbackAddress()));
             System.out.println("SECURE ServerSocket started @ "+serverSocket.getInetAddress()+" @ port " + serverSocket.getLocalPort());
             serverSocket.setReuseAddress(true);
+
             return serverSocket;
        }
 
-       
+
     }

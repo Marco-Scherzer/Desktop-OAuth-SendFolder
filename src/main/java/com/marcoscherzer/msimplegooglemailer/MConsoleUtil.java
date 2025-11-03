@@ -1,22 +1,22 @@
-package com.marcoscherzer.msimplegooglemailer;
-
-
 /**
  * © Marco Scherzer – Alle Rechte vorbehalten
  */
+package com.marcoscherzer.msimplegooglemailer;
 
 import java.io.Console;
 import java.util.Scanner;
 
 public class MConsoleUtil {
 
-    public static final char[] promptPassword(String promptText) {
+    public static final String promptPassword(String promptText) {
         Console console = System.console();
         if (console != null) {
-            return console.readPassword(promptText);
+            char[] passwordChars = console.readPassword("%s", promptText);
+            return new String(passwordChars);
         } else {
             System.out.print(promptText);
-            return new Scanner(System.in).nextLine().toCharArray();
+            return new Scanner(System.in).nextLine();
         }
     }
 }
+

@@ -7,6 +7,7 @@ import java.util.List;
  * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
 public final class MOutgoingMail {
+    public String from;
     public String to;
     public String subject;
     private final StringBuilder messageText;
@@ -15,8 +16,10 @@ public final class MOutgoingMail {
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MOutgoingMail(String to, String subject) {
+    public MOutgoingMail(String from, String to, String subject) {
+        MUtil.checkMailAddress(from);
         MUtil.checkMailAddress(to);
+        this.from=from;
         this.to = to;
         this.subject = subject;
         this.messageText = new StringBuilder();

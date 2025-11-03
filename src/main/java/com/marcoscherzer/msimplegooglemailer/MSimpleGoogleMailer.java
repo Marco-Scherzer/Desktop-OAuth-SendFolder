@@ -1,11 +1,11 @@
-
-
 /**
- * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+ * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
 package com.marcoscherzer.msimplegooglemailer;
 
+import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
@@ -14,7 +14,6 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Message;
@@ -30,46 +29,59 @@ import jakarta.activation.DataHandler;
 import jakarta.activation.DataSource;
 import jakarta.activation.FileDataSource;
 
+import org.apache.commons.codec.binary.Base64;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.ArrayList;
-
-import org.apache.commons.codec.binary.Base64;
 
 /**
- * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+ * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
 public final class MSimpleGoogleMailer {
 
-    private final File credentialsFile;
-    private final File tokensDir = new File("tokens");
     private final List<String> scopes = Collections.singletonList(GmailScopes.GMAIL_SEND);
-
-    private final String userEmail;
-    private final Gmail service;
+    private Gmail service;
 
     /**
-     * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleGoogleMailer(String applicationName, String userEmail, File credentialsFile) throws Exception {
-        MUtil.checkMailAddress(userEmail);
-        this.userEmail = userEmail;
-        if (credentialsFile == null || !credentialsFile.exists()) throw new IllegalArgumentException("Credential file not found: " + credentialsFile);
-        this.credentialsFile = credentialsFile;
-        if (applicationName == null || applicationName.isBlank()) throw new IllegalArgumentException("Application name must not be empty.");
-        if (!tokensDir.exists()) tokensDir.mkdirs();
-        tokensDir.setReadable(true, true);
-        tokensDir.setWritable(true, true);
+    public MSimpleGoogleMailer(MSimpleKeyStore keystore, String applicationName) throws Exception {
 
+
+        if (applicationName == null || applicationName.isBlank()) {
+            throw new IllegalArgumentException("Application name must not be empty.");
+        }
 
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-        Credential credential = authorize(httpTransport, jsonFactory);
+
+        String clientId = keystore.getToken("google-client-id");
+        String clientSecret = keystore.getToken("google-client-secret");
+        String accessToken = keystore.getToken("google-access-token");
+        String refreshToken = keystore.getToken("google-refresh-token");
+
+        Credential credential;
+
+        if (accessToken != null && refreshToken != null) {
+            credential = new Credential.Builder(BearerToken.authorizationHeaderAccessMethod())
+                    .setTransport(httpTransport)
+                    .setJsonFactory(jsonFactory)
+                    .setClientAuthentication(new ClientParametersAuthentication(clientId, clientSecret))
+                    .setTokenServerEncodedUrl("https://oauth2.googleapis.com/token")
+                    .build();
+            credential.setAccessToken(accessToken);
+            credential.setRefreshToken(refreshToken);
+        } else {
+            credential = authenticate(applicationName, httpTransport, jsonFactory, keystore, clientId, clientSecret);
+            accessToken = credential.getAccessToken();
+            refreshToken = credential.getRefreshToken();
+            if (accessToken != null) keystore.addToken("google-access-token", accessToken);
+            if (refreshToken != null) keystore.addToken("google-refresh-token", refreshToken);
+        }
 
         this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
                 .setApplicationName(applicationName)
@@ -77,15 +89,19 @@ public final class MSimpleGoogleMailer {
     }
 
     /**
-     * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private Credential authorize(HttpTransport httpTransport, JsonFactory jsonFactory)
-            throws IOException {
-        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(jsonFactory, new FileReader(credentialsFile));
+    private Credential authenticate(String applicationName, HttpTransport httpTransport, JsonFactory jsonFactory, MSimpleKeyStore keystore, String clientId, String clientSecret) throws IOException {
+        GoogleClientSecrets.Details details = new GoogleClientSecrets.Details();
+        details.setClientId(clientId);
+        details.setClientSecret(clientSecret);
+        details.setAuthUri("https://accounts.google.com/o/oauth2/auth");
+        details.setTokenUri("https://oauth2.googleapis.com/token");
+
+        GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
 
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
                 httpTransport, jsonFactory, clientSecrets, scopes)
-                .setDataStoreFactory(new FileDataStoreFactory(tokensDir))
                 .setAccessType("offline")
                 .build();
 
@@ -95,14 +111,14 @@ public final class MSimpleGoogleMailer {
     }
 
     /**
-     * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final void send(MOutgoingMail mail) {
         try {
             Properties props = new Properties();
             Session session = Session.getDefaultInstance(props, null);
             MimeMessage email = new MimeMessage(session);
-            email.setFrom(new InternetAddress(this.userEmail));
+            email.setFrom(new InternetAddress(mail.from));
             email.addRecipient(jakarta.mail.Message.RecipientType.TO, new InternetAddress(mail.to));
             email.setSubject(mail.subject);
 
@@ -138,6 +154,4 @@ public final class MSimpleGoogleMailer {
             exc.printStackTrace();
         }
     }
-
-
 }
