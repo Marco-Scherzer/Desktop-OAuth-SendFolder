@@ -27,7 +27,7 @@ import javax.net.ssl.TrustManagerFactory;
             // Set up key manager factory
             char[] password = "mypassword".toCharArray();
             KeyStore ks = KeyStore.getInstance("JKS");
-            ks.load(Files.newInputStream(Paths.get(System.getProperty("user.dir")+"mystore.jks")), password);
+            ks.load(Files.newInputStream(Paths.get(System.getProperty("user.dir")+"\\mystore.jks")), password);
             KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
             kmf.init(ks, password);
             // Set up trust manager factory
@@ -37,10 +37,7 @@ import javax.net.ssl.TrustManagerFactory;
             sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
             SSLServerSocket serverSocket=((SSLServerSocket)sslContext.getServerSocketFactory().createServerSocket(port,backlog,InetAddress.getLoopbackAddress()));
             System.out.println("SECURE ServerSocket started @ "+serverSocket.getInetAddress()+" @ port " + serverSocket.getLocalPort());
-            serverSocket.setReceiveBufferSize(100);
             serverSocket.setReuseAddress(true);
-            serverSocket.setPerformancePreferences(20,5,10);
-            serverSocket.setSoTimeout(10);
             return serverSocket;
        }
 

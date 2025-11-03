@@ -11,7 +11,7 @@ import java.security.cert.CertificateException;
 /**
  * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public class MSimpleKeyStore {
+public final class MSimpleKeyStore {
 
     private final String keystorePath;
     private final char[] keystorePassword;
@@ -34,7 +34,7 @@ public class MSimpleKeyStore {
         }
     }
 
-    public MSimpleKeyStore addToken(String alias, String token) throws Exception {
+    public final MSimpleKeyStore addToken(String alias, String token) throws Exception {
         SecretKey secretKey = new SecretKeySpec(token.getBytes(), "AES");
         KeyStore.SecretKeyEntry entry = new KeyStore.SecretKeyEntry(secretKey);
         KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(keystorePassword);
@@ -53,7 +53,7 @@ public class MSimpleKeyStore {
         return this;
     }
 
-    public String getToken(String alias) throws Exception {
+    public final String getToken(String alias) throws Exception {
         KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(keystorePassword);
         KeyStore.SecretKeyEntry entry = (KeyStore.SecretKeyEntry) keyStore.getEntry(alias, protParam);
         if (entry == null) return null;

@@ -44,7 +44,7 @@ import org.apache.commons.codec.binary.Base64;
 /**
  * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public class MSimpleGoogleMailer {
+public final class MSimpleGoogleMailer {
 
     private final File credentialsFile;
     private final File tokensDir = new File("tokens");
@@ -97,7 +97,7 @@ public class MSimpleGoogleMailer {
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public void send(MOutgoingMail mail) {
+    public final void send(MOutgoingMail mail) {
         try {
             Properties props = new Properties();
             Session session = Session.getDefaultInstance(props, null);

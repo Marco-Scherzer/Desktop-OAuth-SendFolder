@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public class MOutgoingMail {
+public final class MOutgoingMail {
     public String to;
     public String subject;
     private final StringBuilder messageText;
@@ -25,7 +25,7 @@ public class MOutgoingMail {
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MOutgoingMail appendMessageText(String text) {
+    public final MOutgoingMail appendMessageText(String text) {
         if (text != null && !text.isBlank()) {
             messageText.append(text);
         }
@@ -35,7 +35,7 @@ public class MOutgoingMail {
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MOutgoingMail addAttachment(String file) {
+    public final MOutgoingMail addAttachment(String file) {
         if (file != null && !file.isBlank()) {
             attachmentList.add(file);
         }
@@ -45,14 +45,14 @@ public class MOutgoingMail {
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public String[] getAttachments() {
+    public final String[] getAttachments() {
         return attachmentList.toArray(new String[0]);
     }
 
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public String getMessageText() {
+    public final String getMessageText() {
         return messageText.toString();
     }
 }

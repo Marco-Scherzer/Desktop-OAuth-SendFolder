@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public class MConsoleUtil {
 
-    public static char[] promptPassword(String promptText) {
+    public static final char[] promptPassword(String promptText) {
         Console console = System.console();
         if (console != null) {
             return console.readPassword(promptText);

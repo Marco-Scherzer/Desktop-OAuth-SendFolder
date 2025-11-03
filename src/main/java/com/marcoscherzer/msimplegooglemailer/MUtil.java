@@ -11,7 +11,7 @@ public class MUtil {
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static void checkMailAddress(String email) {
+    public static final void checkMailAddress(String email) {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("Absenderadresse darf nicht leer sein.");
         }
