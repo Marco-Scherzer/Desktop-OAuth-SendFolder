@@ -3,7 +3,6 @@ package com.marcoscherzer.msimplegooglemailer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.UUID;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -16,26 +15,32 @@ public class MSimpleGoogleMailerService {
      */
     public static void main(String[] args) {
         try {
-            Path keystorePath = Paths.get(System.getProperty("user.dir"), "mystore.jceks");
-
-            if (!Files.exists(keystorePath) && args.length != 1) {
-                throw new Exception("Verwendung: java -jar MSendBackupMail [Basis-Backup-Pfad]");
-            }
-
+            args[0]= System.getProperty("user.dir"+"\\testBackupBasePath");
             String fromAddress = "mailaddr@...";
             String toAddress = fromAddress;
             long delayMs = 30000; // 30 Sekunden
+            Path keystorePath = Paths.get(System.getProperty("user.dir"), "mystore.p12");
+
+            if (!Files.exists(keystorePath) && args.length != 1) {
+                throw new Exception("Bei der ersten Verwendung muss der Basis Pfad gesetzt werden: java -jar MSendBackupMail [Basis-Pfad]");
+            }
 
             String pw = MUtil.promptPassword("Bitte Passwort eingeben:");
             Runtime.getRuntime().addShutdownHook(new Thread(() -> System.exit(0)));
 
-            MSimpleGoogleMailer.setInitialClientSecretFileReadDir(System.getProperty("user.dir"));
-            MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);
+            MSimpleGoogleMailer.setClientKeystoreDir(System.getProperty("user.dir"));
+            MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, false);
             MSimpleKeyStore store = mailer.getKeystore();
 
-            Path watchPath=Paths.get(args[0],store.getToken("clientId"));
+            // UUID aus dem Keystore lesen
+            String uuid = store.getToken("clientId");
+            if (uuid == null || uuid.isBlank()) {
+                throw new IllegalStateException("Keine clientId im Keystore gefunden.");
+            }
 
-            String uuid = "";
+            if(args.length==1 && !store.contains("basePath")) store.addToken("basePath",args[0]);
+            Path watchPath = Paths.get(store.getToken("basePath"), uuid);
+
             if (!Files.exists(watchPath)) {
                 Files.createDirectories(watchPath);
                 System.out.println("Backup-Verzeichnis erstellt: " + watchPath);

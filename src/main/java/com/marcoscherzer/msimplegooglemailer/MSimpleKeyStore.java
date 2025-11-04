@@ -15,7 +15,7 @@ public final class MSimpleKeyStore {
 
     private final String keystorePath;
     private final String keystorePassword;
-    private static final String KEYSTORE_TYPE = "JCEKS";
+    private static final String KEYSTORE_TYPE = "PKCS12"; // moderner Keystore-Typ
     private KeyStore keyStore;
 
     /**
@@ -34,7 +34,14 @@ public final class MSimpleKeyStore {
                 keyStore.load(fis, keystorePassword.toCharArray());
             }
         } else {
+            System.out.println("Keystore wird neu erstellt: " + ksFile.getAbsolutePath());
             keyStore.load(null, keystorePassword.toCharArray());
+
+            // Leerer Keystore wird sofort gespeichert
+            ksFile.getParentFile().mkdirs();
+            try (FileOutputStream fos = new FileOutputStream(ksFile)) {
+                keyStore.store(fos, keystorePassword.toCharArray());
+            }
         }
     }
 
@@ -49,7 +56,7 @@ public final class MSimpleKeyStore {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final MSimpleKeyStore addToken(String alias, String token) throws Exception {
-        SecretKey secretKey = new SecretKeySpec(token.getBytes(), "AES");
+        SecretKey secretKey = new SecretKeySpec(token.getBytes(), "RAW"); // RAW statt AES für Klartext-Token
         KeyStore.SecretKeyEntry entry = new KeyStore.SecretKeyEntry(secretKey);
         KeyStore.ProtectionParameter protParam =
                 new KeyStore.PasswordProtection(keystorePassword.toCharArray());
@@ -57,7 +64,6 @@ public final class MSimpleKeyStore {
         keyStore.setEntry(alias, entry, protParam);
 
         File ksFile = new File(keystorePath);
-        ksFile.getParentFile().mkdirs();
         try (FileOutputStream fos = new FileOutputStream(ksFile)) {
             keyStore.store(fos, keystorePassword.toCharArray());
         }
@@ -87,8 +93,8 @@ public final class MSimpleKeyStore {
      */
     public boolean contains(String alias) {
         try {
-            return getToken(alias) != null;
-        } catch (Exception e) {
+            return keyStore.containsAlias(alias);
+        } catch (KeyStoreException e) {
             return false;
         }
     }

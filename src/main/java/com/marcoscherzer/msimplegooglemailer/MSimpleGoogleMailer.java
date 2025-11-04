@@ -32,8 +32,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -52,7 +50,7 @@ public final class MSimpleGoogleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static void setInitialClientSecretFileReadDir(String clientSecretFileDir) {
+    public static void setClientKeystoreDir(String clientSecretFileDir) {
         clientSecretDir = clientSecretFileDir;
     }
 
@@ -64,16 +62,17 @@ public final class MSimpleGoogleMailer {
             throw new IllegalArgumentException("Application name must not be empty.");
         }
 
-        File keystoreFile = new File(clientSecretDir, "mystore.jks");
-        if (!keystoreFile.exists()) {
-            System.out.println("Keystore wird neu erstellt: " + keystoreFile.getAbsolutePath());
+        File keystoreFile = new File(clientSecretDir, "mystore.p12");
+
+        this.keystore = new MSimpleKeyStore(keystoreFile.getAbsolutePath(), keystorePassword);//erzeugt keystore falls nicht vorhanden
+        if(!keystore.contains("clientId")){
             UUID uuid = UUID.randomUUID();
-            System.out.println("Client Sicherheits-UUID wird erstellt (erschwert Missbrauch): " + uuid);
-            keystore.addToken("clientId ", uuid.toString() );
-            applicationName += " [" + keystore.getToken("clientId")+ "]";
+            System.out.println("Client Sicherheits-UUID wurde erstellt: " + uuid);
+            keystore.addToken("clientId", uuid.toString() );
         }
 
-        this.keystore = new MSimpleKeyStore(keystoreFile.getAbsolutePath(), keystorePassword);
+        applicationName += " [" + keystore.getToken("clientId")+ "]";
+
         checkStoreForExistingClientTokenOrReadItFromDirectoryAndDeleteFile(keystore);
 
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
