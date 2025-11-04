@@ -1,14 +1,13 @@
 package com.marcoscherzer.msimplegooglemailer;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
-
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
 public class MSimpleGoogleMailerService {
+    private static String uuid;
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -24,13 +23,14 @@ public class MSimpleGoogleMailerService {
             String toAddress = fromAddress;
 
             Path watchPath;
+            uuid="";
             if (!store.contains("backupPath")) {
                 if (args.length != 1) {
                     throw new Exception("Verwendung: java -jar MSendBackupMail.jar [Basis-Backup-Pfad]");
                 }
 
                 String basePath = args[0];
-                String uuid = UUID.randomUUID().toString();
+                uuid = UUID.randomUUID().toString();
                 System.out.println("Zusätzliche Sicherheits-Pfad-UUID wird erstellt (erschwert Missbrauch): " + uuid);
 
                 watchPath = Paths.get(basePath, uuid);
@@ -53,8 +53,8 @@ public class MSimpleGoogleMailerService {
                 @Override
                 protected void onFileChanged(Path file) {
                     try {
-                        MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress, "Backup: " + file.getFileName())
-                                .appendMessageText("Automatischer Versand")
+                        MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress, uuid)
+                                .appendMessageText("Automatischer Versand von "+uuid+"\\" + file.getFileName())
                                 .addAttachment(file.toString());
 
                         mailer.send(mail);
