@@ -1,8 +1,10 @@
 package com.marcoscherzer.msimplegooglemailer;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
+
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
@@ -21,9 +23,13 @@ public class MSimpleGoogleMailerService {
             String pw = MUtil.promptPassword("Bitte Passwort eingeben:");
             Runtime.getRuntime().addShutdownHook(new Thread(() -> System.exit(0)));
 
-            MSimpleKeyStore store = new MSimpleKeyStore(System.getProperty("user.dir") + "\\mystore.jks", pw);
+            MSimpleGoogleMailer.setInitialClientSecretFileReadDir(System.getProperty("user.dir"));
+            MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);
+            MSimpleKeyStore store = mailer.getKeystore();
+
             Path watchPath;
-            String uuid="";
+            String uuid = "";
+
             if (!store.contains("clientId")) {
                 if (args.length != 1) {
                     throw new Exception("Verwendung: java -jar MSendBackupMail [Basis-Backup-Pfad]");
@@ -46,17 +52,15 @@ public class MSimpleGoogleMailerService {
                 watchPath = Paths.get(store.getToken("clientId"));
                 System.out.println("Gespeicherter Backup-Pfad: " + watchPath);
             }
-            MSimpleGoogleMailerService.clientAndPathUUID= uuid;
 
-            MSimpleGoogleMailer.setInitialClientSecretFileReadDir(System.getProperty("user.dir"));
-            MSimpleGoogleMailer mailer = new MSimpleGoogleMailer(store, "BackupMailer",true);
+            MSimpleGoogleMailerService.clientAndPathUUID = uuid;
 
             MFileWatcherWithDelayHandling watcher = new MFileWatcherWithDelayHandling() {
                 @Override
                 protected void onFileChanged(Path file) {
                     try {
                         MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress, clientAndPathUUID)
-                                .appendMessageText("Automatischer Versand von "+clientAndPathUUID+"\\" + file.getFileName())
+                                .appendMessageText("Automatischer Versand von " + clientAndPathUUID + "\\" + file.getFileName())
                                 .addAttachment(file.toString());
 
                         mailer.send(mail);

@@ -44,23 +44,30 @@ public final class MSimpleGoogleMailer {
     private static String clientSecretDir = System.getProperty("user.dir");
     private final List<String> scopes = Collections.singletonList(GmailScopes.GMAIL_SEND);
     private Gmail service;
+    private MSimpleKeyStore keystore;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static void setInitialClientSecretFileReadDir(String clientSecretFileDir){
+    public static void setInitialClientSecretFileReadDir(String clientSecretFileDir) {
         clientSecretDir = clientSecretFileDir;
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleGoogleMailer(MSimpleKeyStore keystore, String applicationName, boolean forceOAuth) throws Exception {
-        checkStoreForExistingClientTokenOrReadItFromDirectoryAndDeleteFile(keystore);
-
+    public MSimpleGoogleMailer(String applicationName, String keystorePassword, boolean forceOAuth) throws Exception {
         if (applicationName == null || applicationName.isBlank()) {
             throw new IllegalArgumentException("Application name must not be empty.");
         }
+
+        File keystoreFile = new File(clientSecretDir, "mystore.jks");
+        if (!keystoreFile.exists()) {
+            System.out.println("Keystore wird neu erstellt: " + keystoreFile.getAbsolutePath());
+        }
+
+        this.keystore = new MSimpleKeyStore(keystoreFile.getAbsolutePath(), keystorePassword);
+        checkStoreForExistingClientTokenOrReadItFromDirectoryAndDeleteFile(keystore);
 
         String clientUuid = keystore.getToken("clientId");
         if (clientUuid != null && !clientUuid.isBlank()) {
@@ -103,6 +110,13 @@ public final class MSimpleGoogleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
+    public MSimpleKeyStore getKeystore() {
+        return this.keystore;
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     private static void checkStoreForExistingClientTokenOrReadItFromDirectoryAndDeleteFile(MSimpleKeyStore store) throws Exception {
         File jsonFile = new File(clientSecretDir, "client_secret.json");
 
@@ -125,7 +139,7 @@ public final class MSimpleGoogleMailer {
             }
         } else {
             if (store.getToken("google-client-id") == null || store.getToken("google-client-secret") == null) {
-                throw new IllegalStateException("Kein client_secret.json gefunden und keine Client-Daten im Keystore. Bitte client_secret.json in " + System.getProperty("user.dir") + " ablegen.");
+                throw new IllegalStateException("Kein client_secret.json gefunden und keine Client-Daten im Keystore. Bitte client_secret.json in " + clientSecretDir + " ablegen.");
             }
         }
     }
@@ -197,4 +211,5 @@ public final class MSimpleGoogleMailer {
         }
     }
 }
+
 
