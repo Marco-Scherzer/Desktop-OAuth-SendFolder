@@ -7,26 +7,26 @@ import java.util.UUID;
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
 public class MSimpleGoogleMailerService {
-    private static String uuid;
+    private static String clientAndPathUUID;
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public static void main(String[] args) {
         try {
+            String fromAddress = "mailaddr@...";
+            String toAddress = fromAddress;
+            long delayMs = 30000; // 30 Sekunden
+
             String pw = MUtil.promptPassword("Bitte Passwort eingeben:");
             Runtime.getRuntime().addShutdownHook(new Thread(() -> System.exit(0)));
 
             MSimpleKeyStore store = new MSimpleKeyStore(System.getProperty("user.dir") + "\\mystore.jks", pw);
-            MSimpleGoogleMailer mailer = new MSimpleGoogleMailer(store, "BackupMailer");
-
-            String fromAddress = "mailadresse@...";
-            String toAddress = fromAddress;
-
             Path watchPath;
-            uuid="";
-            if (!store.contains("backupPath")) {
+            String uuid="";
+            if (!store.contains("clientId")) {
                 if (args.length != 1) {
-                    throw new Exception("Verwendung: java -jar MSendBackupMail.jar [Basis-Backup-Pfad]");
+                    throw new Exception("Verwendung: java -jar MSendBackupMail [Basis-Backup-Pfad]");
                 }
 
                 String basePath = args[0];
@@ -40,21 +40,23 @@ public class MSimpleGoogleMailerService {
                     System.out.println("Backup-Verzeichnis erstellt: " + watchPath);
                 }
 
-                store.addToken("backupPath", watchPath.toString());
+                store.addToken("clientId", watchPath.toString());
                 System.out.println("Backup-Pfad initialisiert: " + watchPath);
             } else {
-                watchPath = Paths.get(store.getToken("backupPath"));
+                watchPath = Paths.get(store.getToken("clientId"));
                 System.out.println("Gespeicherter Backup-Pfad: " + watchPath);
             }
+            MSimpleGoogleMailerService.clientAndPathUUID= uuid;
 
-            long delayMs = 30000; // 30 Sekunden
+            MSimpleGoogleMailer.setInitialClientSecretFileReadDir(System.getProperty("user.dir"));
+            MSimpleGoogleMailer mailer = new MSimpleGoogleMailer(store, "BackupMailer",true);
 
             MFileWatcherWithDelayHandling watcher = new MFileWatcherWithDelayHandling() {
                 @Override
                 protected void onFileChanged(Path file) {
                     try {
-                        MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress, uuid)
-                                .appendMessageText("Automatischer Versand von "+uuid+"\\" + file.getFileName())
+                        MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress, clientAndPathUUID)
+                                .appendMessageText("Automatischer Versand von "+clientAndPathUUID+"\\" + file.getFileName())
                                 .addAttachment(file.toString());
 
                         mailer.send(mail);

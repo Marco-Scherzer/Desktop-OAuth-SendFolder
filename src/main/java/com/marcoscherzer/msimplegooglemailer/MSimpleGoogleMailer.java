@@ -1,6 +1,3 @@
-/**
- * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
 package com.marcoscherzer.msimplegooglemailer;
 
 import com.google.api.client.auth.oauth2.BearerToken;
@@ -44,17 +41,30 @@ import java.util.Properties;
  */
 public final class MSimpleGoogleMailer {
 
+    private static String clientSecretDir = System.getProperty("user.dir");
     private final List<String> scopes = Collections.singletonList(GmailScopes.GMAIL_SEND);
     private Gmail service;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleGoogleMailer(MSimpleKeyStore keystore, String applicationName) throws Exception {
+    public static void setInitialClientSecretFileReadDir(String clientSecretFileDir){
+        clientSecretDir = clientSecretFileDir;
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public MSimpleGoogleMailer(MSimpleKeyStore keystore, String applicationName, boolean forceOAuth) throws Exception {
         checkStoreForExistingClientTokenOrReadItFromDirectoryAndDeleteFile(keystore);
 
         if (applicationName == null || applicationName.isBlank()) {
             throw new IllegalArgumentException("Application name must not be empty.");
+        }
+
+        String clientUuid = keystore.getToken("clientId");
+        if (clientUuid != null && !clientUuid.isBlank()) {
+            applicationName += " [" + clientUuid + "]";
         }
 
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
@@ -68,7 +78,7 @@ public final class MSimpleGoogleMailer {
 
         Credential credential;
 
-        if (accessToken != null && refreshToken != null) {
+        if (!forceOAuth && accessToken != null && refreshToken != null) {
             credential = new Credential.Builder(BearerToken.authorizationHeaderAccessMethod())
                     .setTransport(httpTransport)
                     .setJsonFactory(jsonFactory)
@@ -91,10 +101,10 @@ public final class MSimpleGoogleMailer {
     }
 
     /**
-     * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     private static void checkStoreForExistingClientTokenOrReadItFromDirectoryAndDeleteFile(MSimpleKeyStore store) throws Exception {
-        File jsonFile = new File(System.getProperty("user.dir"), "client_secret.json");
+        File jsonFile = new File(clientSecretDir, "client_secret.json");
 
         if (jsonFile.exists()) {
             JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
@@ -187,3 +197,4 @@ public final class MSimpleGoogleMailer {
         }
     }
 }
+
