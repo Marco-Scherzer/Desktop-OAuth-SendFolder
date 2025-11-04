@@ -43,22 +43,7 @@ public final class MSimpleKeyStore {
         return keyStore;
     }
 
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public final KeyManagerFactory createKeyManagerFactory(String algorithm) throws Exception {
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
-        kmf.init(keyStore, keystorePassword.toCharArray());
-        return kmf;
-    }
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public final TrustManagerFactory createTrustManagerFactory(String algorithm) throws Exception {
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance(algorithm);
-        tmf.init(keyStore);
-        return tmf;
-    }
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -91,4 +76,15 @@ public final class MSimpleKeyStore {
         SecretKey secretKey = entry.getSecretKey();
         return new String(secretKey.getEncoded());
     }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public boolean contains(String alias) {
+        try {
+            return getToken(alias) != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 }

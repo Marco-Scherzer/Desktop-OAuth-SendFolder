@@ -1,7 +1,9 @@
 package com.marcoscherzer.msimplegooglemailer;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -18,10 +20,33 @@ public class MSimpleGoogleMailerService {
             MSimpleKeyStore store = new MSimpleKeyStore(System.getProperty("user.dir") + "\\mystore.jks", pw);
             MSimpleGoogleMailer mailer = new MSimpleGoogleMailer(store, "BackupMailer");
 
-            String fromAddress = "Marco.Scherzer@outlook.com";
+            String fromAddress = "mailadresse@...";
             String toAddress = fromAddress;
 
-            Path watchPath = Paths.get("D:/Backup/Android_Backup/rar");
+            Path watchPath;
+            if (!store.contains("backupPath")) {
+                if (args.length != 1) {
+                    throw new Exception("Verwendung: java -jar MSendBackupMail.jar [Basis-Backup-Pfad]");
+                }
+
+                String basePath = args[0];
+                String uuid = UUID.randomUUID().toString();
+                System.out.println("Zusätzliche Sicherheits-Pfad-UUID wird erstellt (erschwert Missbrauch): " + uuid);
+
+                watchPath = Paths.get(basePath, uuid);
+
+                if (!Files.exists(watchPath)) {
+                    Files.createDirectories(watchPath);
+                    System.out.println("Backup-Verzeichnis erstellt: " + watchPath);
+                }
+
+                store.addToken("backupPath", watchPath.toString());
+                System.out.println("Backup-Pfad initialisiert: " + watchPath);
+            } else {
+                watchPath = Paths.get(store.getToken("backupPath"));
+                System.out.println("Gespeicherter Backup-Pfad: " + watchPath);
+            }
+
             long delayMs = 30000; // 30 Sekunden
 
             MFileWatcherWithDelayHandling watcher = new MFileWatcherWithDelayHandling() {
@@ -41,6 +66,7 @@ public class MSimpleGoogleMailerService {
             };
 
             watcher.startWatching(watchPath, delayMs);
+            System.out.println("Neue Dateien, die dem Pfad hinzugefügt werden, werden automatisch per E-Mail versendet.");
 
         } catch (Exception e) {
             System.err.println("Fehler: " + e.getMessage());
@@ -49,6 +75,7 @@ public class MSimpleGoogleMailerService {
         }
     }
 }
+
 
 
 
