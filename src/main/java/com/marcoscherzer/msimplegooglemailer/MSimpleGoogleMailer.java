@@ -32,9 +32,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -64,15 +67,14 @@ public final class MSimpleGoogleMailer {
         File keystoreFile = new File(clientSecretDir, "mystore.jks");
         if (!keystoreFile.exists()) {
             System.out.println("Keystore wird neu erstellt: " + keystoreFile.getAbsolutePath());
+            UUID uuid = UUID.randomUUID();
+            System.out.println("Client Sicherheits-UUID wird erstellt (erschwert Missbrauch): " + uuid);
+            keystore.addToken("clientId ", uuid.toString() );
+            applicationName += " [" + keystore.getToken("clientId")+ "]";
         }
 
         this.keystore = new MSimpleKeyStore(keystoreFile.getAbsolutePath(), keystorePassword);
         checkStoreForExistingClientTokenOrReadItFromDirectoryAndDeleteFile(keystore);
-
-        String clientUuid = keystore.getToken("clientId");
-        if (clientUuid != null && !clientUuid.isBlank()) {
-            applicationName += " [" + clientUuid + "]";
-        }
 
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = GsonFactory.getDefaultInstance();

@@ -1,11 +1,7 @@
-package com.marcoscherzer.msimplegooglemailer; /**
- * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+package com.marcoscherzer.msimplegooglemailer;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.TrustManagerFactory;
 import java.io.*;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -15,15 +11,18 @@ import java.security.cert.CertificateException;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-
 public final class MSimpleKeyStore {
 
     private final String keystorePath;
     private final String keystorePassword;
-    private static final String KEYSTORE_TYPE = "JKS";
+    private static final String KEYSTORE_TYPE = "JCEKS";
     private KeyStore keyStore;
 
-    public MSimpleKeyStore(String keystorePath, String keystorePassword) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public MSimpleKeyStore(String keystorePath, String keystorePassword)
+            throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
         this.keystorePath = keystorePath;
         this.keystorePassword = keystorePassword;
 
@@ -39,10 +38,12 @@ public final class MSimpleKeyStore {
         }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public KeyStore getKeyStore() {
         return keyStore;
     }
-
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -50,7 +51,8 @@ public final class MSimpleKeyStore {
     public final MSimpleKeyStore addToken(String alias, String token) throws Exception {
         SecretKey secretKey = new SecretKeySpec(token.getBytes(), "AES");
         KeyStore.SecretKeyEntry entry = new KeyStore.SecretKeyEntry(secretKey);
-        KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(keystorePassword.toCharArray());
+        KeyStore.ProtectionParameter protParam =
+                new KeyStore.PasswordProtection(keystorePassword.toCharArray());
 
         keyStore.setEntry(alias, entry, protParam);
 
@@ -65,17 +67,21 @@ public final class MSimpleKeyStore {
 
         return this;
     }
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final String getToken(String alias) throws Exception {
-        KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(keystorePassword.toCharArray());
-        KeyStore.SecretKeyEntry entry = (KeyStore.SecretKeyEntry) keyStore.getEntry(alias, protParam);
+        KeyStore.ProtectionParameter protParam =
+                new KeyStore.PasswordProtection(keystorePassword.toCharArray());
+        KeyStore.SecretKeyEntry entry =
+                (KeyStore.SecretKeyEntry) keyStore.getEntry(alias, protParam);
         if (entry == null) return null;
 
         SecretKey secretKey = entry.getSecretKey();
         return new String(secretKey.getEncoded());
     }
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -86,5 +92,4 @@ public final class MSimpleKeyStore {
             return false;
         }
     }
-
 }
