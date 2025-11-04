@@ -15,7 +15,7 @@ public class MSimpleGoogleMailerService {
      */
     public static void main(String[] args) {
         try {
-            args[0]= System.getProperty("user.dir"+"\\testBackupBasePath");
+            args = new String[]{ System.getProperty("user.dir")+"\\testBackupBasePath" };
             String fromAddress = "mailaddr@...";
             String toAddress = fromAddress;
             long delayMs = 30000; // 30 Sekunden
@@ -49,7 +49,6 @@ public class MSimpleGoogleMailerService {
             }
 
             MSimpleGoogleMailerService.clientAndPathUUID = uuid;
-
             MFileWatcherWithDelayHandling watcher = new MFileWatcherWithDelayHandling() {
                 @Override
                 protected void onFileChanged(Path file) {

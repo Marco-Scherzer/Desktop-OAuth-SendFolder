@@ -21,8 +21,7 @@ public final class MSimpleKeyStore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleKeyStore(String keystorePath, String keystorePassword)
-            throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+    public MSimpleKeyStore(String keystorePath, String keystorePassword) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
         this.keystorePath = keystorePath;
         this.keystorePassword = keystorePassword;
 
@@ -56,7 +55,7 @@ public final class MSimpleKeyStore {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final MSimpleKeyStore addToken(String alias, String token) throws Exception {
-        SecretKey secretKey = new SecretKeySpec(token.getBytes(), "RAW"); // RAW statt AES für Klartext-Token
+        SecretKey secretKey = new SecretKeySpec(token.getBytes(), "AES");
         KeyStore.SecretKeyEntry entry = new KeyStore.SecretKeyEntry(secretKey);
         KeyStore.ProtectionParameter protParam =
                 new KeyStore.PasswordProtection(keystorePassword.toCharArray());
