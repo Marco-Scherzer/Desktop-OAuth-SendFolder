@@ -39,6 +39,10 @@ public final class MSimpleKeyStore {
         }
     }
 
+    public KeyStore getKeyStore() {
+        return keyStore;
+    }
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */

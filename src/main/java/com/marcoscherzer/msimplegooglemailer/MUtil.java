@@ -1,6 +1,4 @@
 package com.marcoscherzer.msimplegooglemailer;
-
-
 import java.io.Console;
 import java.util.Scanner;
 import java.util.regex.Pattern;
