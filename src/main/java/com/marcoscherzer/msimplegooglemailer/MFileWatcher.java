@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.*;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -18,31 +19,78 @@ public abstract class MFileWatcher {
     private final ExecutorService pool = Executors.newCachedThreadPool();
     private final Map<Path, MObservedFile> fileStates = new ConcurrentHashMap<>();
     private final Set<Path> activeMonitors = ConcurrentHashMap.newKeySet();
+    private WatchService watchService;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * Startet die Überwachung eines Verzeichnisses und verarbeitet Dateiänderungen.
      */
-    public void startWatching(Path watchDir) throws IOException {
-        WatchService watchService = FileSystems.getDefault().newWatchService();
-        watchDir.register(watchService, ENTRY_CREATE, ENTRY_MODIFY);
+    public boolean startWatching(Path watchDir) {
+        try {
+            watchService = FileSystems.getDefault().newWatchService();
+            watchDir.register(watchService, ENTRY_CREATE, ENTRY_MODIFY);
 
-        pool.submit(() -> {
-            while (true) {
-                WatchKey key = watchService.take();
-                for (WatchEvent<?> event : key.pollEvents()) {
-                    Path changedFile = watchDir.resolve((Path) event.context());
-                    if (Files.isRegularFile(changedFile) && activeMonitors.add(changedFile)) {
-                        MObservedFile monitor = new MObservedFile(changedFile);
-                        fileStates.put(changedFile, monitor);
-                        pool.submit(monitor);
+            pool.submit(() -> {
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        WatchKey key = watchService.take();
+                        for (WatchEvent<?> event : key.pollEvents()) {
+                            Path changedFile = watchDir.resolve((Path) event.context());
+                            if (Files.isRegularFile(changedFile) && activeMonitors.add(changedFile)) {
+                                MObservedFile monitor = new MObservedFile(changedFile);
+                                fileStates.put(changedFile, monitor);
+                                pool.submit(monitor);
+                            }
+                        }
+                        key.reset();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        System.out.println("Watcher-Thread wurde unterbrochen.");
+                    } catch (ClosedWatchServiceException e) {
+                        System.out.println("WatchService wurde geschlossen.");
+                        break;
                     }
                 }
-                key.reset();
-            }
-        });
+            });
 
-        System.out.println("MWatcher gestartet für: " + watchDir);
+            System.out.println("MWatcher gestartet für: " + watchDir);
+            return true;
+        } catch (IOException e) {
+            System.out.println("Fehler beim Starten von MWatcher: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * Beendet den Threadpool sanft und schließt den WatchService.
+     */
+    public void shutdown() throws Exception{
+        System.out.println("MWatcher wird heruntergefahren (sanft)...");
+        try {
+            if (watchService != null) watchService.close();
+        } catch (IOException e) {
+            System.out.println("Fehler beim Schließen des WatchService: " + e.getMessage());
+        }
+
+        pool.shutdown();
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * Beendet den Threadpool sofort und schließt den WatchService.
+     */
+    public List<Runnable> shutdownNow() {
+        System.out.println("MWatcher wird sofort beendet...");
+        try {
+            if (watchService != null) watchService.close();
+        } catch (IOException e) {
+            System.out.println("Fehler beim Schließen des WatchService: " + e.getMessage());
+        }
+
+        List<Runnable> dropped = pool.shutdownNow();
+        System.out.println("Abgebrochene Tasks: " + dropped.size());
+        return dropped;
     }
 
     /**
@@ -53,7 +101,7 @@ public abstract class MFileWatcher {
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * Repräsentiert den Zustand einer Datei und erkennt Stabilität.
+     * Beobachtet eine einzelne Datei bis zur Stabilität.
      */
     private class MObservedFile implements Runnable {
         private final Path file;
@@ -76,19 +124,29 @@ public abstract class MFileWatcher {
         public void run() {
             try {
                 boolean done = false;
-                while (!done) {
+                while (!done && !Thread.currentThread().isInterrupted()) {
                     long size = Files.size(file);
                     long modified = Files.getLastModifiedTime(file).toMillis();
                     boolean locked = isLocked();
-                    System.out.println("Datei: " + file.getFileName() + " | Größe: " + size + " | Geändert: " + modified + " | Gesperrt: " + locked);
+
+                    System.out.println("Datei: " + file.getFileName() +
+                            " | Größe: " + size +
+                            " | Geändert: " + modified +
+                            " | Gesperrt: " + locked);
+
                     done = !locked && size == lastSize && modified == lastModified;
                     lastSize = size;
                     lastModified = modified;
+
                     if (!done) Thread.sleep(3000);
                 }
-                System.out.println("Datei fertig geschrieben: " + file.getFileName());
-                activeMonitors.remove(file);
-                onFileChangedAndUnlocked(file);
+
+                if (done) {
+                    System.out.println("Datei fertig geschrieben: " + file.getFileName());
+                    activeMonitors.remove(file);
+                    onFileChangedAndUnlocked(file);
+                }
+
             } catch (Exception e) {
                 System.out.println("Fehler bei Dateiüberwachung: " + file + " → " + e.getMessage());
                 activeMonitors.remove(file);
@@ -113,3 +171,4 @@ public abstract class MFileWatcher {
         }
     }
 }
+

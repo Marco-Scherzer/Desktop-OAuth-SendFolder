@@ -1,14 +1,13 @@
 package com.marcoscherzer.msimplegooglemailer;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
 public class MSimpleGoogleMailerService {
     private static String clientAndPathUUID;
+    private static MFileWatcher watcher;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -18,15 +17,13 @@ public class MSimpleGoogleMailerService {
             args = new String[]{ System.getProperty("user.dir")+"\\testBackupBasePath" };
             String fromAddress = "mailaddr@...";
             String toAddress = fromAddress;
-            long delayMs = 30000; // 30 Sekunden
             Path keystorePath = Paths.get(System.getProperty("user.dir"), "mystore.p12");
 
             if (!Files.exists(keystorePath) && args.length != 1) {
                 throw new Exception("Bei der ersten Verwendung muss der Basis Pfad gesetzt werden: java -jar MSendBackupMail [Basis-Pfad]");
             }
-
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> { exit(0);}));
             String pw = MUtil.promptPassword("Bitte Passwort eingeben:");
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> System.exit(0)));
 
             MSimpleGoogleMailer.setClientKeystoreDir(System.getProperty("user.dir"));
             MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, false);
@@ -38,7 +35,10 @@ public class MSimpleGoogleMailerService {
                 throw new IllegalStateException("Keine clientId im Keystore gefunden.");
             }
 
-            if(args.length==1 && !store.contains("basePath")) store.addToken("basePath",args[0]);
+            if (args.length == 1 && !store.contains("basePath")) {
+                store.addToken("basePath", args[0]);
+            }
+
             Path watchPath = Paths.get(store.getToken("basePath"), uuid);
 
             if (!Files.exists(watchPath)) {
@@ -49,15 +49,15 @@ public class MSimpleGoogleMailerService {
             }
 
             MSimpleGoogleMailerService.clientAndPathUUID = uuid;
-            MFileWatcher watcher = new MFileWatcher() {
-                 @Override
-               protected void onFileChangedAndUnlocked(Path file) {
+            watcher = new MFileWatcher() {
+                @Override
+                protected void onFileChangedAndUnlocked(Path file) {
                     try {
                         MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress, clientAndPathUUID)
                                 .appendMessageText("Automatischer Versand von " + clientAndPathUUID + "\\" + file.getFileName())
                                 .addAttachment(file.toString());
 
-                        //mailer.send(mail);
+                        mailer.send(mail);
                         System.out.println("Backup versendet: " + file.getFileName());
                     } catch (Exception e) {
                         System.err.println("Fehler beim Senden: " + e.getMessage());
@@ -71,8 +71,18 @@ public class MSimpleGoogleMailerService {
         } catch (Exception e) {
             System.err.println("Fehler: " + e.getMessage());
             e.printStackTrace();
-            System.exit(1);
+            exit(1);
         }
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * Beendet das Programm mit dem angegebenen Exit-Code.
+     */
+    private static void exit(int code) {
+        try { watcher.shutdown(); } catch (Exception exc) { exc.printStackTrace(); }
+        System.out.println("Programm wird beendet mit Code: " + code);
+        System.exit(code);
     }
 }
 

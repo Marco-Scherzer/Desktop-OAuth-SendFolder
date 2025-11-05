@@ -41,3 +41,7 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Keystore & OAuth ###
+mystore.p12
+client_secret.json
