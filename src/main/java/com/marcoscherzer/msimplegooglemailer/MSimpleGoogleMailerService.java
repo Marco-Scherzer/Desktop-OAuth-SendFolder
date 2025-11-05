@@ -49,9 +49,9 @@ public class MSimpleGoogleMailerService {
             }
 
             MSimpleGoogleMailerService.clientAndPathUUID = uuid;
-            MFileWatcherWithDelayHandling watcher = new MFileWatcherWithDelayHandling() {
-                @Override
-                protected void onFileChanged(Path file) {
+            MFileWatcher watcher = new MFileWatcher() {
+                 @Override
+               protected void onFileChangedAndUnlocked(Path file) {
                     try {
                         MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress, clientAndPathUUID)
                                 .appendMessageText("Automatischer Versand von " + clientAndPathUUID + "\\" + file.getFileName())
@@ -65,7 +65,7 @@ public class MSimpleGoogleMailerService {
                 }
             };
 
-            watcher.startWatching(watchPath, delayMs);
+            watcher.startWatching(watchPath);
             System.out.println("Neue Dateien, die dem Pfad hinzugefügt werden, werden automatisch per E-Mail versendet.");
 
         } catch (Exception e) {
