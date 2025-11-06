@@ -75,7 +75,7 @@ public final class MSimpleGoogleMailer {
             String clientId;
             String clientSecret;
 
-            if (newCreated) {
+            if(newCreated){
                 // Parameter aus JSON laden und in Keystore schreiben
                 if (jsonFile.exists()) {
                     GoogleClientSecrets secrets = GoogleClientSecrets.load(jsonFactory, new FileReader(jsonFile));
@@ -94,7 +94,12 @@ public final class MSimpleGoogleMailer {
                 UUID uuid = UUID.randomUUID();
                 System.out.println("Client Sicherheits-UUID wurde erstellt: " + uuid);
                 keystore.add("clientId", uuid.toString());
+            }
 
+            if (newCreated || forceOAuth) {
+                // Parameter aus Keystore laden
+                clientId = keystore.get("google-client-id");
+                clientSecret = keystore.get("google-client-secret");
                 // OAuth-Flow starten
                 GoogleClientSecrets.Details details = new GoogleClientSecrets.Details()
                         .setClientId(clientId)
