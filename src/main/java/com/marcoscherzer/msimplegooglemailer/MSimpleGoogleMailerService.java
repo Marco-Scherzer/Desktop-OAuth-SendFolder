@@ -26,21 +26,22 @@ public final class MSimpleGoogleMailerService {
             // sonst Keystore erzeugen oder vorhandenen verwenden
 
             String pw = MUtil.promptPassword(!initialized ? "Bitte Passwort setzen: " : "Bitte Passwort eingeben: ");
+            System.out.println();
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);
             MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);
             //Keystore erzeugt, UUID und alles andere intern gesetzt
             MSimpleKeyStore store = mailer.getKeystore();
 
             //nicht vorhandener initialParamter als Indikator für das setzen der initialParameter
-            if (store.contains("basePath")){
-                store.addToken("basePath", args[0]);
-                store.addToken("fromAddress", MUtil.checkMailAddress(args[1]));
-                store.addToken("toAddress", MUtil.checkMailAddress(args[2]));
+            if (!store.contains("basePath")){
+                store.add("basePath", args[0]);
+                store.add("fromAddress", MUtil.checkMailAddress(args[1]));
+                store.add("toAddress", MUtil.checkMailAddress(args[2]));
             }
 
             // UUID aus dem Keystore lesen
-            String uuid = store.getToken("clientId");
-            Path watchPath = Paths.get(store.getToken("basePath"), uuid);
+            String uuid = store.get("clientId");
+            Path watchPath = Paths.get(store.get("basePath"), uuid);
 
             if (!Files.exists(watchPath)) {
                 Files.createDirectories(watchPath);
@@ -54,7 +55,7 @@ public final class MSimpleGoogleMailerService {
                 @Override
                 protected void onFileChangedAndUnlocked(Path file) {
                     try {
-                        MOutgoingMail mail = new MOutgoingMail(store.getToken("fromAddress"),"toAddress", clientAndPathUUID)
+                        MOutgoingMail mail = new MOutgoingMail(store.get("fromAddress"),"toAddress", clientAndPathUUID)
                                 .appendMessageText("Automatischer Versand von " + clientAndPathUUID + "\\" + file.getFileName())
                                 .addAttachment(file.toString());
 
@@ -68,10 +69,12 @@ public final class MSimpleGoogleMailerService {
 
             watcher.startWatching(watchPath);
             System.out.println("Neue Dateien, die dem Pfad hinzugefügt werden, werden automatisch per E-Mail versendet.");
-            exit(0);
+            //exit(0);
         } catch (Exception exc) {
-            System.err.println("\n\nFehler: " + exc.getMessage());
-            //exc.printStackTrace();
+            Throwable cause = exc.getCause();
+            System.err.println("\nFehler: " + exc.getMessage()+ "\n");
+            if(cause != null) System.err.println(exc.getCause().getMessage());
+            exc.printStackTrace();
             exit(1);
         }
     }

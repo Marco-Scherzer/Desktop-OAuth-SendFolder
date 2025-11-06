@@ -66,25 +66,25 @@ public final class MSimpleGoogleMailer {
             this.keystore = new MSimpleKeyStore(keystoreFile.getAbsolutePath(), keystorePassword);
             //neuer keystore wurde erzeugt falls nicht vorhanden
 
+            checkStoreForExistingClientTokenOrReadItFromDirectory(keystore,jsonFile);
+
             if (!keystore.contains("clientId")) {
                 UUID uuid = UUID.randomUUID();
                 System.out.println("Client Sicherheits-UUID wurde erstellt: " + uuid);
-                keystore.addToken("clientId", uuid.toString());
+                keystore.add("clientId", uuid.toString());
             }
 
-            applicationName += " [" + keystore.getToken("clientId") + "]";
+            String clientId = keystore.get("google-client-id");
+            String clientSecret = keystore.get("google-client-secret");
 
-            checkStoreForExistingClientTokenOrReadItFromDirectory(keystore,jsonFile);
+            String accessToken = keystore.get("google-access-token");
+            String refreshToken = keystore.get("google-refresh-token");
 
+
+
+            applicationName += " [" + keystore.get("clientId") + "]";
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-
-            String clientId = keystore.getToken("google-client-id");
-            String clientSecret = keystore.getToken("google-client-secret");
-
-            String accessToken = keystore.getToken("google-access-token");
-            String refreshToken = keystore.getToken("google-refresh-token");
-
             Credential credential;
 
             if (!forceOAuth && accessToken != null && refreshToken != null) {
@@ -100,32 +100,22 @@ public final class MSimpleGoogleMailer {
                 credential = authenticate(applicationName, httpTransport, jsonFactory, keystore, clientId, clientSecret);
                 accessToken = credential.getAccessToken();
                 refreshToken = credential.getRefreshToken();
-                if (accessToken != null) keystore.addToken("google-access-token", accessToken);
-                if (refreshToken != null) keystore.addToken("google-refresh-token", refreshToken);
+                if (accessToken != null) keystore.add("google-access-token", accessToken);
+                if (refreshToken != null) keystore.add("google-refresh-token", refreshToken);
             }
 
             this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
                     .setApplicationName(applicationName)
                     .build();
-
         } catch(MPasswordIncorrectException exc) { // pwIncorrect
             throw exc;
         } catch (Exception exc){ //Jede andere Exception Fehler während Initialisierung
-            System.out.println("Initialisierungvorgang konnte nicht abgeschlossen werden. KeystoreFile wird gelöscht.");
-
-            boolean keyStoreFileDeleted = keystoreFile.delete();
-
-
-            if (!keyStoreFileDeleted) {
-                System.out.println("Warnung: keystoreFile \""+keystoreFile.toString()+"\" konnte nicht gelöscht werden. Bitte manuell löschen.");
-            } else {
-                System.out.println("keystoreFile erfolgreich gelöscht.");
-            }
-            throw exc;
+            try{ keystore.clear();} catch( Exception exc2 ) { throw new RuntimeException("Initialisierungvorgang konnte nicht abgeschlossen werden und Keystore konnte nicht zurückgesetzt werden. Bitte manuelle löschen.",exc);}
+            throw new RuntimeException("Initialisierungvorgang konnte nicht abgeschlossen werden. Keystore wurde erfolgreich zurückgesetzt.",exc);
         }
 
          //Initialisierung abgeschlossen
-        if(jsonFile.exists() && keystoreFile.exists()){
+        if(jsonFile.exists()){
             boolean jsonFileDeleted = jsonFile.delete();
             if (!jsonFileDeleted) System.out.println("Warnung: Datei \"client_secret.json\" konnte nicht gelöscht werden. Bitte manuell löschen.");
             else System.out.println("client_secret.json erfolgreich importiert und gelöscht.");
@@ -158,7 +148,7 @@ public final class MSimpleGoogleMailer {
             String clientId = secrets.getDetails().getClientId();
             String clientSecret = secrets.getDetails().getClientSecret();
             if (clientId != null && clientSecret != null) {
-                store.addToken("google-client-id", clientId).addToken("google-client-secret", clientSecret);
+                store.add("google-client-id", clientId).add("google-client-secret", clientSecret);
             } else {
                 throw new IllegalStateException("client_secret.json enthält keine gültigen Daten.");
             }

@@ -15,7 +15,7 @@ public final class MSimpleKeyStore {
 
     private final String keystorePath;
     private final String keystorePassword;
-    private static final String KEYSTORE_TYPE = "PKCS12"; // moderner Keystore-Typ
+    private static final String KEYSTORE_TYPE = "PKCS12";
     private KeyStore keyStore;
 
     /**
@@ -23,31 +23,28 @@ public final class MSimpleKeyStore {
      */
     public MSimpleKeyStore(String keystorePath, String keystorePassword) throws Exception {
         try {
-        this.keystorePath = keystorePath;
-        this.keystorePassword = keystorePassword;
-        keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
+            this.keystorePath = keystorePath;
+            this.keystorePassword = keystorePassword;
+            keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
 
-        File ksFile = new File(keystorePath);
+            File ksFile = new File(keystorePath);
 
-        if (ksFile.exists()) {
-            FileInputStream fis = new FileInputStream(ksFile);
-            keyStore.load(fis, keystorePassword.toCharArray());
-        } else {
-            System.out.println("Keystore wird neu erstellt: " + ksFile.getAbsolutePath());
-            keyStore.load(null, keystorePassword.toCharArray());
-            // Leerer Keystore wird sofort gespeichert
-            ksFile.getParentFile().mkdirs();
-            FileOutputStream fos = new FileOutputStream(ksFile);
-            keyStore.store(fos, keystorePassword.toCharArray());
-        }
-        } catch (FileNotFoundException exc) {
+            if (ksFile.exists()) {
+                try (FileInputStream fis = new FileInputStream(ksFile)) {
+                    keyStore.load(fis, keystorePassword.toCharArray());
+                }
+            } else {
+                System.out.println("Keystore wird neu erstellt: " + ksFile.getAbsolutePath());
+                keyStore.load(null, keystorePassword.toCharArray());
+                ksFile.getParentFile().mkdirs();
+                try (FileOutputStream fos = new FileOutputStream(ksFile)) {
+                    keyStore.store(fos, keystorePassword.toCharArray());
+                }
+            }
+        } catch (FileNotFoundException | CertificateException | NoSuchAlgorithmException exc) {
             throw new RuntimeException(exc);
-        } catch (CertificateException  exc) {
-            throw new RuntimeException( exc);
         } catch (IOException exc) {
             throw new MPasswordIncorrectException("Falsches Passwort", exc);
-        } catch (NoSuchAlgorithmException  exc) {
-            throw new RuntimeException( exc);
         }
     }
 
@@ -61,7 +58,7 @@ public final class MSimpleKeyStore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final MSimpleKeyStore addToken(String alias, String token) throws Exception {
+    public final MSimpleKeyStore add(String alias, String token) throws Exception {
         SecretKey secretKey = new SecretKeySpec(token.getBytes(), "AES");
         KeyStore.SecretKeyEntry entry = new KeyStore.SecretKeyEntry(secretKey);
         KeyStore.ProtectionParameter protParam =
@@ -69,13 +66,9 @@ public final class MSimpleKeyStore {
 
         keyStore.setEntry(alias, entry, protParam);
 
-        File ksFile = new File(keystorePath);
-        try (FileOutputStream fos = new FileOutputStream(ksFile)) {
+        try (FileOutputStream fos = new FileOutputStream(keystorePath)) {
             keyStore.store(fos, keystorePassword.toCharArray());
         }
-
-        ksFile.setReadable(true, true);
-        ksFile.setWritable(true, true);
 
         return this;
     }
@@ -83,7 +76,7 @@ public final class MSimpleKeyStore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final String getToken(String alias) throws Exception {
+    public final String get(String alias) throws Exception {
         KeyStore.ProtectionParameter protParam =
                 new KeyStore.PasswordProtection(keystorePassword.toCharArray());
         KeyStore.SecretKeyEntry entry =
@@ -100,8 +93,48 @@ public final class MSimpleKeyStore {
     public final boolean contains(String alias) {
         try {
             return keyStore.containsAlias(alias);
-        } catch (KeyStoreException e) {
+        } catch (KeyStoreException exc) {
             return false;
         }
     }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * Entfernt einen Eintrag aus dem Keystore.
+     */
+    public final boolean remove(String alias) {
+        try {
+            if (keyStore.containsAlias(alias)) {
+                keyStore.deleteEntry(alias);
+                try (FileOutputStream fos = new FileOutputStream(keystorePath)) {
+                    keyStore.store(fos, keystorePassword.toCharArray());
+                }
+                return true;
+            }
+        } catch (Exception exc) {
+           throw new RuntimeException("Fehler beim Entfernen von \"" + alias + "\"",exc);
+        }
+        return false;
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * Entfernt alle Einträge aus dem Keystore und speichert ihn leer zurück.
+     */
+    public final void clear() throws Exception {
+        try {
+        java.util.Enumeration<String> aliases = keyStore.aliases();
+        while (aliases.hasMoreElements()) {
+            String alias = aliases.nextElement();
+            keyStore.deleteEntry(alias);
+        }
+
+        try (FileOutputStream fos = new FileOutputStream(keystorePath)) {
+            keyStore.store(fos, keystorePassword.toCharArray());
+        }
+        } catch (Exception exc) {
+            throw new RuntimeException("Fehler beim löschen des KeyStores",exc);
+        }
+    }
+
 }
