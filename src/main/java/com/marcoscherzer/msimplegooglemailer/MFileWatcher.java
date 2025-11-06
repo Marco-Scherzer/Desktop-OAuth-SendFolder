@@ -31,7 +31,7 @@ public abstract class MFileWatcher {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * Startet die Überwachung eines Verzeichnisses und verarbeitet Dateiänderungen.
      */
-    public boolean startWatching(Path watchDir) {
+    public final boolean startWatching(Path watchDir) {
         try {
             watchService = FileSystems.getDefault().newWatchService();
             watchDir.register(watchService, ENTRY_CREATE, ENTRY_MODIFY);
@@ -127,7 +127,7 @@ public abstract class MFileWatcher {
          * Überwacht eine einzelne Datei, bis sie stabil und nicht mehr gesperrt ist.
          */
         @Override
-        public void run() {
+        public final void run() {
             try {
                 boolean done = false;
                 while (!done && !Thread.currentThread().isInterrupted()) {

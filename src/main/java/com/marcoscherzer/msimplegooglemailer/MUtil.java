@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 /**
  * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public class MUtil {
+public final class MUtil {
 
     public static final String promptPassword(String promptText) {
         Console console = System.console();

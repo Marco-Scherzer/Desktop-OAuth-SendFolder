@@ -5,7 +5,7 @@ import java.nio.file.Paths;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public class MSimpleGoogleMailerService {
+public final class MSimpleGoogleMailerService {
     private static String clientAndPathUUID;
     private static MFileWatcher watcher;
     private static String userDir= System.getProperty("user.dir");
@@ -13,9 +13,9 @@ public class MSimpleGoogleMailerService {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static void main(String[] args) {
+    public static final void main(String[] args) {
         try {
-            args = new String[]{ System.getProperty("user.dir")+"\\testBackupBasePath" , "marco.scherzer@outlook.com", "marco.scherzer@outlook.com"};
+            args = new String[]{ System.getProperty("user.dir")+"\\testBackupBasePath" , "marcoscherzer@outlook.com", "marcoscherzer@outlook.com"};
             Path keystorePath = Paths.get(userDir, "mystore.p12");
             boolean initialized = Files.exists(keystorePath);
             boolean argsLengthOK = args.length == 3;
@@ -23,7 +23,7 @@ public class MSimpleGoogleMailerService {
             if (!initialized && ! argsLengthOK)
                 throw new Exception("Bei der ersten Verwendung muessen der Basis Pfad, sowie fromAddress und toAddress gesetzt werden:" +
                         "\njava -jar MSendBackupMail [Base-Path] [From-Email-Adress] [To-Email-Adress]");
-            // sonst Keystore erzeugen
+            // sonst Keystore erzeugen oder vorhandenen verwenden
 
             String pw = MUtil.promptPassword(!initialized ? "Bitte Passwort setzen: " : "Bitte Passwort eingeben: ");
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);
@@ -71,7 +71,7 @@ public class MSimpleGoogleMailerService {
             exit(0);
         } catch (Exception exc) {
             System.err.println("\n\nFehler: " + exc.getMessage());
-            //e.printStackTrace();
+            //exc.printStackTrace();
             exit(1);
         }
     }

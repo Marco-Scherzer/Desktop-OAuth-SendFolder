@@ -40,23 +40,21 @@ public final class MSimpleKeyStore {
             FileOutputStream fos = new FileOutputStream(ksFile);
             keyStore.store(fos, keystorePassword.toCharArray());
         }
-        } catch (KeyStoreException e) {
-            throw new RuntimeException(e);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (CertificateException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException("Falsches Passwort",e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+        } catch (FileNotFoundException exc) {
+            throw new RuntimeException(exc);
+        } catch (CertificateException  exc) {
+            throw new RuntimeException( exc);
+        } catch (IOException exc) {
+            throw new MPasswordIncorrectException("Falsches Passwort", exc);
+        } catch (NoSuchAlgorithmException  exc) {
+            throw new RuntimeException( exc);
         }
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public KeyStore getKeyStore() {
+    public final KeyStore getKeyStore() {
         return keyStore;
     }
 
@@ -99,7 +97,7 @@ public final class MSimpleKeyStore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public boolean contains(String alias) {
+    public final boolean contains(String alias) {
         try {
             return keyStore.containsAlias(alias);
         } catch (KeyStoreException e) {
