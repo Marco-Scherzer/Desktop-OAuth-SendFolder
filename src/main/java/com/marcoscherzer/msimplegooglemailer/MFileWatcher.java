@@ -16,11 +16,17 @@ import static java.nio.file.StandardWatchEventKinds.*;
  */
 public abstract class MFileWatcher {
 
-    private final ExecutorService pool = Executors.newCachedThreadPool();
-    private final Map<Path, MObservedFile> fileStates = new ConcurrentHashMap<>();
-    private final Set<Path> activeMonitors = ConcurrentHashMap.newKeySet();
+    private final ExecutorService pool;
+    private final Map<Path, MObservedFile> fileStates;
+    private final Set<Path> activeMonitors;
     private WatchService watchService;
 
+
+    MFileWatcher(){
+           pool = Executors.newCachedThreadPool();
+           fileStates = new ConcurrentHashMap<>();
+           activeMonitors = ConcurrentHashMap.newKeySet();
+    }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * Startet die Überwachung eines Verzeichnisses und verarbeitet Dateiänderungen.

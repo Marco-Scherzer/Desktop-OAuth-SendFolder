@@ -140,7 +140,7 @@ public final class MSimpleGoogleMailer {
             }
         } else {
             if (store.getToken("google-client-id") == null || store.getToken("google-client-secret") == null) {
-                throw new IllegalStateException("Kein client_secret.json gefunden und keine Client-Daten im Keystore. Bitte client_secret.json in " + clientSecretDir + " ablegen.");
+                throw new IllegalStateException("client_secret.json muss beim ersten Start zum Einlesen im Verzeichnis \"" + clientSecretDir + "\" liegen.");
             }
         }
     }

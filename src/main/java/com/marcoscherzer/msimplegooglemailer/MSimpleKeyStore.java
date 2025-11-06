@@ -21,26 +21,35 @@ public final class MSimpleKeyStore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleKeyStore(String keystorePath, String keystorePassword) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+    public MSimpleKeyStore(String keystorePath, String keystorePassword) throws Exception {
+        try {
         this.keystorePath = keystorePath;
         this.keystorePassword = keystorePassword;
-
         keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
+
         File ksFile = new File(keystorePath);
 
         if (ksFile.exists()) {
-            try (FileInputStream fis = new FileInputStream(ksFile)) {
-                keyStore.load(fis, keystorePassword.toCharArray());
-            }
+            FileInputStream fis = new FileInputStream(ksFile);
+            keyStore.load(fis, keystorePassword.toCharArray());
         } else {
             System.out.println("Keystore wird neu erstellt: " + ksFile.getAbsolutePath());
             keyStore.load(null, keystorePassword.toCharArray());
-
             // Leerer Keystore wird sofort gespeichert
             ksFile.getParentFile().mkdirs();
-            try (FileOutputStream fos = new FileOutputStream(ksFile)) {
-                keyStore.store(fos, keystorePassword.toCharArray());
-            }
+            FileOutputStream fos = new FileOutputStream(ksFile);
+            keyStore.store(fos, keystorePassword.toCharArray());
+        }
+        } catch (KeyStoreException e) {
+            throw new RuntimeException(e);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (CertificateException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException("Falsches Passwort",e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
     }
 

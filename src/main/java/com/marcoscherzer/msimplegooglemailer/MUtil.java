@@ -21,7 +21,7 @@ public class MUtil {
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static final void checkMailAddress(String email) {
+    public static final String checkMailAddress(String email) {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("Absenderadresse darf nicht leer sein.");
         }
@@ -31,5 +31,6 @@ public class MUtil {
         if (!emailPattern.matcher(email).matches()) {
             throw new IllegalArgumentException("Ungültiges Email-Format: " + email);
         }
+        return email;
     }
 }
