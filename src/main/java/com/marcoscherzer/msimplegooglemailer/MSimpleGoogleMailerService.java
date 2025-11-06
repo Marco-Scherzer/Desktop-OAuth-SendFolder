@@ -23,7 +23,7 @@ public final class MSimpleGoogleMailerService {
      */
     public static final void main(String[] args) {
         try {
-            args = new String[]{ System.getProperty("user.dir")+"\\testBackupBasePath" , "m.scherzer@hotmail.com", "m.scherzer@hotmail.com"};
+            args = new String[]{ System.getProperty("user.dir")+"\\testBackupBasePath" , "fromAddress", "toAddress"};
             Path keystorePath = Paths.get(userDir, "mystore.p12");
             boolean initialized = Files.exists(keystorePath);
             boolean argsLengthOK = args.length == 3;
@@ -34,6 +34,8 @@ public final class MSimpleGoogleMailerService {
             // sonst Keystore erzeugen oder vorhandenen verwenden
 
             String pw = MUtil.promptPassword(!initialized ? "Bitte Passwort setzen: " : "Bitte Passwort eingeben: ");
+            pw="lkjhjgD-767548";
+
             System.out.println();
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);
             MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);
@@ -88,9 +90,9 @@ public final class MSimpleGoogleMailerService {
             System.out.println("Neue Dateien, die dem Pfad hinzugefügt werden, werden automatisch per E-Mail versendet.");
         } catch (Exception exc) {
             Throwable cause = exc.getCause();
-            System.err.println("\nFehler: " + exc.getMessage()+ "\n");
+            System.err.println("\nFehler: " + exc.getMessage());
             if(cause != null) System.err.println(exc.getCause().getMessage());
-            exc.printStackTrace();
+            //exc.printStackTrace();
             exit(1);
         }
     }

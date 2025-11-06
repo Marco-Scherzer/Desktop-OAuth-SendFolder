@@ -3,15 +3,14 @@ package com.marcoscherzer.msimplegooglemailer;
 import com.google.api.client.util.store.DataStore;
 import com.google.api.client.util.store.DataStoreFactory;
 
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.security.GeneralSecurityException;
 import java.util.*;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public class MSimpleKeystoreDataStore<V extends Serializable> implements DataStore<V>, DataStoreFactory {
+public class MSimpleKeystoreDataStore<V extends Serializable> implements DataStore<V> {
 
     private final MSimpleKeystore keystore;
     private final String id;
@@ -27,24 +26,8 @@ public class MSimpleKeystoreDataStore<V extends Serializable> implements DataSto
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static DataStoreFactory getDataStoreFactory(MSimpleKeystore keystore) {
-        return new MSimpleKeystoreDataStore<>(keystore, "default");
-    }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    @Override
     public DataStoreFactory getDataStoreFactory() {
-        return this;
-    }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    @Override
-    public DataStore<V> getDataStore(String id) throws IOException {
-        return new MSimpleKeystoreDataStore<>(keystore, id);
+        return new MSimpleKeystoreDataStoreFactory(keystore);
     }
 
     /**
@@ -109,8 +92,8 @@ public class MSimpleKeystoreDataStore<V extends Serializable> implements DataSto
     @Override
     public V get(String key) throws IOException {
         try {
-            String raw = keystore.get(key);
-            return raw == null ? null : (V) raw;
+            String base64 = keystore.get(key);
+            return base64 == null ? null : deserialize(base64);
         } catch (GeneralSecurityException e) {
             throw new IOException("Fehler beim Lesen aus Keystore", e);
         }
@@ -122,7 +105,8 @@ public class MSimpleKeystoreDataStore<V extends Serializable> implements DataSto
     @Override
     public DataStore<V> set(String key, V value) throws IOException {
         try {
-            keystore.add(key, value.toString());
+            String base64 = serialize(value);
+            keystore.add(key, base64);
             return this;
         } catch (Exception e) {
             throw new IOException("Fehler beim Schreiben in Keystore", e);
@@ -154,5 +138,30 @@ public class MSimpleKeystoreDataStore<V extends Serializable> implements DataSto
             throw new IOException("Fehler beim Löschen des Keystores", e);
         }
     }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private String serialize(V value) throws IOException {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+            oos.writeObject(value);
+            return Base64.getEncoder().encodeToString(baos.toByteArray());
+        }
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private V deserialize(String base64) throws IOException {
+        byte[] data = Base64.getDecoder().decode(base64);
+        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data))) {
+            return (V) ois.readObject();
+        } catch (ClassNotFoundException e) {
+            throw new IOException("Deserialisierung fehlgeschlagen", e);
+        }
+    }
 }
+
+
 

@@ -1,7 +1,6 @@
 package com.marcoscherzer.msimplegooglemailer;
-import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
+import com.google.api.client.auth.oauth2.StoredCredential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
@@ -10,6 +9,7 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.store.MemoryDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Message;
@@ -101,26 +101,25 @@ public final class MSimpleGoogleMailer {
                     .setTokenUri("https://oauth2.googleapis.com/token");
 
             GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
-
+            GoogleAuthorizationCodeFlow flow;
+            forceOAuth = false;
             if (newCreated || forceOAuth) {
-                GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
-                        .setAccessType("online") // keine Refresh-Tokens
-                        .setCredentialDataStore(new com.google.api.client.util.store.MemoryDataStoreFactory().getDataStore("temp-session"))
+                flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
+                        .setAccessType("online")
+                        .setApprovalPrompt("force")
+                        .setCredentialDataStore(new MemoryDataStoreFactory().getDataStore("tempsession"))
                         .build();
-
-                LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-                credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("session-" + UUID.randomUUID());
-
             } else {
-                GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
+                flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
                         .setAccessType("offline")
-                        .setCredentialDataStore(MSimpleKeystoreDataStore.getDataStoreFactory(keystore).getDataStore(keystore.get("clientId")))
+                        .setCredentialDataStore(new MSimpleKeystoreDataStoreFactory(keystore).getDataStore("OAuth"))
                         .build();
+            }
 
-                credential = flow.loadCredential(keystore.get("clientId"));
-                if (credential == null) {
-                    throw new IllegalStateException("Kein gespeichertes OAuth-Credential gefunden. Bitte forceOAuth aktivieren.");
-                }
+            LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+            credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("OAuth");
+            if (credential == null) {
+                throw new IllegalStateException("Kein gespeichertes OAuth-Credential gefunden.");
             }
 
             applicationName += " [" + keystore.get("clientId") + "]";
