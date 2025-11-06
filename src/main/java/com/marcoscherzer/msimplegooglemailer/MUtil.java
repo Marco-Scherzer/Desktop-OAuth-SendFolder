@@ -7,7 +7,10 @@ import java.util.regex.Pattern;
  * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
 public final class MUtil {
-
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * Prüft die Passwortkomplexität anhand konfigurierbarer Kriterien.
+     */
     public static final String promptPassword(String promptText) {
         Console console = System.console();
         if (console != null) {
@@ -28,24 +31,29 @@ public final class MUtil {
             throw new IllegalArgumentException("Password must not be empty.");
         }
 
+        StringBuilder requirements = new StringBuilder("Password must meet the following requirements:");
+        requirements.append("\n- Minimum length: ").append(minLength).append(" characters");
+
+        if (requireUppercase) requirements.append("\n- At least one uppercase letter");
+        if (requireDigit) requirements.append("\n- At least one digit");
+        if (requireSpecial) requirements.append("\n- At least one special character");
+
         if (password.length() < minLength) {
-            throw new IllegalArgumentException("Password must be at least " + minLength + " characters long.");
+            throw new IllegalArgumentException(requirements.toString());
         }
 
         if (requireUppercase && !password.matches(".*[A-Z].*")) {
-            throw new IllegalArgumentException("Password must contain at least one uppercase letter.");
+            throw new IllegalArgumentException(requirements.toString());
         }
 
         if (requireDigit && !password.matches(".*\\d.*")) {
-            throw new IllegalArgumentException("Password must contain at least one digit.");
+            throw new IllegalArgumentException(requirements.toString());
         }
 
         if (requireSpecial && !password.matches(".*[^a-zA-Z0-9].*")) {
-            throw new IllegalArgumentException("Password must contain at least one special character.");
+            throw new IllegalArgumentException(requirements.toString());
         }
     }
-
-
 
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

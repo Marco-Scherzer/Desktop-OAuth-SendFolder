@@ -6,26 +6,27 @@ import java.io.*;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MSimpleKeyStore {
+public final class MSimpleKeystore {
 
     private final File ksFile;
     private final String keystorePassword;
     private static final String KEYSTORE_TYPE = "PKCS12";
     private KeyStore keyStore;
 
-    public MSimpleKeyStore(File ksFile, String keystorePassword){
+    public MSimpleKeystore(File ksFile, String keystorePassword){
         this.ksFile = ksFile;
         this.keystorePassword = keystorePassword;
     }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public boolean loadKeyStoreOrCreateKeyStoreIfNotExists() throws Exception {
+    public boolean loadKeyStoreOrCreateKeyStoreIfNotExists() throws MPasswordIncorrectException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
         try {
             keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
             if (ksFile.exists()) {
@@ -42,8 +43,6 @@ public final class MSimpleKeyStore {
                 }
                 return true;
             }
-        } catch (FileNotFoundException | CertificateException | NoSuchAlgorithmException exc) {
-            throw new RuntimeException(exc);
         } catch (IOException exc) {
             throw new MPasswordIncorrectException("Falsches Passwort", exc);
         }
@@ -59,7 +58,7 @@ public final class MSimpleKeyStore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final MSimpleKeyStore add(String alias, String token) throws Exception {
+    public final MSimpleKeystore add(String alias, String token) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
         SecretKey secretKey = new SecretKeySpec(token.getBytes(), "AES");
         KeyStore.SecretKeyEntry entry = new KeyStore.SecretKeyEntry(secretKey);
         KeyStore.ProtectionParameter protParam =
@@ -75,13 +74,29 @@ public final class MSimpleKeyStore {
     }
 
     /**
+     * Prüft, ob alle angegebenen Schlüssel im Keystore gesetzt und nicht null sind.
+     * @param keys Schlüsselnamen, die geprüft werden sollen
+     * @return true, wenn alle Schlüssel vorhanden und nicht null sind
+     */
+    public boolean isCompletelyInitialized(String... keys) {
+     try {
+         for (String key : keys) {
+             String value = get(key);
+             if (value == null || value.isBlank()) {
+                 return false;
+             }
+         }
+         return true;
+     } catch(Exception exc){ return false;}
+    }
+
+
+    /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final String get(String alias) throws Exception {
-        KeyStore.ProtectionParameter protParam =
-                new KeyStore.PasswordProtection(keystorePassword.toCharArray());
-        KeyStore.SecretKeyEntry entry =
-                (KeyStore.SecretKeyEntry) keyStore.getEntry(alias, protParam);
+    public final String get(String alias) throws UnrecoverableEntryException, NoSuchAlgorithmException, KeyStoreException {
+        KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(keystorePassword.toCharArray());
+        KeyStore.SecretKeyEntry entry = (KeyStore.SecretKeyEntry) keyStore.getEntry(alias, protParam);
         if (entry == null) return null;
 
         SecretKey secretKey = entry.getSecretKey();
@@ -103,7 +118,7 @@ public final class MSimpleKeyStore {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * Entfernt einen Eintrag aus dem Keystore.
      */
-    public final boolean remove(String alias) {
+    public final boolean remove(String alias) throws RuntimeException {
         try {
             if (keyStore.containsAlias(alias)) {
                 keyStore.deleteEntry(alias);
@@ -122,7 +137,7 @@ public final class MSimpleKeyStore {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * Entfernt alle Einträge aus dem Keystore und speichert ihn leer zurück.
      */
-    public final void clear() throws Exception {
+    public final void clear() throws RuntimeException {
         try {
         java.util.Enumeration<String> aliases = keyStore.aliases();
         while (aliases.hasMoreElements()) {

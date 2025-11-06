@@ -6,9 +6,9 @@ import java.util.List;
  * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
 public final class MOutgoingMail {
-    public String from;
-    public String to;
-    public String subject;
+    private String from;
+    private String to;
+    private String subject;
     private final StringBuilder messageText;
     private final List<String> attachmentList = new ArrayList<>();
 
@@ -18,7 +18,7 @@ public final class MOutgoingMail {
     public MOutgoingMail(String from, String to, String subject) {
         MUtil.checkMailAddress(from);
         MUtil.checkMailAddress(to);
-        this.from=from;
+        this.from = from;
         this.to = to;
         this.subject = subject;
         this.messageText = new StringBuilder();
@@ -50,12 +50,28 @@ public final class MOutgoingMail {
     public final String[] getAttachments() {
         return attachmentList.toArray(new String[0]);
     }
-
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final String getMessageText() {
         return messageText.toString();
     }
-
+    /**
+     * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final String getFrom() {
+        return from;
+    }
+    /**
+     * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final String getTo() {
+        return to;
+    }
+    /**
+     * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final String getSubject() {
+        return subject;
+    }
 }

@@ -1,7 +1,12 @@
 package com.marcoscherzer.msimplegooglemailer;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
@@ -9,13 +14,16 @@ public final class MSimpleGoogleMailerService {
     private static String clientAndPathUUID;
     private static MFileWatcher watcher;
     private static String userDir= System.getProperty("user.dir");
+    private static Path sentFolder;
+    private static String fromAdress;
+    private static String toAdress;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public static final void main(String[] args) {
         try {
-            args = new String[]{ System.getProperty("user.dir")+"\\testBackupBasePath" , "marcoscherzer@outlook.com", "marcoscherzer@outlook.com"};
+            args = new String[]{ System.getProperty("user.dir")+"\\testBackupBasePath" , "m.scherzer@hotmail.com", "m.scherzer@hotmail.com"};
             Path keystorePath = Paths.get(userDir, "mystore.p12");
             boolean initialized = Files.exists(keystorePath);
             boolean argsLengthOK = args.length == 3;
@@ -30,46 +38,54 @@ public final class MSimpleGoogleMailerService {
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);
             MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);
             //Keystore erzeugt, UUID und alles andere intern gesetzt
-            MSimpleKeyStore store = mailer.getKeystore();
+            MSimpleKeystore store = mailer.getKeystore();
 
             //nicht vorhandener initialParamter als Indikator für das setzen der initialParameter
-            if (!store.contains("basePath")){
+            if (!store.isCompletelyInitialized("basePath","fromAddress","toAddress")){
                 store.add("basePath", args[0]);
                 store.add("fromAddress", MUtil.checkMailAddress(args[1]));
                 store.add("toAddress", MUtil.checkMailAddress(args[2]));
             }
-
             // UUID aus dem Keystore lesen
             String uuid = store.get("clientId");
-            Path watchPath = Paths.get(store.get("basePath"), uuid);
 
-            if (!Files.exists(watchPath)) {
-                Files.createDirectories(watchPath);
-                System.out.println("Backup-Verzeichnis erstellt: " + watchPath);
-            } else {
-                System.out.println("Gespeicherter Backup-Pfad: " + watchPath);
-            }
+            Path watchPath = createPathIfNotExists(Paths.get(store.get("basePath"), uuid), "Backup-Verzeichnis");
+            sentFolder = createPathIfNotExists(Paths.get(store.get("basePath"), store.get("clientId") + "-sent"), "sentFolder-Verzeichnis");
 
-            MSimpleGoogleMailerService.clientAndPathUUID = uuid;
+            clientAndPathUUID = uuid;
+            fromAdress =store.get("fromAddress");
+            toAdress = store.get("toAddress");
             watcher = new MFileWatcher() {
                 @Override
                 protected void onFileChangedAndUnlocked(Path file) {
+                    boolean sent = false;
                     try {
-                        MOutgoingMail mail = new MOutgoingMail(store.get("fromAddress"),"toAddress", clientAndPathUUID)
-                                .appendMessageText("Automatischer Versand von " + clientAndPathUUID + "\\" + file.getFileName())
-                                .addAttachment(file.toString());
+                    String sendTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                    MOutgoingMail mail = new MOutgoingMail(fromAdress, toAdress,clientAndPathUUID + ", sendTime " + sendTime)
+                            .appendMessageText("Backup " + clientAndPathUUID + "\\" + file.getFileName())
+                            .addAttachment(file.toString());
 
                         mailer.send(mail);
                         System.out.println("Backup versendet: " + file.getFileName());
-                    } catch (Exception exc) {
-                        System.err.println("Fehler beim Senden: " + exc.getMessage());
+                        sent = true;
+                    } catch (Exception sendExc) {
+                        System.err.println("Fehler beim Senden: " + sendExc.getMessage());
+                    }
+
+                    if (sent) {
+                        try {
+                            Path targetFile = sentFolder.resolve(file.getFileName());
+                            Files.move(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
+                            System.out.println("Datei verschoben nach: " + targetFile);
+                        } catch (Exception moveExc) {
+                            System.err.println("Fehler beim Verschieben der Datei: " + moveExc.getMessage());
+                        }
                     }
                 }
-            };
 
+            };
             watcher.startWatching(watchPath);
             System.out.println("Neue Dateien, die dem Pfad hinzugefügt werden, werden automatisch per E-Mail versendet.");
-            //exit(0);
         } catch (Exception exc) {
             Throwable cause = exc.getCause();
             System.err.println("\nFehler: " + exc.getMessage()+ "\n");
@@ -78,6 +94,25 @@ public final class MSimpleGoogleMailerService {
             exit(1);
         }
     }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * Beendet das Programm mit dem angegebenen Exit-Code.
+     */
+    public static Path createPathIfNotExists(Path path, String descriptionName) {
+        try {
+            if (!Files.exists(path)) {
+                Files.createDirectories(path);
+                System.out.println( descriptionName+ " erstellt: " + path);
+            } else {
+                System.out.println(descriptionName + " Pfad exitiert bereits: " + path);
+            }
+            return path;
+        } catch (IOException e) {
+            throw new RuntimeException("Fehler beim Erstellen des Verzeichnisses für \"" + descriptionName + "\": " + path, e);
+        }
+    }
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

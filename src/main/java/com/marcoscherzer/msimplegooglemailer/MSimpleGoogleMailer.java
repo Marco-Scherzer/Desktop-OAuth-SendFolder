@@ -1,5 +1,4 @@
 package com.marcoscherzer.msimplegooglemailer;
-
 import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
@@ -14,24 +13,19 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Message;
-
 import jakarta.mail.Session;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.Multipart;
-
 import jakarta.activation.DataHandler;
 import jakarta.activation.DataSource;
 import jakarta.activation.FileDataSource;
-
 import org.apache.commons.codec.binary.Base64;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -47,7 +41,7 @@ public final class MSimpleGoogleMailer {
     private static String clientSecretDir = System.getProperty("user.dir");
     private final List<String> scopes = Collections.singletonList(GmailScopes.GMAIL_SEND);
     private Gmail service;
-    private MSimpleKeyStore keystore;
+    private MSimpleKeystore keystore;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -66,8 +60,11 @@ public final class MSimpleGoogleMailer {
         try {
             if (!keystoreFile.exists()) checkParameters(applicationName, keystorePassword);
 
-            this.keystore = new MSimpleKeyStore(keystoreFile, keystorePassword);
+            this.keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
             boolean newCreated = keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
+            if (!newCreated && !keystore.isCompletelyInitialized("clientId", "google-client-id", "google-client-secret")) {
+                keystore.clear();
+            }
 
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
@@ -75,8 +72,7 @@ public final class MSimpleGoogleMailer {
             String clientId;
             String clientSecret;
 
-            if(newCreated){
-                // Parameter aus JSON laden und in Keystore schreiben
+            if (newCreated) {
                 if (jsonFile.exists()) {
                     GoogleClientSecrets secrets = GoogleClientSecrets.load(jsonFactory, new FileReader(jsonFile));
                     clientId = secrets.getDetails().getClientId();
@@ -90,60 +86,45 @@ public final class MSimpleGoogleMailer {
                     throw new IllegalStateException("client_secret.json muss vor dem ersten Start im Verzeichnis \"" + clientSecretDir + "\" abgelegt werden.");
                 }
 
-                // UUID erzeugen und speichern
                 UUID uuid = UUID.randomUUID();
                 System.out.println("Client Sicherheits-UUID wurde erstellt: " + uuid);
                 keystore.add("clientId", uuid.toString());
             }
 
-            if (newCreated || forceOAuth) {
-                // Parameter aus Keystore laden
-                clientId = keystore.get("google-client-id");
-                clientSecret = keystore.get("google-client-secret");
-                // OAuth-Flow starten
-                GoogleClientSecrets.Details details = new GoogleClientSecrets.Details()
-                        .setClientId(clientId)
-                        .setClientSecret(clientSecret)
-                        .setAuthUri("https://accounts.google.com/o/oauth2/auth")
-                        .setTokenUri("https://oauth2.googleapis.com/token");
+            clientId = keystore.get("google-client-id");
+            clientSecret = keystore.get("google-client-secret");
 
-                GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
-                GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                        httpTransport, jsonFactory, clientSecrets, scopes)
-                        .setAccessType("offline")
+            GoogleClientSecrets.Details details = new GoogleClientSecrets.Details()
+                    .setClientId(clientId)
+                    .setClientSecret(clientSecret)
+                    .setAuthUri("https://accounts.google.com/o/oauth2/auth")
+                    .setTokenUri("https://oauth2.googleapis.com/token");
+
+            GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
+
+            if (newCreated || forceOAuth) {
+                GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
+                        .setAccessType("online") // keine Refresh-Tokens
+                        .setCredentialDataStore(new com.google.api.client.util.store.MemoryDataStoreFactory().getDataStore("temp-session"))
                         .build();
 
                 LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-                credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
-
-                // Tokens speichern
-                String accessToken = credential.getAccessToken();
-                String refreshToken = credential.getRefreshToken();
-                if (accessToken != null) keystore.add("google-access-token", accessToken);
-                if (refreshToken != null) keystore.add("google-refresh-token", refreshToken);
+                credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("session-" + UUID.randomUUID());
 
             } else {
-                // Parameter aus Keystore laden
-                clientId = keystore.get("google-client-id");
-                clientSecret = keystore.get("google-client-secret");
-
-                String accessToken = keystore.get("google-access-token");
-                String refreshToken = keystore.get("google-refresh-token");
-
-                credential = new Credential.Builder(BearerToken.authorizationHeaderAccessMethod())
-                        .setTransport(httpTransport)
-                        .setJsonFactory(jsonFactory)
-                        .setClientAuthentication(new ClientParametersAuthentication(clientId, clientSecret))
-                        .setTokenServerEncodedUrl("https://oauth2.googleapis.com/token")
+                GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
+                        .setAccessType("offline")
+                        .setCredentialDataStore(MSimpleKeystoreDataStore.getDataStoreFactory(keystore).getDataStore(keystore.get("clientId")))
                         .build();
-                credential.setAccessToken(accessToken);
-                credential.setRefreshToken(refreshToken);
+
+                credential = flow.loadCredential(keystore.get("clientId"));
+                if (credential == null) {
+                    throw new IllegalStateException("Kein gespeichertes OAuth-Credential gefunden. Bitte forceOAuth aktivieren.");
+                }
             }
 
-            // App-Name mit UUID ergänzen
             applicationName += " [" + keystore.get("clientId") + "]";
 
-            // Gmail-Service initialisieren
             this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
                     .setApplicationName(applicationName)
                     .build();
@@ -151,15 +132,19 @@ public final class MSimpleGoogleMailer {
         } catch (MPasswordIncorrectException exc) {
             throw exc;
         } catch (Exception exc) {
+            String msg = "Initialisierung konnte nicht abgeschlossen werden. ";
             try {
-                keystore.clear();
+                if (keystore != null) {
+                    keystore.clear();
+                    msg += " Keystore wurde erfolgreich zurückgesetzt.";
+                }
             } catch (Exception exc2) {
-                throw new RuntimeException("Initialisierung konnte nicht abgeschlossen werden und Keystore konnte nicht zurückgesetzt werden. Bitte manuell löschen.", exc);
+                msg += " und Keystore konnte nicht zurückgesetzt werden. Bitte manuell löschen.";
+                throw new RuntimeException(msg, exc);
             }
-            throw new RuntimeException("Initialisierung konnte nicht abgeschlossen werden. Keystore wurde erfolgreich zurückgesetzt.", exc);
+            throw new RuntimeException(msg, exc);
         }
 
-        // client_secret.json löschen
         if (jsonFile.exists()) {
             boolean jsonFileDeleted = jsonFile.delete();
             if (!jsonFileDeleted) {
@@ -169,6 +154,7 @@ public final class MSimpleGoogleMailer {
             }
         }
     }
+
 
     /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -181,7 +167,7 @@ public final class MSimpleGoogleMailer {
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
-    public MSimpleKeyStore getKeystore() {
+    public MSimpleKeystore getKeystore() {
         return this.keystore;
     }
 
@@ -193,9 +179,9 @@ public final class MSimpleGoogleMailer {
             Properties props = new Properties();
             Session session = Session.getDefaultInstance(props, null);
             MimeMessage email = new MimeMessage(session);
-            email.setFrom(new InternetAddress(mail.from));
-            email.addRecipient(jakarta.mail.Message.RecipientType.TO, new InternetAddress(mail.to));
-            email.setSubject(mail.subject);
+            email.setFrom(new InternetAddress(mail.getFrom()));
+            email.addRecipient(jakarta.mail.Message.RecipientType.TO, new InternetAddress(mail.getTo()));
+            email.setSubject(mail.getSubject());
 
             MimeBodyPart textPart = new MimeBodyPart();
             textPart.setText(mail.getMessageText());
@@ -226,7 +212,7 @@ public final class MSimpleGoogleMailer {
             System.out.println("Mail erfolgreich gesendet. ID: " + sentMessage.getId());
 
         } catch (Exception exc) {
-            throw new RuntimeException("Fehler beim Mail versenden der Mail.");
+            throw new RuntimeException("Fehler beim Mail versenden der Mail.",exc);
         }
     }
 }
