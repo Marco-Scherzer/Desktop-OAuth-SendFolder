@@ -64,9 +64,7 @@ public final class MSimpleGoogleMailer {
         File jsonFile = new File(clientSecretDir, "client_secret.json");
 
         try {
-            if (!keystoreFile.exists()) {
-                checkParameters(applicationName, keystorePassword);
-            }
+            if (!keystoreFile.exists()) checkParameters(applicationName, keystorePassword);
 
             this.keystore = new MSimpleKeyStore(keystoreFile, keystorePassword);
             boolean newCreated = keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
@@ -74,21 +72,59 @@ public final class MSimpleGoogleMailer {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
             Credential credential;
-            String accessToken;
-            String refreshToken;
-            boolean jsonStillExists = checkStoreForExistingClientTokenOrReadItFromDirectory(keystore, jsonFile);
-            String clientId = keystore.get("google-client-id");
-            String clientSecret = keystore.get("google-client-secret");
+            String clientId;
+            String clientSecret;
 
-            if (newCreated || forceOAuth) {
-                credential = authenticate(applicationName, httpTransport, jsonFactory, keystore, clientId, clientSecret);
-                accessToken = credential.getAccessToken();
-                refreshToken = credential.getRefreshToken();
+            if (newCreated) {
+                // Parameter aus JSON laden und in Keystore schreiben
+                if (jsonFile.exists()) {
+                    GoogleClientSecrets secrets = GoogleClientSecrets.load(jsonFactory, new FileReader(jsonFile));
+                    clientId = secrets.getDetails().getClientId();
+                    clientSecret = secrets.getDetails().getClientSecret();
+                    if (clientId != null && clientSecret != null) {
+                        keystore.add("google-client-id", clientId).add("google-client-secret", clientSecret);
+                    } else {
+                        throw new IllegalStateException("client_secret.json enthält keine gültigen Daten.");
+                    }
+                } else {
+                    throw new IllegalStateException("client_secret.json muss vor dem ersten Start im Verzeichnis \"" + clientSecretDir + "\" abgelegt werden.");
+                }
+
+                // UUID erzeugen und speichern
+                UUID uuid = UUID.randomUUID();
+                System.out.println("Client Sicherheits-UUID wurde erstellt: " + uuid);
+                keystore.add("clientId", uuid.toString());
+
+                // OAuth-Flow starten
+                GoogleClientSecrets.Details details = new GoogleClientSecrets.Details()
+                        .setClientId(clientId)
+                        .setClientSecret(clientSecret)
+                        .setAuthUri("https://accounts.google.com/o/oauth2/auth")
+                        .setTokenUri("https://oauth2.googleapis.com/token");
+
+                GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
+                GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
+                        httpTransport, jsonFactory, clientSecrets, scopes)
+                        .setAccessType("offline")
+                        .build();
+
+                LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+                credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+
+                // Tokens speichern
+                String accessToken = credential.getAccessToken();
+                String refreshToken = credential.getRefreshToken();
                 if (accessToken != null) keystore.add("google-access-token", accessToken);
                 if (refreshToken != null) keystore.add("google-refresh-token", refreshToken);
+
             } else {
-                accessToken = keystore.get("google-access-token");
-                refreshToken = keystore.get("google-refresh-token");
+                // Parameter aus Keystore laden
+                clientId = keystore.get("google-client-id");
+                clientSecret = keystore.get("google-client-secret");
+
+                String accessToken = keystore.get("google-access-token");
+                String refreshToken = keystore.get("google-refresh-token");
+
                 credential = new Credential.Builder(BearerToken.authorizationHeaderAccessMethod())
                         .setTransport(httpTransport)
                         .setJsonFactory(jsonFactory)
@@ -99,13 +135,10 @@ public final class MSimpleGoogleMailer {
                 credential.setRefreshToken(refreshToken);
             }
 
-            if(newCreated){
-                UUID uuid = UUID.randomUUID();
-                System.out.println("Client Sicherheits-UUID wurde erstellt: " + uuid);
-                keystore.add("clientId", uuid.toString());
-            }
+            // App-Name mit UUID ergänzen
             applicationName += " [" + keystore.get("clientId") + "]";
 
+            // Gmail-Service initialisieren
             this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
                     .setApplicationName(applicationName)
                     .build();
@@ -121,7 +154,7 @@ public final class MSimpleGoogleMailer {
             throw new RuntimeException("Initialisierung konnte nicht abgeschlossen werden. Keystore wurde erfolgreich zurückgesetzt.", exc);
         }
 
-        // Initialisierung abgeschlossen – client_secret.json löschen
+        // client_secret.json löschen
         if (jsonFile.exists()) {
             boolean jsonFileDeleted = jsonFile.delete();
             if (!jsonFileDeleted) {
@@ -131,7 +164,6 @@ public final class MSimpleGoogleMailer {
             }
         }
     }
-
 
     /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -146,52 +178,6 @@ public final class MSimpleGoogleMailer {
          */
     public MSimpleKeyStore getKeystore() {
         return this.keystore;
-    }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    private static boolean checkStoreForExistingClientTokenOrReadItFromDirectory(MSimpleKeyStore store,File inputJsonFile) throws Exception {
-        if (inputJsonFile.exists()) {
-            JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-            GoogleClientSecrets secrets = GoogleClientSecrets.load(jsonFactory, new FileReader(inputJsonFile));
-            String clientId = secrets.getDetails().getClientId();
-            String clientSecret = secrets.getDetails().getClientSecret();
-            if (clientId != null && clientSecret != null) {
-                store.add("google-client-id", clientId).add("google-client-secret", clientSecret);
-            } else {
-                throw new IllegalStateException("client_secret.json enthält keine gültigen Daten.");
-            }
-            return true;
-        } else {
-            if (!store.contains("google-client-id") || !store.contains("google-client-secret")) {
-                throw new IllegalStateException("client_secret.json muss vor dem ersten Start zum Einlesen im Verzeichnis \"" + clientSecretDir + "\" abgelegt werden.");
-            }
-            return false;
-        }
-
-    }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    private Credential authenticate(String applicationName, HttpTransport httpTransport, JsonFactory jsonFactory, MSimpleKeyStore keystore, String clientId, String clientSecret) throws IOException {
-        GoogleClientSecrets.Details details = new GoogleClientSecrets.Details();
-        details.setClientId(clientId);
-        details.setClientSecret(clientSecret);
-        details.setAuthUri("https://accounts.google.com/o/oauth2/auth");
-        details.setTokenUri("https://oauth2.googleapis.com/token");
-
-        GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
-
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                httpTransport, jsonFactory, clientSecrets, scopes)
-                .setAccessType("offline")
-                .build();
-
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-
-        return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
     /**
