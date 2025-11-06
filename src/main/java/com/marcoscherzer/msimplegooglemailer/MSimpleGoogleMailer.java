@@ -37,6 +37,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
+import static com.marcoscherzer.msimplegooglemailer.MUtil.checkPasswordComplexity;
+
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
@@ -61,14 +63,14 @@ public final class MSimpleGoogleMailer {
         File keystoreFile = new File(clientSecretDir, "mystore.p12");
         File jsonFile = new File(clientSecretDir, "client_secret.json");
         try {
-            checkParameters(applicationName, keystorePassword);
-
-            this.keystore = new MSimpleKeyStore(keystoreFile.getAbsolutePath(), keystorePassword);
+            if(!keystoreFile.exists()) checkParameters(applicationName, keystorePassword);
+            this.keystore = new MSimpleKeyStore(keystoreFile, keystorePassword);
+            boolean newCreated = keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
             //neuer keystore wurde erzeugt falls nicht vorhanden
 
             checkStoreForExistingClientTokenOrReadItFromDirectory(keystore,jsonFile);
 
-            if (!keystore.contains("clientId")) {
+            if (newCreated) {
                 UUID uuid = UUID.randomUUID();
                 System.out.println("Client Sicherheits-UUID wurde erstellt: " + uuid);
                 keystore.add("clientId", uuid.toString());
@@ -79,8 +81,6 @@ public final class MSimpleGoogleMailer {
 
             String accessToken = keystore.get("google-access-token");
             String refreshToken = keystore.get("google-refresh-token");
-
-
 
             applicationName += " [" + keystore.get("clientId") + "]";
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
@@ -128,7 +128,7 @@ public final class MSimpleGoogleMailer {
          */
         private final void checkParameters(String applicationName, String keystorePassword) throws IllegalArgumentException{
             if (applicationName == null || applicationName.isBlank()) throw new IllegalArgumentException("Application name must not be empty.");
-            if (keystorePassword == null || keystorePassword.isBlank()) throw new IllegalArgumentException("KeystorePassword must not be empty and has to be longer than 8 signs.");
+            checkPasswordComplexity(keystorePassword, 8, true, true, true);
         }
 
         /**
