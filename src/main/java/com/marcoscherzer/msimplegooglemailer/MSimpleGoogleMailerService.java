@@ -26,6 +26,7 @@ public final class MSimpleGoogleMailerService {
      */
     public static final void main(String[] args) {
         try {
+            System.setErr(System.out);
             args = new String[]{"m.scherzer@outlook.com", "m.scherzer@outlook.com"};
             Path keystorePath = Paths.get(userDir, "mystore.p12");
             boolean initialized = Files.exists(keystorePath);
