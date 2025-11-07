@@ -62,6 +62,7 @@ public final class MSimpleGoogleMailer {
             try {
 
                 this.keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
+                keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
 
                 HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
                 JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
@@ -136,26 +137,17 @@ public final class MSimpleGoogleMailer {
                         .setApplicationName(applicationName)
                         .build();
 
-
-            } catch (MPasswordIncorrectException exc) {
-                System.err.println("Error in initialization.\n" + exc.getMessage());
-
         } catch (Exception exc) {
-
                 System.err.println("Error in initialization.\n" + exc.getMessage());
-                try {
-                    if (keystore != null) {
+                    if (keystore.successfullyInitialized()) {
                         System.out.println("clearing KeyStore");
-                        keystore.clear();
-                    } else {
-                        throw new Exception("Initialization could not be completed (no KeyStore File written yet).", exc);
-                    }
-                } catch (Exception exc2) {
-                    System.err.println("Error while clearing keystore.\n" +(exc2.getMessage()==null ?exc2:exc2.getMessage()));
-                    throw new Exception("Initialization failed and keystore could not be cleared. Please delete it manually.",exc2);
-
-                }
-                throw exc;
+                        try {
+                         keystore.clear();
+                        } catch (Exception exc2) {
+                            System.err.println("Error while clearing keystore.\n" +(exc2.getMessage()==null ?exc2:exc2.getMessage()));
+                            throw new Exception("Initialization failed and keystore could not be cleared. Please delete it manually.",exc2);
+                        }
+                    } else throw exc;
         }
 
         if (jsonFile.exists()) {

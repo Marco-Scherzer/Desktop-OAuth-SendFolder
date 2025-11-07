@@ -25,26 +25,25 @@ public final class MSimpleKeystore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleKeystore(File ksFile, String keystorePassword) throws Exception {
+    public MSimpleKeystore(File ksFile, String keystorePassword) {
         this.ksFile = ksFile;
         this.keystorePassword = keystorePassword;
-        loadKeyStoreOrCreateKeyStoreIfNotExists();
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private final synchronized void loadKeyStoreOrCreateKeyStoreIfNotExists() throws Exception {
+    public final synchronized void loadKeyStoreOrCreateKeyStoreIfNotExists() throws Exception {
         try { keyStore = KeyStore.getInstance(KEYSTORE_TYPE); } catch (Exception exc) { throw new Exception("Error in context with keystore while instantiating keystore", exc); }
 
         if (ksFile.exists()) {
             System.out.println("loading keystore " + ksFile);
             FileInputStream fis = null;
-            try { fis = new FileInputStream(ksFile); } catch (Exception exc) { throw new Exception("Error in context with keystore while opening keystore file", exc); }
+            try { fis = new FileInputStream(ksFile);} catch (Exception exc) { throw new Exception("Error in context with keystore while opening keystore file", exc); }
             try { keyStore.load(fis, keystorePassword.toCharArray()); } catch (IOException exc) {
                 Throwable cause = exc.getCause();
                 if (cause instanceof UnrecoverableKeyException || cause instanceof UnrecoverableEntryException || cause instanceof BadPaddingException) {
-                    throw new MPasswordIncorrectException("Password seems to not work (possible wrong password or corruption)", exc);
+                    throw new Exception("Password seems to not work (possible wrong password or corruption)", exc);
                 }
                 if (cause instanceof IllegalBlockSizeException) {
                     throw new Exception("Error in context with keystore while decrypting block (possible password or corruption)", exc);
@@ -60,7 +59,7 @@ public final class MSimpleKeystore {
         } else {
             System.out.println("creating keystore " + ksFile);
             try { keyStore.load(null, keystorePassword.toCharArray()); } catch (Exception exc) { throw new Exception("Error in context with keystore while initializing new keystore", exc); }
-            try { ksFile.getParentFile().mkdirs(); } catch (Exception exc) { throw new Exception("Error in context with keystore while creating parent directories", exc); }
+            try { ksFile.getParentFile().mkdirs();} catch (Exception exc) { throw new Exception("Error in context with keystore while creating parent directories", exc); }
             FileOutputStream fos = null;
             try { fos = new FileOutputStream(ksFile); } catch (Exception exc) { throw new Exception("Error in context with keystore while opening fileoutputstream", exc); }
             try { keyStore.store(fos, keystorePassword.toCharArray()); } catch (Exception exc) { throw new Exception("Error in context with keystore while storing new keystore", exc); }

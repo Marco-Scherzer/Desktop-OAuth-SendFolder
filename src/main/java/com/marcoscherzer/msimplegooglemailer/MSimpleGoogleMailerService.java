@@ -96,7 +96,7 @@ public final class MSimpleGoogleMailerService {
 
         } catch (Exception exc) {
             Throwable cause = exc.getCause();
-            System.err.println("\nError: " + exc.getMessage());
+            //System.err.println("\nError: " + exc.getMessage());
             if (cause != null) System.err.println(cause.getMessage());
             exit(1);
         }
