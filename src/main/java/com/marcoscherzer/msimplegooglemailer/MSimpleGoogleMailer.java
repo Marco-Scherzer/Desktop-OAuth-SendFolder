@@ -79,7 +79,7 @@ public final class MSimpleGoogleMailer {
                     clientId = secrets.getDetails().getClientId();
                     clientSecret = secrets.getDetails().getClientSecret();
                     if (clientId != null && clientSecret != null) {
-                        System.out.println("Tokens exist. Saving found tokens in encrypted keystore");
+                        System.out.println("Tokens exist. Saving found tokens to encrypted keystore");
                         keystore.add("google-client-id", clientId).add("google-client-secret", clientSecret);
                         System.out.println("Tokens successfully saved");
                     } else {
@@ -136,6 +136,7 @@ public final class MSimpleGoogleMailer {
                     .build();
 
         } catch (Exception exc) {
+
                 System.err.println("Error in initialization.\n" + exc.getMessage());
                 try {
                     if (keystore != null) {

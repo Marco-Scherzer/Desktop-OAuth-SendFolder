@@ -19,19 +19,22 @@ public final class MSimpleKeystore {
     private final String keystorePassword;
     private static final String KEYSTORE_TYPE = "PKCS12";
     private KeyStore keyStore;
+    private boolean successfullyInitialized;
+    private boolean wasExisting;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleKeystore(File ksFile, String keystorePassword) {
+    public MSimpleKeystore(File ksFile, String keystorePassword) throws Exception {
         this.ksFile = ksFile;
         this.keystorePassword = keystorePassword;
+        loadKeyStoreOrCreateKeyStoreIfNotExists();
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final synchronized boolean loadKeyStoreOrCreateKeyStoreIfNotExists() throws Exception {
+    private final synchronized void loadKeyStoreOrCreateKeyStoreIfNotExists() throws Exception {
         try { keyStore = KeyStore.getInstance(KEYSTORE_TYPE); } catch (Exception exc) { throw new Exception("Error in context with keystore while instantiating keystore", exc); }
 
         if (ksFile.exists()) {
@@ -52,7 +55,8 @@ public final class MSimpleKeystore {
                 throw new Exception("Error in context with keystore while loading existing keystore", exc);
             } catch (Exception exc) { throw new Exception("Error in context with keystore while loading existing keystore", exc); }
             try { fis.close(); } catch (Exception exc) { throw new Exception("Error in context with keystore while closing keystore file", exc); }
-            return false;
+            successfullyInitialized = true;
+            wasExisting = true;
         } else {
             System.out.println("creating keystore " + ksFile);
             try { keyStore.load(null, keystorePassword.toCharArray()); } catch (Exception exc) { throw new Exception("Error in context with keystore while initializing new keystore", exc); }
@@ -61,8 +65,22 @@ public final class MSimpleKeystore {
             try { fos = new FileOutputStream(ksFile); } catch (Exception exc) { throw new Exception("Error in context with keystore while opening fileoutputstream", exc); }
             try { keyStore.store(fos, keystorePassword.toCharArray()); } catch (Exception exc) { throw new Exception("Error in context with keystore while storing new keystore", exc); }
             try { fos.close(); } catch (Exception exc) { throw new Exception("Error in context with keystore while closing fileoutputstream", exc); }
-            return true;
+            successfullyInitialized = true;
+            wasExisting = false;
         }
+    }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final boolean wasExisting(){
+        return wasExisting;
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final boolean successfullyInitialized(){
+        return successfullyInitialized;
     }
 
     /**
