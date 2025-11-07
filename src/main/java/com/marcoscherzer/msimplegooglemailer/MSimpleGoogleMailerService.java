@@ -34,6 +34,7 @@ public final class MSimpleGoogleMailerService {
             if (!initialized && !argsLengthOK) throw new Exception("Error: On first start, you must setup the fromAddress and toAddress:\njava -jar MSendBackupMail [From-Email-Address] [To-Email-Address]");
 
             String pw = MUtil.promptPassword(!initialized ? "Please set a password: " : "Please enter your password: ");
+            pw = "testTesttest-123";
 
             System.out.println();
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);

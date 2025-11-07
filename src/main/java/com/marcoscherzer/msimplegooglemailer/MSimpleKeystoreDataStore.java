@@ -5,6 +5,7 @@ import com.google.api.client.util.store.DataStoreFactory;
 
 import java.io.*;
 import java.security.GeneralSecurityException;
+import java.security.KeyStoreException;
 import java.util.*;
 
 /**
@@ -58,7 +59,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     @Override
-    public final boolean containsKey(String key) throws IOException {
+    public final boolean containsKey(String key) throws RuntimeException {
         return keystore.contains(key);
     }
 
@@ -94,7 +95,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
         try {
             String base64 = keystore.get(key);
             return base64 == null ? null : deserialize(base64);
-        } catch (GeneralSecurityException e) {
+        } catch (Exception e) {
             throw new IOException("Error reading from keystore", e);
         }
     }

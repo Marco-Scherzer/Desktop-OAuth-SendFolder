@@ -136,17 +136,17 @@ public final class MSimpleGoogleMailer {
         } catch (MPasswordIncorrectException exc) {
             throw exc;
         } catch (Exception exc) {
-            String msg = "Initialization could not be completed.";
             try {
                 if (keystore != null) {
                     keystore.clear();
-                    msg += " Keystore was successfully reset.";
+                    throw new RuntimeException("Initialization could not be completed. Keystore was successfully reset."+exc.getMessage());
+                }
+                else{
+                    throw new RuntimeException("Initialization could not be completed (no KeyStore File written yet).", exc);
                 }
             } catch (Exception exc2) {
-                msg += " and Keystore could not be reset. Please delete it manually.";
-                throw new RuntimeException(msg, exc);
+                throw new RuntimeException("Initialization could not be completed and Keystore could not be reset. Please delete it manually.", exc);
             }
-            throw new RuntimeException(msg, exc);
         }
 
         if (jsonFile.exists()) {

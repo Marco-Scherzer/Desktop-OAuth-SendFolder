@@ -30,25 +30,20 @@ public final class MSimpleKeystore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final boolean loadKeyStoreOrCreateKeyStoreIfNotExists() throws MPasswordIncorrectException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
-        try {
-            keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
-            if (ksFile.exists()) {
-                try (FileInputStream fis = new FileInputStream(ksFile)) {
-                    keyStore.load(fis, keystorePassword.toCharArray());
-                }
-                return false;
-            } else {
-                System.out.println("Keystore is being created: " + ksFile.getAbsolutePath());
-                keyStore.load(null, keystorePassword.toCharArray());
-                ksFile.getParentFile().mkdirs();
-                try (FileOutputStream fos = new FileOutputStream(ksFile)) {
-                    keyStore.store(fos, keystorePassword.toCharArray());
-                }
-                return true;
-            }
-        } catch (IOException exc) {
-            throw new MPasswordIncorrectException("Incorrect password", exc);
+    public final boolean loadKeyStoreOrCreateKeyStoreIfNotExists() {
+        try { keyStore = KeyStore.getInstance(KEYSTORE_TYPE); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while instantiating keystore", exc); }
+        if (ksFile.exists()) {
+            try (FileInputStream fis = new FileInputStream(ksFile)) {
+                try { keyStore.load(fis, keystorePassword.toCharArray()); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while loading existing keystore", exc); }
+            } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while opening keystore file", exc); }
+            return false;
+        } else {
+            try { keyStore.load(null, keystorePassword.toCharArray()); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while initializing new keystore", exc); }
+            try { ksFile.getParentFile().mkdirs(); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while creating parent directories", exc); }
+            try (FileOutputStream fos = new FileOutputStream(ksFile)) {
+                try { keyStore.store(fos, keystorePassword.toCharArray()); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while storing new keystore", exc); }
+            } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while writing new keystore file", exc); }
+            return true;
         }
     }
 
@@ -62,17 +57,15 @@ public final class MSimpleKeystore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final MSimpleKeystore add(String alias, String token) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
-        SecretKey secretKey = new SecretKeySpec(token.getBytes(), "AES");
+    public final MSimpleKeystore add(String alias, String token) {
+        SecretKey secretKey;
+        try { secretKey = new SecretKeySpec(token.getBytes(), "AES"); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while creating secret key", exc); }
         KeyStore.SecretKeyEntry entry = new KeyStore.SecretKeyEntry(secretKey);
         KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(keystorePassword.toCharArray());
-
-        keyStore.setEntry(alias, entry, protParam);
-
+        try { keyStore.setEntry(alias, entry, protParam); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while setting entry " + alias, exc); }
         try (FileOutputStream fos = new FileOutputStream(ksFile)) {
-            keyStore.store(fos, keystorePassword.toCharArray());
-        }
-
+            try { keyStore.store(fos, keystorePassword.toCharArray()); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while storing after add", exc); }
+        } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while writing keystore file after add", exc); }
         return this;
     }
 
@@ -80,28 +73,24 @@ public final class MSimpleKeystore {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final boolean isCompletelyInitialized(String... keys) {
-        try {
-            for (String key : keys) {
-                String value = get(key);
-                if (value == null || value.isBlank()) {
-                    return false;
-                }
-            }
-            return true;
-        } catch (Exception exc) {
-            return false;
+        for (String key : keys) {
+            String value;
+            try { value = get(key); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while checking key " + key, exc); }
+            if (value == null || value.isBlank()) return false;
         }
+        return true;
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final String get(String alias) throws UnrecoverableEntryException, NoSuchAlgorithmException, KeyStoreException {
+    public final String get(String alias) {
         KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(keystorePassword.toCharArray());
-        KeyStore.SecretKeyEntry entry = (KeyStore.SecretKeyEntry) keyStore.getEntry(alias, protParam);
+        KeyStore.SecretKeyEntry entry;
+        try { entry = (KeyStore.SecretKeyEntry) keyStore.getEntry(alias, protParam); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while retrieving entry " + alias, exc); }
         if (entry == null) return null;
-
-        SecretKey secretKey = entry.getSecretKey();
+        SecretKey secretKey;
+        try { secretKey = entry.getSecretKey(); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while accessing secret key for " + alias, exc); }
         return new String(secretKey.getEncoded());
     }
 
@@ -109,27 +98,22 @@ public final class MSimpleKeystore {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final boolean contains(String alias) {
-        try {
-            return keyStore.containsAlias(alias);
-        } catch (KeyStoreException exc) {
-            return false;
-        }
+        try { return keyStore.containsAlias(alias); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while checking contains " + alias, exc); }
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final boolean remove(String alias) throws RuntimeException {
-        try {
-            if (keyStore.containsAlias(alias)) {
-                keyStore.deleteEntry(alias);
-                try (FileOutputStream fos = new FileOutputStream(ksFile)) {
-                    keyStore.store(fos, keystorePassword.toCharArray());
-                }
-                return true;
-            }
-        } catch (Exception exc) {
-            throw new RuntimeException("Error while removing \"" + alias + "\"", exc);
+    public final boolean remove(String key) throws RuntimeException {
+        boolean contains;
+        try { contains = keyStore.containsAlias(key); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while checking contains " + key, exc); }
+        if (contains) {
+            try { keyStore.deleteEntry(key); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while deleting entry " + key, exc); }
+            FileOutputStream fos = null;
+            try { fos = new FileOutputStream(ksFile); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while opening fileoutputstream", exc); }
+            try { keyStore.store(fos, keystorePassword.toCharArray()); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while storing keystore", exc); }
+            try { fos.close(); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while closing fileoutputstream", exc); }
+            return true;
         }
         return false;
     }
@@ -137,20 +121,17 @@ public final class MSimpleKeystore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final void clear() throws RuntimeException {
-        try {
-            java.util.Enumeration<String> aliases = keyStore.aliases();
-            while (aliases.hasMoreElements()) {
-                String alias = aliases.nextElement();
-                keyStore.deleteEntry(alias);
-            }
-
-            try (FileOutputStream fos = new FileOutputStream(ksFile)) {
-                keyStore.store(fos, keystorePassword.toCharArray());
-            }
-        } catch (Exception exc) {
-            throw new RuntimeException("Error while clearing the keystore", exc);
+    public final void clear() {
+        java.util.Enumeration<String> aliases;
+        try { aliases = keyStore.aliases(); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while listing aliases", exc); }
+        while (aliases.hasMoreElements()) {
+            String alias = aliases.nextElement();
+            try { keyStore.deleteEntry(alias); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while deleting entry " + alias, exc); }
         }
+        try (FileOutputStream fos = new FileOutputStream(ksFile)) {
+            try { keyStore.store(fos, keystorePassword.toCharArray()); } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while storing after clear", exc); }
+        } catch (Exception exc) { throw new RuntimeException("Error in context with keystore while writing keystore file after clear", exc); }
     }
 }
+
 
