@@ -62,7 +62,7 @@ public final class MSimpleGoogleMailer {
             try {
                 this.keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
                 newCreated = keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
-            } catch (Exception exc) { throw new RuntimeException("incorrect Password",exc); }
+            } catch (Exception exc) { throw new Exception("incorrect Password",exc); }
 
             try {
             if (!newCreated && !keystore.isCompletelyInitialized("clientId", "google-client-id", "google-client-secret")) {
@@ -138,13 +138,12 @@ public final class MSimpleGoogleMailer {
             try {
                 if (keystore != null) {
                     keystore.clear();
-                    throw new RuntimeException("Initialization could not be completed. Keystore was successfully reset."+exc.getMessage());
                 }
                 else{
-                    throw new RuntimeException("Initialization could not be completed (no KeyStore File written yet).", exc);
+                    throw new Exception("Initialization could not be completed (no KeyStore File written yet).", exc);
                 }
             } catch (Exception exc2) {
-                throw new RuntimeException("Initialization could not be completed and Keystore could not be reset. Please delete it manually.", exc);
+                throw new Exception("Initialization could not be completed and Keystore could not be reset. Please delete it manually.", exc);
             }
         }
 
@@ -213,7 +212,7 @@ public final class MSimpleGoogleMailer {
             System.out.println("Mail successfully sent. ID: " + sentMessage.getId());
 
         } catch (Exception exc) {
-            throw new RuntimeException("Error while sending the email.", exc);
+            throw new Exception("Error while sending the email.", exc);
         }
     }
 }
