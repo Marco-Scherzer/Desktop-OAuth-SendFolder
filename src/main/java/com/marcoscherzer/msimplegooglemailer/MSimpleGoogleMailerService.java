@@ -49,11 +49,16 @@ public final class MSimpleGoogleMailerService {
 
             clientAndPathUUID = store.get("clientId");
 
-            Path watchPath = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID), "Backup directory");
+            Path path= Paths.get(basePath, clientAndPathUUID);
+
+            Path watchPath = createPathIfNotExists(path, "Backup directory");
+
             sentFolder = createPathIfNotExists(Paths.get(basePath,clientAndPathUUID + "-sent"), "Sent folder");
 
             fromAdress = store.get("fromAddress");
             toAdress = store.get("toAddress");
+
+
  /*
   *@author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
   */

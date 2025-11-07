@@ -149,6 +149,7 @@ public final class MSimpleGoogleMailer {
                     throw new Exception("Initialization failed and keystore could not be cleared. Please delete it manually.",exc2);
 
                 }
+                throw exc;
         }
 
         if (jsonFile.exists()) {
