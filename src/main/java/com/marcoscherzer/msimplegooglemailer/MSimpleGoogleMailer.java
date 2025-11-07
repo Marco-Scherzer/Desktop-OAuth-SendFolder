@@ -57,16 +57,17 @@ public final class MSimpleGoogleMailer {
     public MSimpleGoogleMailer(String applicationName, String keystorePassword, boolean forceOAuth) throws Exception {
         File keystoreFile = new File(clientSecretDir, "mystore.p12");
         File jsonFile = new File(clientSecretDir, "client_secret.json");
-
-        try {
             if (!keystoreFile.exists()) checkParameters(applicationName, keystorePassword);
+            boolean newCreated;
+            try {
+                this.keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
+                newCreated = keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
+            } catch(Exception exc) { throw new RuntimeException("incorrect Password",exc); }
 
-            this.keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
-            boolean newCreated = keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
+            try {
             if (!newCreated && !keystore.isCompletelyInitialized("clientId", "google-client-id", "google-client-secret")) {
                 keystore.clear();
             }
-
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
             Credential credential;
@@ -133,8 +134,6 @@ public final class MSimpleGoogleMailer {
                     .setApplicationName(applicationName)
                     .build();
 
-        } catch (MPasswordIncorrectException exc) {
-            throw exc;
         } catch (Exception exc) {
             try {
                 if (keystore != null) {
