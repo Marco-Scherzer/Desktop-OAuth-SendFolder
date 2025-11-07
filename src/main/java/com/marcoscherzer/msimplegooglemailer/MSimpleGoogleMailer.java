@@ -61,24 +61,27 @@ public final class MSimpleGoogleMailer {
             if (!keystoreFile.exists()) checkParameters(applicationName, keystorePassword);
             try {
                 this.keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
-  //generelles problem für !created wenn jsonfile anfangas vergessen wurde und der nächste aufrf erfolgt
                 boolean newCreated= keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
-            if (!newCreated && !keystore.isCompletelyInitialized("clientId","google-client-id", "google-client-secret")) {
-                throw new Exception("KeyStore not properly initalized.");
-            }
+
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
             Credential credential;
             String clientId;
             String clientSecret;
-//generelles problem für !created wenn jsonfile anfangas vergessen wurde und der nächste aufrf erfolgt
-            if (newCreated) {
+
+             //versucht die parameter immer neu einzulesen bis irgendwann mal ein json file ins verzeichnis gelegt wird
+            // danach wird der block nur neu betreten falls der keystore manuell gelöscht wird.
+            if (newCreated || !keystore.isCompletelyInitialized("clientId","google-client-id", "google-client-secret")) {
+                System.out.println("Checking if file \"client_secret.json\" exists");
                 if (jsonFile.exists()) {
+                    System.out.println("File \"client_secret.json\" found. Reading tokens.");
                     GoogleClientSecrets secrets = GoogleClientSecrets.load(jsonFactory, new FileReader(jsonFile));
                     clientId = secrets.getDetails().getClientId();
                     clientSecret = secrets.getDetails().getClientSecret();
                     if (clientId != null && clientSecret != null) {
+                        System.out.println("Tokens exist. Saving found tokens in encrypted keystore");
                         keystore.add("google-client-id", clientId).add("google-client-secret", clientSecret);
+                        System.out.println("Tokens successfully saved");
                     } else {
                         throw new IllegalStateException("client_secret.json does not contain valid credentials.");
                     }
@@ -87,7 +90,7 @@ public final class MSimpleGoogleMailer {
                 }
 
                 UUID uuid = UUID.randomUUID();
-                System.out.println("Client security UUID generated: " + uuid);
+                System.out.println("Client security UUID generated." + uuid+ "saving UUID in encrypted keystore");
                 keystore.add("clientId", uuid.toString());
             }
 
@@ -105,7 +108,7 @@ public final class MSimpleGoogleMailer {
 
             if (forceOAuth) {
                 if (keystore.contains("OAuth")) {
-                    System.out.println("Removing persistent OAuth token.");
+                    System.out.println("Securer OAuth Mode was chosen. Not keeping old tokens. Removing persistent OAuth token.");
                     keystore.remove("OAuth");
                 }
                 flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
