@@ -41,7 +41,7 @@ public final class MSimpleGoogleMailerService {
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);
             MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);
             MSimpleKeystore store = mailer.getKeystore();
-  /*
+
             if (!store.isCompletelyInitialized("fromAddress", "toAddress")) {
                 store.add("fromAddress", MUtil.checkMailAddress(args[0]));
                 store.add("toAddress", MUtil.checkMailAddress(args[1]));
@@ -54,8 +54,9 @@ public final class MSimpleGoogleMailerService {
 
             fromAdress = store.get("fromAddress");
             toAdress = store.get("toAddress");
-
- * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+ /*
+  *@author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+  */
             watcher = new MFileWatcher() {
                 @Override
                 protected void onFileChangedAndUnlocked(Path file) {
@@ -87,11 +88,9 @@ public final class MSimpleGoogleMailerService {
 
             watcher.startWatching(watchPath);
             System.out.println("New files added to the path will be automatically sent via email.");
-            */
+
         } catch (Exception exc) {
-            Throwable cause = exc.getCause();
             System.err.println("\nError: " + exc.getMessage());
-            if (cause != null) System.err.println(cause.getMessage());
             exit(1);
         }
     }
