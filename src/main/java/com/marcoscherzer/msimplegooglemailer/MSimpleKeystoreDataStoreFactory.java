@@ -8,7 +8,7 @@ import java.io.Serializable;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public class MSimpleKeystoreDataStoreFactory implements DataStoreFactory {
+public final class MSimpleKeystoreDataStoreFactory implements DataStoreFactory {
 
     private final MSimpleKeystore keystore;
 

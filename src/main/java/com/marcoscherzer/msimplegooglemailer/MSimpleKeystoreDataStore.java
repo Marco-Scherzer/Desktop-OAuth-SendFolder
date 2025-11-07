@@ -10,7 +10,7 @@ import java.util.*;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public class MSimpleKeystoreDataStore<V extends Serializable> implements DataStore<V> {
+public final class MSimpleKeystoreDataStore<V extends Serializable> implements DataStore<V> {
 
     private final MSimpleKeystore keystore;
     private final String id;

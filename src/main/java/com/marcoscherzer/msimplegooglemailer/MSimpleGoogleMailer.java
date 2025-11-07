@@ -102,8 +102,8 @@ public final class MSimpleGoogleMailer {
 
             GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
             GoogleAuthorizationCodeFlow flow;
-            forceOAuth = false;
-            if (newCreated || forceOAuth) {
+            //forceOAuth = true;
+            if (forceOAuth) {
                 flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
                         .setAccessType("online")
                         .setApprovalPrompt("force")
@@ -153,7 +153,6 @@ public final class MSimpleGoogleMailer {
             }
         }
     }
-
 
     /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

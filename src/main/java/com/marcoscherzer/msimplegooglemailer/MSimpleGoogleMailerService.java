@@ -23,7 +23,7 @@ public final class MSimpleGoogleMailerService {
      */
     public static final void main(String[] args) {
         try {
-            args = new String[]{ System.getProperty("user.dir")+"\\testBackupBasePath" , "fromAddress", "toAddress"};
+            args = new String[]{ System.getProperty("user.dir")+"\\testBackupBasePath" , "testadress", "testadress"};
             Path keystorePath = Paths.get(userDir, "mystore.p12");
             boolean initialized = Files.exists(keystorePath);
             boolean argsLengthOK = args.length == 3;
@@ -34,7 +34,6 @@ public final class MSimpleGoogleMailerService {
             // sonst Keystore erzeugen oder vorhandenen verwenden
 
             String pw = MUtil.promptPassword(!initialized ? "Bitte Passwort setzen: " : "Bitte Passwort eingeben: ");
-            pw="lkjhjgD-767548";
 
             System.out.println();
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);
