@@ -40,22 +40,22 @@ public final class MSimpleGoogleMailerService {
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);
             MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);
             MSimpleKeystore store = mailer.getKeystore();
-
+  /*
             if (!store.isCompletelyInitialized("fromAddress", "toAddress")) {
                 store.add("fromAddress", MUtil.checkMailAddress(args[0]));
                 store.add("toAddress", MUtil.checkMailAddress(args[1]));
             }
 
             clientAndPathUUID = store.get("clientId");
+
             Path watchPath = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID), "Backup directory");
             sentFolder = createPathIfNotExists(Paths.get(basePath,clientAndPathUUID + "-sent"), "Sent folder");
+
             fromAdress = store.get("fromAddress");
             toAdress = store.get("toAddress");
 
+ * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
             watcher = new MFileWatcher() {
-                /**
-                 * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-                 */
                 @Override
                 protected void onFileChangedAndUnlocked(Path file) {
                     boolean sent = false;
@@ -86,6 +86,7 @@ public final class MSimpleGoogleMailerService {
 
             watcher.startWatching(watchPath);
             System.out.println("New files added to the path will be automatically sent via email.");
+            */
         } catch (Exception exc) {
             Throwable cause = exc.getCause();
             System.err.println("\nError: " + exc.getMessage());
@@ -97,7 +98,7 @@ public final class MSimpleGoogleMailerService {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static final Path createPathIfNotExists(Path path, String descriptionName) {
+    public static final Path createPathIfNotExists(Path path, String descriptionName) throws Exception {
         try {
             if (!Files.exists(path)) {
                 Files.createDirectories(path);
@@ -107,7 +108,7 @@ public final class MSimpleGoogleMailerService {
             }
             return path;
         } catch (IOException e) {
-            throw new RuntimeException("Error while creating directory for \"" + descriptionName + "\": " + path, e);
+            throw new Exception("Error while creating directory for \"" + descriptionName + "\": " + path, e);
         }
     }
 

@@ -57,23 +57,21 @@ public final class MSimpleGoogleMailer {
     public MSimpleGoogleMailer(String applicationName, String keystorePassword, boolean forceOAuth) throws Exception {
         File keystoreFile = new File(clientSecretDir, "mystore.p12");
         File jsonFile = new File(clientSecretDir, "client_secret.json");
+
             if (!keystoreFile.exists()) checkParameters(applicationName, keystorePassword);
-            boolean newCreated;
             try {
                 this.keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
-                newCreated = keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
-            } catch (Exception exc) { throw new Exception("incorrect Password",exc); }
-
-            try {
-            if (!newCreated && !keystore.isCompletelyInitialized("clientId", "google-client-id", "google-client-secret")) {
-                keystore.clear();
+  //generelles problem für !created wenn jsonfile anfangas vergessen wurde und der nächste aufrf erfolgt
+                boolean newCreated= keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
+            if (!newCreated && !keystore.isCompletelyInitialized("clientId","google-client-id", "google-client-secret")) {
+                throw new Exception("KeyStore not properly initalized.");
             }
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
             Credential credential;
             String clientId;
             String clientSecret;
-
+//generelles problem für !created wenn jsonfile anfangas vergessen wurde und der nächste aufrf erfolgt
             if (newCreated) {
                 if (jsonFile.exists()) {
                     GoogleClientSecrets secrets = GoogleClientSecrets.load(jsonFactory, new FileReader(jsonFile));
@@ -135,15 +133,17 @@ public final class MSimpleGoogleMailer {
                     .build();
 
         } catch (Exception exc) {
-            try {
+                System.out.println("Error in initialization");
+                try {
                 if (keystore != null) {
+                    System.out.println("resetting KeyStore");
                     keystore.clear();
                 }
                 else{
                     throw new Exception("Initialization could not be completed (no KeyStore File written yet).", exc);
                 }
             } catch (Exception exc2) {
-                throw new Exception("Initialization could not be completed and Keystore could not be reset. Please delete it manually.", exc);
+                throw new Exception("Warning: Initialization could not be completed and Keystore could not be reset. Please delete it manually.", exc);
             }
         }
 
