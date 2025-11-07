@@ -90,7 +90,9 @@ public final class MSimpleGoogleMailerService {
             System.out.println("New files added to the path will be automatically sent via email.");
 
         } catch (Exception exc) {
+            Throwable cause = exc.getCause();
             System.err.println("\nError: " + exc.getMessage());
+            if (cause != null) System.err.println(cause.getMessage());
             exit(1);
         }
     }

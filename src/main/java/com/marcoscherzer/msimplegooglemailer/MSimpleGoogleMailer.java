@@ -136,19 +136,19 @@ public final class MSimpleGoogleMailer {
                     .build();
 
         } catch (Exception exc) {
-                System.err.println("Error in initialization.\n"+ exc.getMessage());
+                System.err.println("Error in initialization.\n" + exc.getMessage());
                 try {
-                if (keystore != null) {
-                    System.out.println("clearing KeyStore");
-                    keystore.clear();
+                    if (keystore != null) {
+                        System.out.println("clearing KeyStore");
+                        keystore.clear();
+                    } else {
+                        throw new Exception("Initialization could not be completed (no KeyStore File written yet).", exc);
+                    }
+                } catch (Exception exc2) {
+                    System.err.println("Error while clearing keystore.\n" +(exc2.getMessage()==null ?exc2:exc2.getMessage()));
+                    throw new Exception("Initialization failed and keystore could not be cleared. Please delete it manually.",exc2);
+
                 }
-                else{
-                    throw new Exception("Initialization could not be completed (no KeyStore File written yet).", exc);
-                }
-            } catch (Exception exc2) {
-                    System.err.println("Error while clearing keystore.\n"+exc2.getMessage());
-                throw new Exception("Initialization could not be completed and Keystore could not be cleared. Please delete it manually.", exc);
-            }
         }
 
         if (jsonFile.exists()) {
