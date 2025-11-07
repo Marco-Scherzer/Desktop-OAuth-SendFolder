@@ -60,80 +60,85 @@ public final class MSimpleGoogleMailer {
 
             if (!keystoreFile.exists()) checkParameters(applicationName, keystorePassword);
             try {
+
                 this.keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
 
+                HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+                JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+                Credential credential;
+                String clientId;
+                String clientSecret;
 
-            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-            Credential credential;
-            String clientId;
-            String clientSecret;
 
-             //versucht die parameter immer neu einzulesen bis irgendwann mal ein json file ins verzeichnis gelegt wird
-            // danach wird der block nur neu betreten falls der keystore manuell gelöscht wird.
-            if (keystore.newCreated() || !keystore.containsAllNonNullKeys("clientId","google-client-id", "google-client-secret")) {
-                System.out.println("Checking if file \"client_secret.json\" exists");
-                if (jsonFile.exists()) {
-                    System.out.println("File \"client_secret.json\" found. Reading tokens.");
-                    GoogleClientSecrets secrets = GoogleClientSecrets.load(jsonFactory, new FileReader(jsonFile));
-                    clientId = secrets.getDetails().getClientId();
-                    clientSecret = secrets.getDetails().getClientSecret();
-                    if (clientId != null && clientSecret != null) {
-                        System.out.println("Tokens exist. Saving found tokens to encrypted keystore");
-                        keystore.add("google-client-id", clientId).add("google-client-secret", clientSecret);
-                        System.out.println("Tokens successfully saved");
+                //versucht die parameter immer neu einzulesen bis irgendwann mal ein json file ins verzeichnis gelegt wird
+                // danach wird der block nur neu betreten falls der keystore manuell gelöscht wird.
+                if (keystore.newCreated() || !keystore.containsAllNonNullKeys("clientId", "google-client-id", "google-client-secret")) {
+                    System.out.println("Checking if file \"client_secret.json\" exists");
+                    if (jsonFile.exists()) {
+                        System.out.println("File \"client_secret.json\" found. Reading tokens.");
+                        GoogleClientSecrets secrets = GoogleClientSecrets.load(jsonFactory, new FileReader(jsonFile));
+                        clientId = secrets.getDetails().getClientId();
+                        clientSecret = secrets.getDetails().getClientSecret();
+                        if (clientId != null && clientSecret != null) {
+                            System.out.println("Tokens exist. Saving found tokens to encrypted keystore");
+                            keystore.add("google-client-id", clientId).add("google-client-secret", clientSecret);
+                            System.out.println("Tokens successfully saved");
+                        } else {
+                            throw new IllegalStateException("client_secret.json does not contain valid credentials.");
+                        }
                     } else {
-                        throw new IllegalStateException("client_secret.json does not contain valid credentials.");
+                        throw new IllegalStateException("client_secret.json must be placed in the directory \"" + clientSecretDir + "\" before first launch.");
                     }
+
+                    UUID uuid = UUID.randomUUID();
+                    System.out.println("Client security UUID generated." + uuid + "saving UUID in encrypted keystore");
+                    keystore.add("clientId", uuid.toString());
+                }
+
+                clientId = keystore.get("google-client-id");
+                clientSecret = keystore.get("google-client-secret");
+
+                GoogleClientSecrets.Details details = new GoogleClientSecrets.Details()
+                        .setClientId(clientId)
+                        .setClientSecret(clientSecret)
+                        .setAuthUri("https://accounts.google.com/o/oauth2/auth")
+                        .setTokenUri("https://oauth2.googleapis.com/token");
+
+                GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
+                GoogleAuthorizationCodeFlow flow;
+
+                if (forceOAuth) {
+                    if (keystore.contains("OAuth")) {
+                        System.out.println("Securer OAuth Mode was chosen. Not keeping old tokens. Removing persistent OAuth token.");
+                        keystore.remove("OAuth");
+                    }
+                    flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
+                            .setAccessType("online")
+                            .setApprovalPrompt("force")
+                            .setCredentialDataStore(new MemoryDataStoreFactory().getDataStore("tempsession"))
+                            .build();
                 } else {
-                    throw new IllegalStateException("client_secret.json must be placed in the directory \"" + clientSecretDir + "\" before first launch.");
+                    flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
+                            .setAccessType("offline")
+                            .setCredentialDataStore(new MSimpleKeystoreDataStoreFactory(keystore).getDataStore("OAuth"))
+                            .build();
                 }
 
-                UUID uuid = UUID.randomUUID();
-                System.out.println("Client security UUID generated." + uuid+ "saving UUID in encrypted keystore");
-                keystore.add("clientId", uuid.toString());
-            }
-
-            clientId = keystore.get("google-client-id");
-            clientSecret = keystore.get("google-client-secret");
-
-            GoogleClientSecrets.Details details = new GoogleClientSecrets.Details()
-                    .setClientId(clientId)
-                    .setClientSecret(clientSecret)
-                    .setAuthUri("https://accounts.google.com/o/oauth2/auth")
-                    .setTokenUri("https://oauth2.googleapis.com/token");
-
-            GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
-            GoogleAuthorizationCodeFlow flow;
-
-            if (forceOAuth) {
-                if (keystore.contains("OAuth")) {
-                    System.out.println("Securer OAuth Mode was chosen. Not keeping old tokens. Removing persistent OAuth token.");
-                    keystore.remove("OAuth");
+                LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+                credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("OAuth");
+                if (credential == null) {
+                    throw new IllegalStateException("No stored OAuth credential found.");
                 }
-                flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
-                        .setAccessType("online")
-                        .setApprovalPrompt("force")
-                        .setCredentialDataStore(new MemoryDataStoreFactory().getDataStore("tempsession"))
+
+                applicationName += " [" + keystore.get("clientId") + "]";
+
+                this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
+                        .setApplicationName(applicationName)
                         .build();
-            } else {
-                flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
-                        .setAccessType("offline")
-                        .setCredentialDataStore(new MSimpleKeystoreDataStoreFactory(keystore).getDataStore("OAuth"))
-                        .build();
-            }
 
-            LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-            credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("OAuth");
-            if (credential == null) {
-                throw new IllegalStateException("No stored OAuth credential found.");
-            }
 
-            applicationName += " [" + keystore.get("clientId") + "]";
-
-            this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
-                    .setApplicationName(applicationName)
-                    .build();
+            } catch (MPasswordIncorrectException exc) {
+                System.err.println("Error in initialization.\n" + exc.getMessage());
 
         } catch (Exception exc) {
 
