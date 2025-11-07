@@ -4,8 +4,6 @@ import com.google.api.client.util.store.DataStore;
 import com.google.api.client.util.store.DataStoreFactory;
 
 import java.io.*;
-import java.security.GeneralSecurityException;
-import java.security.KeyStoreException;
 import java.util.*;
 
 /**
@@ -51,7 +49,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     @Override
-    public boolean isEmpty() throws IOException {
+    public final boolean isEmpty() throws IOException {
         return size() == 0;
     }
 
@@ -59,8 +57,8 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     @Override
-    public final boolean containsKey(String key) throws RuntimeException {
-        return keystore.contains(key);
+    public final boolean containsKey(String key) throws IOException {
+        try { return keystore.contains(key); } catch (Exception e) { throw new IOException(e); }
     }
 
     /**
@@ -76,7 +74,16 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      */
     @Override
     public final Set<String> keySet() throws IOException {
-        return Collections.emptySet(); // Optional: implement if needed
+        Set<String> keys = new HashSet<>();
+        try {
+            Enumeration<String> aliases = keystore.getKeyStore().aliases();
+            while (aliases.hasMoreElements()) {
+                keys.add(aliases.nextElement());
+            }
+            return keys;
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
     }
 
     /**
@@ -84,7 +91,12 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      */
     @Override
     public final Collection<V> values() throws IOException {
-        return Collections.emptyList(); // Optional: implement if needed
+        List<V> values = new ArrayList<>();
+        for (String key : keySet()) {
+            V value = get(key);
+            if (value != null) values.add(value);
+        }
+        return values;
     }
 
     /**
@@ -96,7 +108,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
             String base64 = keystore.get(key);
             return base64 == null ? null : deserialize(base64);
         } catch (Exception e) {
-            throw new IOException("Error reading from keystore", e);
+            throw new IOException(e);
         }
     }
 
@@ -110,7 +122,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
             keystore.add(key, base64);
             return this;
         } catch (Exception e) {
-            throw new IOException("Error writing to keystore", e);
+            throw new IOException(e);
         }
     }
 
@@ -123,7 +135,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
             keystore.remove(key);
             return this;
         } catch (Exception e) {
-            throw new IOException("Error removing from keystore", e);
+            throw new IOException(e);
         }
     }
 
@@ -136,7 +148,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
             keystore.clear();
             return this;
         } catch (Exception e) {
-            throw new IOException("Error clearing keystore", e);
+            throw new IOException(e);
         }
     }
 
@@ -144,11 +156,12 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     private final String serialize(V value) throws IOException {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-             ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-            oos.writeObject(value);
-            return Base64.getEncoder().encodeToString(baos.toByteArray());
-        }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos;
+        try { oos = new ObjectOutputStream(baos); } catch (Exception e) { throw new IOException("Error creating ObjectOutputStream", e); }
+        try { oos.writeObject(value); } catch (Exception e) { throw new IOException("Error serializing object", e); }
+        try { oos.close(); } catch (Exception e) { throw new IOException("Error closing ObjectOutputStream", e); }
+        return Base64.getEncoder().encodeToString(baos.toByteArray());
     }
 
     /**
@@ -156,10 +169,16 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      */
     private final V deserialize(String base64) throws IOException {
         byte[] data = Base64.getDecoder().decode(base64);
-        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data))) {
+        ObjectInputStream ois;
+        try { ois = new ObjectInputStream(new ByteArrayInputStream(data)); } catch (Exception e) { throw new IOException("Error creating ObjectInputStream", e); }
+        try {
             return (V) ois.readObject();
         } catch (ClassNotFoundException e) {
             throw new IOException("Deserialization failed", e);
+        } catch (Exception e) {
+            throw new IOException("Error reading object from stream", e);
+        } finally {
+            try { ois.close(); } catch (Exception e) { throw new IOException("Error closing ObjectInputStream", e); }
         }
     }
 }
