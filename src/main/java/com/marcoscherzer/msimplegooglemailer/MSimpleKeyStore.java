@@ -20,7 +20,7 @@ public final class MSimpleKeystore {
     private static final String KEYSTORE_TYPE = "PKCS12";
     private KeyStore keyStore;
     private boolean successfullyInitialized;
-    private boolean wasExisting;
+    private boolean newCreated;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -56,7 +56,7 @@ public final class MSimpleKeystore {
             } catch (Exception exc) { throw new Exception("Error in context with keystore while loading existing keystore", exc); }
             try { fis.close(); } catch (Exception exc) { throw new Exception("Error in context with keystore while closing keystore file", exc); }
             successfullyInitialized = true;
-            wasExisting = true;
+            newCreated = false;
         } else {
             System.out.println("creating keystore " + ksFile);
             try { keyStore.load(null, keystorePassword.toCharArray()); } catch (Exception exc) { throw new Exception("Error in context with keystore while initializing new keystore", exc); }
@@ -66,14 +66,14 @@ public final class MSimpleKeystore {
             try { keyStore.store(fos, keystorePassword.toCharArray()); } catch (Exception exc) { throw new Exception("Error in context with keystore while storing new keystore", exc); }
             try { fos.close(); } catch (Exception exc) { throw new Exception("Error in context with keystore while closing fileoutputstream", exc); }
             successfullyInitialized = true;
-            wasExisting = false;
+            newCreated = true;
         }
     }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final boolean wasExisting(){
-        return wasExisting;
+    public final boolean newCreated(){
+        return newCreated;
     }
 
     /**
@@ -109,7 +109,7 @@ public final class MSimpleKeystore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final synchronized boolean isCompletelyInitialized(String... keys) throws Exception {
+    public final synchronized boolean containsAllNonNullKeys(String... keys) throws Exception {
         for (String key : keys) {
             String value;
             try { value = get(key); } catch (Exception exc) { throw new Exception("Error in context with keystore while checking key " + key, exc); }

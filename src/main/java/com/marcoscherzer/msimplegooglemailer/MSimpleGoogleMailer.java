@@ -61,7 +61,7 @@ public final class MSimpleGoogleMailer {
             if (!keystoreFile.exists()) checkParameters(applicationName, keystorePassword);
             try {
                 this.keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
-                boolean newCreated= keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
+
 
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
@@ -71,7 +71,7 @@ public final class MSimpleGoogleMailer {
 
              //versucht die parameter immer neu einzulesen bis irgendwann mal ein json file ins verzeichnis gelegt wird
             // danach wird der block nur neu betreten falls der keystore manuell gelöscht wird.
-            if (newCreated || !keystore.isCompletelyInitialized("clientId","google-client-id", "google-client-secret")) {
+            if (keystore.newCreated() || !keystore.containsAllNonNullKeys("clientId","google-client-id", "google-client-secret")) {
                 System.out.println("Checking if file \"client_secret.json\" exists");
                 if (jsonFile.exists()) {
                     System.out.println("File \"client_secret.json\" found. Reading tokens.");

@@ -42,7 +42,7 @@ public final class MSimpleGoogleMailerService {
             MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);
             MSimpleKeystore store = mailer.getKeystore();
 
-            if (!store.isCompletelyInitialized("fromAddress", "toAddress")) {
+            if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
                 store.add("fromAddress", MUtil.checkMailAddress(args[0]));
                 store.add("toAddress", MUtil.checkMailAddress(args[1]));
             }
