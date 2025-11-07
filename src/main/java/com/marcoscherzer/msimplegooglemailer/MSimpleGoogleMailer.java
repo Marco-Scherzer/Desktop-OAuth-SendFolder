@@ -136,10 +136,10 @@ public final class MSimpleGoogleMailer {
                     .build();
 
         } catch (Exception exc) {
-                System.out.println("Error in initialization");
+                System.err.println("Error in initialization.\n"+ exc.getMessage());
                 try {
                 if (keystore != null) {
-                    System.out.println("resetting KeyStore");
+                    System.err.println("resetting KeyStore");
                     keystore.clear();
                 }
                 else{
