@@ -33,8 +33,6 @@ public final class MSimpleGoogleMailerService {
 
             if (!initialized && !argsLengthOK) throw new Exception("Error: On first start, you must setup the fromAddress and toAddress:\njava -jar MSendBackupMail [From-Email-Address] [To-Email-Address]");
 
-            String fromAddress = MUtil.checkMailAddress(args[0]);
-            String toAddress = MUtil.checkMailAddress(args[1]);
             String pw = MUtil.promptPassword(!initialized ? "Please set a password: " : "Please enter your password: ");
 
             System.out.println();
@@ -43,8 +41,8 @@ public final class MSimpleGoogleMailerService {
             MSimpleKeystore store = mailer.getKeystore();
 
             if (!store.isCompletelyInitialized("fromAddress", "toAddress")) {
-                store.add("fromAddress", fromAddress);
-                store.add("toAddress", toAddress);
+                store.add("fromAddress", MUtil.checkMailAddress(args[0]));
+                store.add("toAddress", MUtil.checkMailAddress(args[1]));
             }
 
             clientAndPathUUID = store.get("clientId");
@@ -119,7 +117,7 @@ public final class MSimpleGoogleMailerService {
         try {
             if (watcher != null) watcher.shutdown();
         } catch (Exception exc) {
-            //exc.printStackTrace();
+            exc.printStackTrace();
         }
         System.out.println("Program terminated. Exit code: " + code);
         System.exit(code);

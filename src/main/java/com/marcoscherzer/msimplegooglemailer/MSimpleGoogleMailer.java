@@ -44,10 +44,16 @@ public final class MSimpleGoogleMailer {
     private Gmail service;
     private MSimpleKeystore keystore;
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public static void setClientKeystoreDir(String clientSecretFileDir) {
         clientSecretDir = clientSecretFileDir;
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public MSimpleGoogleMailer(String applicationName, String keystorePassword, boolean forceOAuth) throws Exception {
         File keystoreFile = new File(clientSecretDir, "mystore.p12");
         File jsonFile = new File(clientSecretDir, "client_secret.json");
