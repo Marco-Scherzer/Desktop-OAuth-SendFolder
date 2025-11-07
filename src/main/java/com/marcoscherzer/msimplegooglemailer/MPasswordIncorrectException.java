@@ -3,7 +3,7 @@ package com.marcoscherzer.msimplegooglemailer;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public class MPasswordIncorrectException extends Exception {
+public final class MPasswordIncorrectException extends Exception {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */

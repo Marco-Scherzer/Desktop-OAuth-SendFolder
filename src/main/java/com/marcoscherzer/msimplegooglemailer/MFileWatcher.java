@@ -21,15 +21,17 @@ public abstract class MFileWatcher {
     private final Set<Path> activeMonitors;
     private WatchService watchService;
 
-
-    MFileWatcher(){
-           pool = Executors.newCachedThreadPool();
-           fileStates = new ConcurrentHashMap<>();
-           activeMonitors = ConcurrentHashMap.newKeySet();
-    }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * Startet die Überwachung eines Verzeichnisses und verarbeitet Dateiänderungen.
+     */
+    public MFileWatcher() {
+        pool = Executors.newCachedThreadPool();
+        fileStates = new ConcurrentHashMap<>();
+        activeMonitors = ConcurrentHashMap.newKeySet();
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final boolean startWatching(Path watchDir) {
         try {
@@ -51,78 +53,72 @@ public abstract class MFileWatcher {
                         key.reset();
                     } catch (InterruptedException exc) {
                         Thread.currentThread().interrupt();
-                        System.out.println("MWatcher-Thread wurde unterbrochen.");
+                        System.out.println("MWatcher thread was interrupted.");
                     } catch (ClosedWatchServiceException exc) {
-                        System.out.println("WatchService wurde geschlossen.");
+                        System.out.println("WatchService has been closed.");
                         break;
                     }
                 }
             });
 
-            System.out.println("MWatcher gestartet für: " + watchDir);
+            System.out.println("MWatcher started for: " + watchDir);
             return true;
         } catch (IOException exc) {
-            System.out.println("Fehler beim Starten von MWatcher: " + exc.getMessage());
+            System.out.println("Error starting MWatcher: " + exc.getMessage());
             return false;
         }
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * Beendet den Threadpool sanft und schließt den WatchService.
      */
-    public void shutdown() throws Exception{
-        System.out.println("MWatcher wird heruntergefahren...");
+    public final void shutdown() throws Exception {
+        System.out.println("Shutting down MWatcher...");
         try {
             if (watchService != null) watchService.close();
         } catch (IOException exc) {
-            throw new RuntimeException("Fehler beim Schließen des WatchService: ", exc);
+            throw new RuntimeException("Error closing WatchService: ", exc);
         }
         pool.shutdown();
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * Beendet den Threadpool sofort und schließt den WatchService.
      */
-    public List<Runnable> shutdownNow() throws Exception{
-        System.out.println("MWatcher wird sofort heruntergefahren...");
+    public final List<Runnable> shutdownNow() throws Exception {
+        System.out.println("Immediately shutting down MWatcher...");
         try {
             if (watchService != null) watchService.close();
         } catch (IOException exc) {
-            throw new RuntimeException("Fehler beim Schließen des WatchService: ", exc);
+            throw new RuntimeException("Error closing WatchService: ", exc);
         }
         List<Runnable> dropped = pool.shutdownNow();
-        System.out.println("Abgebrochene Tasks: " + dropped.size());
+        System.out.println("Cancelled tasks: " + dropped.size());
         return dropped;
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * Wird aufgerufen, wenn eine Datei fertig geschrieben und entsperrt ist.
      */
     protected abstract void onFileChangedAndUnlocked(Path file);
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * Beobachtet eine einzelne Datei bis zur Stabilität.
      */
-    private class MObservedFile implements Runnable {
+    private final class MObservedFile implements Runnable {
         private final Path file;
         private long lastSize = -1;
         private long lastModified = -1;
 
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-         * Konstruktor für die Dateiüberwachung.
          */
-        public MObservedFile(Path file) {
+        private MObservedFile(Path file) {
             this.file = file;
         }
 
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-         * Überwacht eine einzelne Datei, bis sie stabil und nicht mehr gesperrt ist.
          */
         @Override
         public final void run() {
@@ -133,11 +129,6 @@ public abstract class MFileWatcher {
                     long modified = Files.getLastModifiedTime(file).toMillis();
                     boolean locked = isLocked();
 
-                   /* System.out.println("Datei: " + file.getFileName() +
-                            " | Größe: " + size +
-                            " | Geändert: " + modified +
-                            " | Gesperrt: " + locked);
-                   */
                     done = !locked && size == lastSize && modified == lastModified;
                     lastSize = size;
                     lastModified = modified;
@@ -146,20 +137,19 @@ public abstract class MFileWatcher {
                 }
 
                 if (done) {
-                    System.out.println("Datei fertig geschrieben: " + file.getFileName());
+                    System.out.println("File fully written: " + file.getFileName());
                     activeMonitors.remove(file);
                     onFileChangedAndUnlocked(file);
                 }
 
             } catch (Exception exc) {
-                System.out.println("Fehler bei Dateiüberwachung: " + file + " → " + exc.getMessage());
+                System.out.println("Error monitoring file: " + file + " → " + exc.getMessage());
                 activeMonitors.remove(file);
             }
         }
 
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-         * Prüft, ob eine Datei aktuell gesperrt ist (z.B. durch Schreibzugriff).
          */
         private boolean isLocked() {
             try (FileChannel channel = FileChannel.open(file, StandardOpenOption.WRITE)) {
@@ -175,4 +165,5 @@ public abstract class MFileWatcher {
         }
     }
 }
+
 

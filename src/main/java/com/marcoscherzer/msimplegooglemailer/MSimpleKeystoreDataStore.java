@@ -26,7 +26,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public DataStoreFactory getDataStoreFactory() {
+    public final DataStoreFactory getDataStoreFactory() {
         return new MSimpleKeystoreDataStoreFactory(keystore);
     }
 
@@ -34,7 +34,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     @Override
-    public String getId() {
+    public final String getId() {
         return id;
     }
 
@@ -42,7 +42,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     @Override
-    public int size() throws IOException {
+    public final int size() throws IOException {
         return keySet().size();
     }
 
@@ -58,7 +58,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     @Override
-    public boolean containsKey(String key) throws IOException {
+    public final boolean containsKey(String key) throws IOException {
         return keystore.contains(key);
     }
 
@@ -66,7 +66,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     @Override
-    public boolean containsValue(V value) throws IOException {
+    public final boolean containsValue(V value) throws IOException {
         return values().contains(value);
     }
 
@@ -74,7 +74,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     @Override
-    public Set<String> keySet() throws IOException {
+    public final Set<String> keySet() throws IOException {
         return Collections.emptySet(); // Optional: implement if needed
     }
 
@@ -82,7 +82,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     @Override
-    public Collection<V> values() throws IOException {
+    public final Collection<V> values() throws IOException {
         return Collections.emptyList(); // Optional: implement if needed
     }
 
@@ -90,12 +90,12 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     @Override
-    public V get(String key) throws IOException {
+    public final V get(String key) throws IOException {
         try {
             String base64 = keystore.get(key);
             return base64 == null ? null : deserialize(base64);
         } catch (GeneralSecurityException e) {
-            throw new IOException("Fehler beim Lesen aus Keystore", e);
+            throw new IOException("Error reading from keystore", e);
         }
     }
 
@@ -103,13 +103,13 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     @Override
-    public DataStore<V> set(String key, V value) throws IOException {
+    public final DataStore<V> set(String key, V value) throws IOException {
         try {
             String base64 = serialize(value);
             keystore.add(key, base64);
             return this;
         } catch (Exception e) {
-            throw new IOException("Fehler beim Schreiben in Keystore", e);
+            throw new IOException("Error writing to keystore", e);
         }
     }
 
@@ -117,12 +117,12 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     @Override
-    public DataStore<V> delete(String key) throws IOException {
+    public final DataStore<V> delete(String key) throws IOException {
         try {
             keystore.remove(key);
             return this;
         } catch (Exception e) {
-            throw new IOException("Fehler beim Entfernen aus Keystore", e);
+            throw new IOException("Error removing from keystore", e);
         }
     }
 
@@ -130,19 +130,19 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     @Override
-    public DataStore<V> clear() throws IOException {
+    public final DataStore<V> clear() throws IOException {
         try {
             keystore.clear();
             return this;
         } catch (Exception e) {
-            throw new IOException("Fehler beim Löschen des Keystores", e);
+            throw new IOException("Error clearing keystore", e);
         }
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private String serialize(V value) throws IOException {
+    private final String serialize(V value) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              ObjectOutputStream oos = new ObjectOutputStream(baos)) {
             oos.writeObject(value);
@@ -153,15 +153,16 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private V deserialize(String base64) throws IOException {
+    private final V deserialize(String base64) throws IOException {
         byte[] data = Base64.getDecoder().decode(base64);
         try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data))) {
             return (V) ois.readObject();
         } catch (ClassNotFoundException e) {
-            throw new IOException("Deserialisierung fehlgeschlagen", e);
+            throw new IOException("Deserialization failed", e);
         }
     }
 }
+
 
 
 

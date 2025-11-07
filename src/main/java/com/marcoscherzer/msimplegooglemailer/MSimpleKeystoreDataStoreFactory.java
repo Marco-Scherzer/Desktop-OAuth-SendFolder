@@ -23,7 +23,7 @@ public final class MSimpleKeystoreDataStoreFactory implements DataStoreFactory {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     @Override
-    public <V extends Serializable> DataStore<V> getDataStore(String id) throws IOException {
+    public final <V extends Serializable> DataStore<V> getDataStore(String id) throws IOException {
         return new MSimpleKeystoreDataStore<>(keystore, id);
     }
 }

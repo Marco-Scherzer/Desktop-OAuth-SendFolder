@@ -1,15 +1,16 @@
 package com.marcoscherzer.msimplegooglemailer;
+
 import java.io.Console;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
 /**
- * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+ * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
 public final class MUtil {
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * Prüft die Passwortkomplexität anhand konfigurierbarer Kriterien.
      */
     public static final String promptPassword(String promptText) {
         Console console = System.console();
@@ -24,7 +25,6 @@ public final class MUtil {
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * Prüft die Passwortkomplexität anhand konfigurierbarer Kriterien.
      */
     public static void checkPasswordComplexity(String password, int minLength, boolean requireUppercase, boolean requireDigit, boolean requireSpecial) throws IllegalArgumentException {
         if (password == null || password.isBlank()) {
@@ -56,17 +56,17 @@ public final class MUtil {
     }
 
     /**
-     * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public static final String checkMailAddress(String email) {
         if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("Absenderadresse darf nicht leer sein.");
+            throw new IllegalArgumentException("Sender address must not be empty.");
         }
 
         Pattern emailPattern = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$",
                 Pattern.CASE_INSENSITIVE);
         if (!emailPattern.matcher(email).matches()) {
-            throw new IllegalArgumentException("Ungültiges Email-Format: " + email);
+            throw new IllegalArgumentException("Invalid email format: " + email);
         }
         return email;
     }
