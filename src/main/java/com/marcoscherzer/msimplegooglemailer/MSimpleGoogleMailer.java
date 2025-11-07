@@ -62,7 +62,7 @@ public final class MSimpleGoogleMailer {
             try {
                 this.keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
                 newCreated = keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
-            } catch(Exception exc) { throw new RuntimeException("incorrect Password",exc); }
+            } catch (Exception exc) { throw new RuntimeException("incorrect Password",exc); }
 
             try {
             if (!newCreated && !keystore.isCompletelyInitialized("clientId", "google-client-id", "google-client-secret")) {
