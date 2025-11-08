@@ -1,74 +1,13 @@
 package com.marcoscherzer.msimplegooglemailer;
 
-import com.sun.jna.platform.win32.Advapi32Util;
-import com.sun.jna.platform.win32.WinReg;
-import java.io.Console;
-import java.io.IOException;
-import java.nio.file.*;
-import java.util.Scanner;
 import java.util.regex.Pattern;
 
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MUtil {
+public final class MSimpleGoogleMailerUtil {
 
-        /**
-         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-         */
-        public static void createFolderLink(String targetFolderPath, String linkName) {
-            try {
-                Path desktopPath= getDesktopPath();
-                System.out.println(desktopPath);
-                if (desktopPath == null || !Files.exists(desktopPath)) {
-                    System.err.println("Desktop path is invalid.");
-                    return;
-                }
-
-                // Sonderzeichen aus dem Linknamen entfernen
-                String safeName = linkName.replaceAll("[^a-zA-Z0-9_\\- ]", "").trim();
-
-                Path linkFile = desktopPath.resolve(safeName + ".url");
-                String content =
-                        "[InternetShortcut]\n" +
-                                "URL=file:///" + targetFolderPath.replace("\\", "/") + "\n" +
-                                "IconIndex=0\n";
-
-                Files.write(linkFile, content.getBytes());
-                System.out.println("Link created: " + linkFile.toAbsolutePath());
-            } catch (IOException e) {
-                System.err.println("Error creating folder link: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public static Path getDesktopPath() {
-        String rawPath = Advapi32Util.registryGetStringValue(
-                WinReg.HKEY_CURRENT_USER,
-                "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders",
-                "Desktop"
-        );
-        rawPath = rawPath.replace("%USERPROFILE%", System.getenv("USERPROFILE"));
-        return Paths.get(rawPath);
-    }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public static final String promptPassword(String promptText) {
-        Console console = System.console();
-        if (console != null) {
-            char[] passwordChars = console.readPassword("%s", promptText);
-            return new String(passwordChars);
-        } else {
-            System.out.print(promptText);
-            return new Scanner(System.in).nextLine();
-        }
-    }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

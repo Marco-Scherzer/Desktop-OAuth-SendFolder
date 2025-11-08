@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegooglemailer;
+package com.marcoscherzer.monewayfilesendfolderapp;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;

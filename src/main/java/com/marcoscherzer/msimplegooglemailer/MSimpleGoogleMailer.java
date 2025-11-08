@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
-import static com.marcoscherzer.msimplegooglemailer.MUtil.checkPasswordComplexity;
+import static com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailerUtil.checkPasswordComplexity;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -219,6 +219,8 @@ public final class MSimpleGoogleMailer {
             throw new Exception("Error while sending the email.", exc);
         }
     }
+
+
 }
 
 

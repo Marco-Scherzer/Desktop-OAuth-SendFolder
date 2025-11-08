@@ -1,4 +1,8 @@
-package com.marcoscherzer.msimplegooglemailer;
+package com.marcoscherzer.monewayfilesendfolderapp;
+
+import com.marcoscherzer.msimplegooglemailer.MOutgoingMail;
+import com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailer;
+import com.marcoscherzer.msimplegooglemailer.MSimpleKeystore;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,7 +12,8 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import static com.marcoscherzer.msimplegooglemailer.MUtil.createFolderLink;
+import static com.marcoscherzer.monewayfilesendfolderapp.MUtil.createFolderLink;
+import static com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailerUtil.checkMailAddress;
 
 
 /**
@@ -37,8 +42,6 @@ public final class MSimpleGoogleMailerService {
             boolean initialized = Files.exists(keystorePath);
             boolean argsLengthOK = args.length == 2;
 
-            createFolderLink(userDir+"\\mail","test");
-
             if (!initialized && !argsLengthOK) throw new Exception("Error: On first start, you must setup the fromAddress and toAddress:\njava -jar MSendBackupMail [From-Email-Address] [To-Email-Address]");
 
             String pw = MUtil.promptPassword(!initialized ? "Please set a password: " : "Please enter your password: ");
@@ -50,8 +53,8 @@ public final class MSimpleGoogleMailerService {
             MSimpleKeystore store = mailer.getKeystore();
 
             if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
-                store.add("fromAddress", MUtil.checkMailAddress(args[0]));
-                store.add("toAddress", MUtil.checkMailAddress(args[1]));
+                store.add("fromAddress", checkMailAddress(args[0]));
+                store.add("toAddress", checkMailAddress(args[1]));
             }
 
             clientAndPathUUID = store.get("clientId");
@@ -98,6 +101,8 @@ public final class MSimpleGoogleMailerService {
             };
 
             watcher.startWatching(outFolder);
+            createFolderLink(outFolder.toString(),"Outgoing Things");
+            createFolderLink(sentFolder.toString(),"Sent Things");
             printConfiguration(fromAdress,toAdress,basePath,clientAndPathUUID,clientAndPathUUID + "-sent");
 
         } catch (Exception exc) {
@@ -164,6 +169,7 @@ public final class MSimpleGoogleMailerService {
                         "\n  After sending, they will be moved to the 'sent' folder." +
                         "\n=================================================================="
         );
+
     }
 
 

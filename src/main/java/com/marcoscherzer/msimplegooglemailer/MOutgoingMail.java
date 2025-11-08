@@ -16,8 +16,8 @@ public final class MOutgoingMail {
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public MOutgoingMail(String from, String to, String subject) {
-        MUtil.checkMailAddress(from);
-        MUtil.checkMailAddress(to);
+        MSimpleGoogleMailerUtil.checkMailAddress(from);
+        MSimpleGoogleMailerUtil.checkMailAddress(to);
         this.from = from;
         this.to = to;
         this.subject = subject;
