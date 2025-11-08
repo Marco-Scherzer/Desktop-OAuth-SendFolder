@@ -18,7 +18,9 @@ Contact: fahrservice.1@gmail.com
 <br>
 <br>
 ---
+<br>
 ## Features
+
 OAuth 2.0 authentication for Gmail No plain-text passwords or app-specific passwords required
 
 Monitors a local folder for new files Automatically detects new files to be sent
