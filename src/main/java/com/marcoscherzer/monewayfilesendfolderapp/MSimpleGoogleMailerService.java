@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Scanner;
 
 import static com.marcoscherzer.monewayfilesendfolderapp.MUtil.createFolderLink;
 import static com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailerUtil.checkMailAddress;
@@ -37,15 +38,11 @@ public final class MSimpleGoogleMailerService {
     public static final void main(String[] args) {
         try {
             System.setErr(System.out);
-            args = new String[]{"m.scherzer@outlook.com", "m.scherzer@outlook.com"};
             Path keystorePath = Paths.get(userDir, "mystore.p12");
-            boolean initialized = Files.exists(keystorePath);
+            boolean keystoreFileExists = Files.exists(keystorePath);
             boolean argsLengthOK = args.length == 2;
 
-            if (!initialized && !argsLengthOK) throw new Exception("Error: On first start, you must setup the fromAddress and toAddress:\njava -jar MSendBackupMail [From-Email-Address] [To-Email-Address]");
-
-            String pw = MUtil.promptPassword(!initialized ? "Please set a password: " : "Please enter your password: ");
-            pw = "testTesttest-123";
+            String pw = MUtil.promptPassword(!keystoreFileExists ? "Please set a password: " : "Please enter your password: ");
 
             System.out.println();
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);
@@ -53,14 +50,16 @@ public final class MSimpleGoogleMailerService {
             MSimpleKeystore store = mailer.getKeystore();
 
             if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
-                store.add("fromAddress", checkMailAddress(args[0]));
-                store.add("toAddress", checkMailAddress(args[1]));
+                String fromAddress = readMailAddressInput("sender");
+                String toAddress = readMailAddressInput("receiver");
+                store.add("fromAddress", fromAddress);
+                store.add("toAddress", toAddress);
             }
 
             clientAndPathUUID = store.get("clientId");
 
             Path outPath = Paths.get(basePath, clientAndPathUUID);
-            Path sentPath = Paths.get(basePath,clientAndPathUUID + "-sent");
+            Path sentPath = Paths.get(basePath, clientAndPathUUID + "-sent");
             outFolder = createPathIfNotExists(outPath, "Out folder");
             sentFolder = createPathIfNotExists(sentPath, "Sent folder");
 
@@ -68,9 +67,9 @@ public final class MSimpleGoogleMailerService {
             toAdress = store.get("toAddress");
 
 
- /**
-  *@author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-  */
+            /**
+             *@author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+             */
             watcher = new MFileWatcher() {
                 @Override
                 protected void onFileChangedAndUnlocked(Path file) {
@@ -101,15 +100,39 @@ public final class MSimpleGoogleMailerService {
             };
 
             watcher.startWatching(outFolder);
-            createFolderLink(outFolder.toString(),"Outgoing Things");
-            createFolderLink(sentFolder.toString(),"Sent Things");
-            printConfiguration(fromAdress,toAdress,basePath,clientAndPathUUID,clientAndPathUUID + "-sent");
+            createFolderLink(outFolder.toString(), "Outgoing Things");
+            createFolderLink(sentFolder.toString(), "Sent Things");
+            printConfiguration(fromAdress, toAdress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
 
         } catch (Exception exc) {
             //exc.printStackTrace();
             exit(1);
         }
     }
+
+    /**
+     *@author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+        public static String readMailAddressInput(String addressDescription)  {
+            Scanner scanner = new Scanner(System.in);
+                String out = null;
+                while (out == null) {
+                    System.out.print("Enter "+ addressDescription +" email address (or type 'exit' to cancel): ");
+                    String input = scanner.nextLine().trim();
+                    if (input.equalsIgnoreCase("exit")) {
+                        System.out.println("Aborted by user.");
+                        exit(0);
+                    }
+                    try {
+                        out = checkMailAddress(input);
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Invalid email format. Please try again.");
+                    }
+                }
+            return out;
+        }
+
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
