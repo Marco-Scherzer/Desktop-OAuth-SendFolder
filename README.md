@@ -1,10 +1,5 @@
 # MOneWayFileSendFolder for GoogleMail
-
-*A spontaneous one-week project focused on simplicity and security.*
-
----
-
-## Project Overview
+# A spontaneous one-week project focused on simplicity and security.
 
 This software is proprietary and protected by copyright law.  
 **Idea, Author, and Copyright**: Marco Scherzer  
