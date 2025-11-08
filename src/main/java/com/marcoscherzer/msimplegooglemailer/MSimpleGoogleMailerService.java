@@ -60,7 +60,7 @@ public final class MSimpleGoogleMailerService {
             toAdress = store.get("toAddress");
 
 
- /*
+ /**
   *@author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
   */
             watcher = new MFileWatcher() {
@@ -93,7 +93,7 @@ public final class MSimpleGoogleMailerService {
             };
 
             watcher.startWatching(outFolder);
-            printConfiguration(fromAdress,toAdress,outFolder.toString(),sentFolder.toString());
+            printConfiguration(fromAdress,toAdress,basePath,clientAndPathUUID,clientAndPathUUID + "-sent");
 
         } catch (Exception exc) {
             //exc.printStackTrace();
@@ -131,37 +131,32 @@ public final class MSimpleGoogleMailerService {
         System.exit(code);
     }
 
-
     /**
      * @author Marco Scherzer
      * Copyright © Marco Scherzer. All rights reserved.
      */
-    /**
-     * @author Marco Scherzer
-     * Copyright © Marco Scherzer. All rights reserved.
-     */
-    private static void printConfiguration(String fromAddress, String toAddress, String outFolder, String sentFolder) {
+    private static void printConfiguration(String fromAddress, String toAddress, String basePath, String outFolder, String sentFolder) {
         System.out.println(
                 "\n==================================================================" +
-                        "\nMSimpleGoogleMailerService" +
-                        "\na little spontaneous Mini Project" +
-                        "\nwith focus on simplicity and security" +
+                        "\n                       MOneWayCloudPusher for GoogleMail" +
+                        "\n  (A little spontaneous Mini Project focusing on simplicity and security)" +
                         "\n" +
-                        "\nAuthor   : Marco Scherzer" +
-                        "\nCopyright: © Marco Scherzer. All rights reserved." +
+                        "\n  Author   : Marco Scherzer" +
+                        "\n  Copyright: © Marco Scherzer. All rights reserved." +
                         "\n==================================================================" +
-                        "\nWelcome Mail Sender !" +
+                        "\n  Welcome Mail Sender!" +
                         "\n" +
-                        "\nOutput Folder:" +
-                        "\n" + outFolder +
-                        "\nSent Folder:" +
-                        "\n" + sentFolder +
+                        "\n  Base Path:" +
+                        "\n  " + basePath +
                         "\n" +
-                        "\nSender Address   : " + fromAddress +
-                        "\nReceiver Address : " + toAddress +
+                        "\n  Outgoing Folder:" + outFolder +
+                        "\n  Sent Folder:" + sentFolder +
                         "\n" +
-                        "\nNew files added to the path will be automatically sent via email." +
-                        "\nAfter sending, they will be moved to the 'sent' folder." +
+                        "\n  Sender Address   : " + fromAddress +
+                        "\n  Receiver Address : " + toAddress +
+                        "\n" +
+                        "\n  New files added to the path will be automatically sent via email." +
+                        "\n  After sending, they will be moved to the 'sent' folder." +
                         "\n=================================================================="
         );
     }
