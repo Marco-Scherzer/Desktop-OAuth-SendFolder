@@ -1,4 +1,4 @@
-#  OneWayFileSendFolder for GoogleMail
+#  OneWay FileSend Folder for GoogleMail
 ## A spontaneous one-week project focused on simplicity and security.
 <br>
 <br>
