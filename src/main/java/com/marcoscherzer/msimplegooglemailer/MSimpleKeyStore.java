@@ -43,13 +43,13 @@ public final class MSimpleKeystore {
             try { keyStore.load(fis, keystorePassword.toCharArray()); } catch (IOException exc) {
                 Throwable cause = exc.getCause();
                 if (cause instanceof UnrecoverableKeyException || cause instanceof UnrecoverableEntryException || cause instanceof BadPaddingException) {
-                    throw new Exception("Password seems to not work (possible wrong password or corruption)", exc);
+                    throw new Exception("Password seems to not work (possible wrong password or corruption)\n"+cause.getMessage(), exc);
                 }
                 if (cause instanceof IllegalBlockSizeException) {
-                    throw new Exception("Error in context with keystore while decrypting block (possible password or corruption)", exc);
+                    throw new Exception("Error in context with keystore while decrypting block (possible password or corruption)\n"+cause.getMessage(), exc);
                 }
                 if (cause instanceof EOFException) {
-                    throw new Exception("Error in context with keystore while reading file (unexpected end of file)", exc);
+                    throw new Exception("Error in context with keystore while reading file (unexpected end of file)\n"+cause.getMessage(), exc);
                 }
                 throw new Exception("Error in context with keystore while loading existing keystore", exc);
             } catch (Exception exc) { throw new Exception("Error in context with keystore while loading existing keystore", exc); }

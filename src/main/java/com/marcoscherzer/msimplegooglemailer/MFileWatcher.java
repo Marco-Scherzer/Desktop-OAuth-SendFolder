@@ -53,9 +53,9 @@ public abstract class MFileWatcher {
                         key.reset();
                     } catch (InterruptedException exc) {
                         Thread.currentThread().interrupt();
-                        System.out.println("MWatcher thread was interrupted.");
+                        System.err.println("MWatcher thread was interrupted.");
                     } catch (ClosedWatchServiceException exc) {
-                        System.out.println("WatchService has been closed.");
+                        System.err.println("WatchService has been closed.");
                         break;
                     }
                 }
@@ -64,7 +64,7 @@ public abstract class MFileWatcher {
             System.out.println("MWatcher started for: " + watchDir);
             return true;
         } catch (IOException exc) {
-            System.out.println("Error starting MWatcher: " + exc.getMessage());
+            System.err.println("Error starting MWatcher: " + exc.getMessage());
             return false;
         }
     }
@@ -77,7 +77,8 @@ public abstract class MFileWatcher {
         try {
             if (watchService != null) watchService.close();
         } catch (IOException exc) {
-            throw new RuntimeException("Error closing WatchService: ", exc);
+            System.err.println("Error closing WatchService:" + exc.getMessage());
+            throw new Exception("Error closing WatchService: ", exc);
         }
         pool.shutdown();
     }
@@ -90,6 +91,7 @@ public abstract class MFileWatcher {
         try {
             if (watchService != null) watchService.close();
         } catch (IOException exc) {
+            System.err.println("Error closing WatchService:" + exc.getMessage());
             throw new RuntimeException("Error closing WatchService: ", exc);
         }
         List<Runnable> dropped = pool.shutdownNow();

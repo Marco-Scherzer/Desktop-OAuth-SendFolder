@@ -18,8 +18,10 @@ public final class MSimpleGoogleMailerService {
     private static String clientAndPathUUID;
     private static MFileWatcher watcher;
     private static Path sentFolder;
+    private static Path outFolder;
     private static String fromAdress;
     private static String toAdress;
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -35,7 +37,7 @@ public final class MSimpleGoogleMailerService {
             if (!initialized && !argsLengthOK) throw new Exception("Error: On first start, you must setup the fromAddress and toAddress:\njava -jar MSendBackupMail [From-Email-Address] [To-Email-Address]");
 
             String pw = MUtil.promptPassword(!initialized ? "Please set a password: " : "Please enter your password: ");
-          //  pw = "testTesttest-123";
+            pw = "testTesttest-123";
 
             System.out.println();
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);
@@ -49,11 +51,10 @@ public final class MSimpleGoogleMailerService {
 
             clientAndPathUUID = store.get("clientId");
 
-            Path path= Paths.get(basePath, clientAndPathUUID);
-
-            Path watchPath = createPathIfNotExists(path, "Backup directory");
-
-            sentFolder = createPathIfNotExists(Paths.get(basePath,clientAndPathUUID + "-sent"), "Sent folder");
+            Path outPath = Paths.get(basePath, clientAndPathUUID);
+            Path sentPath = Paths.get(basePath,clientAndPathUUID + "-sent");
+            outFolder = createPathIfNotExists(outPath, "Out folder");
+            sentFolder = createPathIfNotExists(sentPath, "Sent folder");
 
             fromAdress = store.get("fromAddress");
             toAdress = store.get("toAddress");
@@ -91,13 +92,11 @@ public final class MSimpleGoogleMailerService {
                 }
             };
 
-            watcher.startWatching(watchPath);
-            System.out.println("New files added to the path will be automatically sent via email.");
+            watcher.startWatching(outFolder);
+            printConfiguration(fromAdress,toAdress,outFolder.toString(),sentFolder.toString());
 
         } catch (Exception exc) {
-            Throwable cause = exc.getCause();
-            //System.err.println("\nError: " + exc.getMessage());
-            if (cause != null) System.err.println(cause.getMessage());
+            //exc.printStackTrace();
             exit(1);
         }
     }
@@ -131,6 +130,47 @@ public final class MSimpleGoogleMailerService {
         System.out.println("Program terminated. Exit code: " + code);
         System.exit(code);
     }
+
+
+    /**
+     * @author Marco Scherzer
+     * Copyright © Marco Scherzer. All rights reserved.
+     */
+    /**
+     * @author Marco Scherzer
+     * Copyright © Marco Scherzer. All rights reserved.
+     */
+    private static void printConfiguration(String fromAddress, String toAddress, String outFolder, String sentFolder) {
+        System.out.println(
+                "\n==================================================================" +
+                        "\nMSimpleGoogleMailerService" +
+                        "\na little spontaneous Mini Project" +
+                        "\nwith focus on simplicity and security" +
+                        "\n" +
+                        "\nAuthor   : Marco Scherzer" +
+                        "\nCopyright: © Marco Scherzer. All rights reserved." +
+                        "\n==================================================================" +
+                        "\nWelcome Mail Sender !" +
+                        "\n" +
+                        "\nOutput Folder:" +
+                        "\n" + outFolder +
+                        "\nSent Folder:" +
+                        "\n" + sentFolder +
+                        "\n" +
+                        "\nSender Address   : " + fromAddress +
+                        "\nReceiver Address : " + toAddress +
+                        "\n" +
+                        "\nNew files added to the path will be automatically sent via email." +
+                        "\nAfter sending, they will be moved to the 'sent' folder." +
+                        "\n=================================================================="
+        );
+    }
+
+
+
+
+
+
 }
 
 

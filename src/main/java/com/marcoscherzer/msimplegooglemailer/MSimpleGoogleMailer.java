@@ -81,7 +81,7 @@ public final class MSimpleGoogleMailer {
                         clientId = secrets.getDetails().getClientId();
                         clientSecret = secrets.getDetails().getClientSecret();
                         if (clientId != null && clientSecret != null) {
-                            System.out.println("Tokens exist. Saving found tokens to encrypted keystore");
+                            System.out.println("Tokens exist. Saving found tokens to encrypted keystore. ");
                             keystore.add("google-client-id", clientId).add("google-client-secret", clientSecret);
                             System.out.println("Tokens successfully saved");
                         } else {
@@ -92,7 +92,7 @@ public final class MSimpleGoogleMailer {
                     }
 
                     UUID uuid = UUID.randomUUID();
-                    System.out.println("Client security UUID generated." + uuid + "saving UUID in encrypted keystore");
+                    System.out.println("Client security UUID generated." + uuid + "saving UUID in encrypted keystore. ");
                     keystore.add("clientId", uuid.toString());
                 }
 
@@ -145,7 +145,8 @@ public final class MSimpleGoogleMailer {
                          keystore.clear();
                         } catch (Exception exc2) {
                             System.err.println("Error while clearing keystore.\n" +(exc2.getMessage()==null ?exc2:exc2.getMessage()));
-                            throw new Exception("Initialization failed and keystore could not be cleared. Please delete it manually.",exc2);
+                            System.err.println("Initialization failed and keystore could not be cleared. Please delete it manually");
+                            throw new Exception(exc2);
                         }
                     } else throw exc;
         }
