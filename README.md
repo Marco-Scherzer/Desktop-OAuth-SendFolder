@@ -2,13 +2,13 @@
 # A spontaneous one-week project focused on simplicity and security.
 <br>
 <br>
-## Legal Notice
-This software is proprietary and protected by copyright law.  
-Idea, Author, and Copyright: Marco Scherzer  
-All rights reserved.
+# Legal Notice
+# This software is proprietary and protected by copyright law.  
+# Idea, Author, and Copyright: Marco Scherzer  
+# All rights reserved.
 
-Strictly prohibited:  
-Forking, copying, reverse engineering, decompiling, modifying, redistributing, or any unauthorized use of this software.
+# Strictly prohibited:  
+# Forking, copying, reverse engineering, decompiling, modifying, redistributing, or any unauthorized use of this software.
 
 Contact: fahrservice.1@gmail.com
 <br>
