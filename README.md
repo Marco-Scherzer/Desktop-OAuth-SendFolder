@@ -17,9 +17,7 @@ Contact: fahrservice.1@gmail.com
 <br>
 <br>
 <br>
----
-<br>
-<br>
+
  ## Features
 <br>
 OAuth 2.0 authentication for Gmail No plain-text passwords or app-specific passwords required
