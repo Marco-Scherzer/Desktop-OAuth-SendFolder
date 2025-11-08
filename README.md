@@ -20,23 +20,22 @@ Contact: fahrservice.1@gmail.com
 
  ## Features
 <br>
-OAuth 2.0 authentication for Gmail No plain-text passwords or app-specific passwords required
+Gmail OAuth 2.0 authentication without persisting OAuth tokens.
 
-Monitors a local Desktop linked folder for new files Automatically detects new files to be sent
+Application startup access password protection
 
-Automatically sends files to a predefined recipient One-way communication via Gmail
+One Time setup of Sender and Receiver Address
 
-Moves sent files to a "Sent" folder for archiving Regular folder used for tracking sent items
+Files added to the local "Outgoing Things" Desktop link folder are sent automatically to a predefined recipient via Gmail.
 
-Access password protection Application requires a password to launch
+Moves sent files to a "Sent Things" Desktop link folder for archiving.
 
-Encrypted storage of sensitive data
+Google OAuth client secret json file is stored in secure encrypted PKCS#12 database 
 
-Google OAuth client secret JSON file
+Sender email address is stored in secure encrypted PKCS#12 database
 
-Sender email address
+Recipient email address is stored in secure encrypted PKCS#12 database
 
-Recipient email address
 
 <br>
 
