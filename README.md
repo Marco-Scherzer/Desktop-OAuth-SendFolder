@@ -1,4 +1,4 @@
-#  OneWay FileSend Folder for GoogleMail
+#  OAuth Desktop FileSend Folder for GoogleMail
 ## A spontaneous one-week project focused on simplicity and security.
 <br>
 <br>
@@ -22,7 +22,7 @@ Contact: fahrservice.1@gmail.com
 ## Runtime Output
 
 ==========================================================================
-##              OneWay FileSend Folder for GoogleMail 
+##              OAuth Desktop FileSend Folder for GoogleMail 
 ## (A mini project focusing on simplicity and security)
 ## Author : Marco Scherzer Copyright: © Marco Scherzer. All rights reserved. 
 ==========================================================================
