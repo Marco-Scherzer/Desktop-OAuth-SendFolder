@@ -1,47 +1,64 @@
-MOneWayFileSendFolder for GoogleMail
+# MOneWayFileSendFolder for GoogleMail
 
-A spontanius one week project. This software is proprietary and protected by copyright law. 
-Idea, Author and Copyright Marco Scherzer. All rights reserved. 
-Forking, copying, reverse engineering, decompiling, modifying, redistributing, 
-or any unauthorized use of this software is strictly forbidden. 
-Contact: fahrservice.1@gmail.com
-------------------------------------------------------------------------------------------------------------------------------------------------
+*A spontaneous one-week project focused on simplicity and security.*
 
-Example Usage:
+---
 
-Please enter your password: testTesttest-123
+## Project Overview
 
-loading keystore Z:\MarcoScherzer-Projects\MSendBackupMail\mystore.p12
+This software is proprietary and protected by copyright law.  
+**Idea, Author, and Copyright**: Marco Scherzer  
+**All rights reserved**
 
+**Strictly prohibited**:  
+Forking, copying, reverse engineering, decompiling, modifying, redistributing, or any unauthorized use of this software.
+
+**Contact**: fahrservice.1@gmail.com
+
+---
+
+## Example Usage
+
+---
+
+## Runtime Output
+
+========================================================================== 
+              MOneWayFileSendFolder for GoogleMail 
+(A little spontaneous Mini Project focusing on simplicity and security)
+
+Author : Marco Scherzer Copyright: © Marco Scherzer. All rights reserved. 
 ==========================================================================
-                     MOneWayFileSendFolder for GoogleMail
-  (A little spontaneous Mini Project focusing on simplicity and security)
 
-  Author   : Marco Scherzer
-  Copyright: © Marco Scherzer. All rights reserved.
-==========================================================================
-  Welcome Mail Sender!
+Welcome Mail Sender!
 
-  Base Path:
-  Z:\MarcoScherzer-Projects\MSendBackupMail\mail
+Base Path: Z:\MarcoScherzer-Projects\MSendBackupMail\mail
 
-  Outgoing Folder: 6a132b05-9f36-49f0-8399-301e4692c643
-  
-  Sent Folder: 6a132b05-9f36-49f0-8399-301e4692c643-sent
+Outgoing Folder: 6a132b05-9f36-49f0-8399-301e4692c643
 
-  Sender Address   : m.scherzer@hotmail.com
-  
-  Receiver Address : m.scherzer@hotmail.com
+Sent Folder: 6a132b05-9f36-49f0-8399-301e4692c643-sent
 
-  New files added to the 'Outgoing Things' Folder on your Desktop 
-  will be automatically sent via email.
-  
-  After sending, they will be moved to the 'Sent Things' folder.
+Sender Address : m.scherzer@hotmail.com Receiver Address : m.scherzer@hotmail.com
 
-  
-------------------------------------------------------------------------------------------------------------------------------------------------
-This software is proprietary and protected by copyright law. 
-Idea, Author and Copyright Marco Scherzer. All rights reserved. 
-Forking, copying, reverse engineering, decompiling, modifying, redistributing, 
-or any unauthorized use of this software is strictly forbidden. 
-Contact: fahrservice.1@gmail.com
+New files added to the 'Outgoing Things' folder on your Desktop will be automatically sent via email.
+
+After sending, they will be moved to the 'Sent Things' folder.
+
+
+---
+
+## Legal Notice
+
+This software is proprietary and protected by copyright law.  
+**Author**: Marco Scherzer  
+**All rights reserved**
+
+Forking, copying, reverse engineering, decompiling, modifying, redistributing,  
+or any unauthorized use of this software is strictly forbidden.
+
+📬 **Contact**: fahrservice.1@gmail.com
+
+
+
+
+
