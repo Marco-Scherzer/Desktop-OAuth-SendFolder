@@ -1,4 +1,4 @@
-#  OneWay FileSendFolder for GoogleMail
+#  OneWay FileSend Folder for GoogleMail
 ## A spontaneous one-week project focused on simplicity and security.
 <br>
 <br>
@@ -22,7 +22,7 @@ Contact: fahrservice.1@gmail.com
 ## Runtime Output
 
 ==========================================================================
-##              OneWay FileSendFolder for GoogleMail 
+##              OneWay FileSend Folder for GoogleMail 
 ## (A mini project focusing on simplicity and security)
 ## Author : Marco Scherzer Copyright: © Marco Scherzer. All rights reserved. 
 ==========================================================================
@@ -37,7 +37,7 @@ Contact: fahrservice.1@gmail.com
 ## Receiver Address : fahrservice.1@gmail.com
 
 ## New files added to the 'Outgoing Things' folder on your Desktop 
-## and will be automatically sent via email.
+## will be automatically sent via email.
 ## After sending, they will be moved to the 'Sent Things' folder.
 
 
