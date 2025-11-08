@@ -85,8 +85,12 @@ public final class MSimpleKeystore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final KeyStore getKeyStore() {
-        return keyStore;
+    public final synchronized Enumeration<String> keySet() throws Exception {
+        try {
+        return keyStore.aliases();
+        } catch (Exception exc) {
+            throw new Exception("Error in context with keystore while creating keySet", exc);
+        }
     }
 
     /**

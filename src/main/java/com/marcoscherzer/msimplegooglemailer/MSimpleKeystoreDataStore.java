@@ -76,7 +76,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
     public final Set<String> keySet() throws IOException {
         Set<String> keys = new HashSet<>();
         try {
-            Enumeration<String> aliases = keystore.getKeyStore().aliases();
+            Enumeration<String> aliases = keystore.keySet();
             while (aliases.hasMoreElements()) {
                 keys.add(aliases.nextElement());
             }
