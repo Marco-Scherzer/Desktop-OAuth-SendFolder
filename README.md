@@ -13,7 +13,9 @@ Please enter your password: testTesttest-123
 
 loading keystore Z:\MarcoScherzer-Projects\MSendBackupMail\mystore.p12
 Please open the following address in your browser:
+
   https://accounts.google.com/o/oauth2/auth?...
+  
 Attempting to open that address in the default browser now...
 Out folder already exists: "Z:\MarcoScherzer-Projects\MSendBackupMail\mail\6a132b05-9f36-49f0-8399-301e4692c643"
 Sent folder already exists: "Z:\MarcoScherzer-Projects\MSendBackupMail\mail\6a132b05-9f36-49f0-8399-301e4692c643-sent"
