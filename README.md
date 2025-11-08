@@ -1,50 +1,96 @@
-# MSimpleGoogleMailer
+#  OAuth Desktop FileSend Folder for GoogleMail
+## A spontaneous one-week project focused on simplicity and security.
+<br>
+<br>
 
-MSimpleGoogleMailer
-- Versendet E-Mails über die Gmail API, inklusive Text und beliebiger Dateianhänge (MIME-kompatibel)
-- Nutzt OAuth2 zur sicheren Authentifizierung mit Google – entweder bei jedem Start oder nur bei Bedarf
-- Der Authentifizierungsmodus wird über den Parameter forceOAuth gesteuert:
-  → true: OAuth2-Flow wird bei jeder Instanzierung ausgeführt (z. B. für sicherheitskritische Anwendungen)
-  → false: Tokens werden aus dem Keystore geladen und wiederverwendet (z. B. für automatisierte Dienste)
-- Beim ersten Start muss eine gültige client_secret.json im konfigurierten Verzeichnis liegen
-  → Diese wird eingelesen, die enthaltenen Zugangsdaten werden im Keystore gespeichert und die Datei wird gelöscht
-- Der Keystore wird automatisch im gesetzten Verzeichnis erzeugt, falls er nicht existiert
-  → Kein manuelles Setup nötig – ideal für portable oder einmalige Tools
-- Der Pfad zur client_secret.json kann über setInitialClientSecretFileReadDir(...) gesetzt werden
-  → Ermöglicht flexible Konfiguration für verschiedene Umgebungen oder Container
-- Die Klasse erzeugt und speichert Access- und Refresh-Tokens im Keystore
-  → Diese können bei Bedarf neu generiert oder wiederverwendet werden
-- Eine UUID wird beim ersten Start erzeugt und im Keystore unter clientId gespeichert
-  → Diese dient zur eindeutigen Identifikation des Clients
-  → Wird automatisch in den applicationName eingebunden und erscheint im Betreff jeder versendeten Mail
-- Die Methode getKeystore() erlaubt Zugriff auf gespeicherte Tokens und UUID
-  → Ermöglicht eigene Logik zur Anzeige, Prüfung oder Weiterverarbeitung
-- Die Methode send(MOutgoingMail mail) übernimmt den Versandprozess:
-  → Baut eine MIME-Mail mit Text und Anhängen
-  → Kodiert sie Base64-url-safe
-  → Sendet sie über die Gmail API und gibt die Message-ID aus
-  
-- MSimpleGoogleMailer
-- Sends emails via the Gmail API, including text and any file attachments (MIME-compatible)
-- Uses OAuth2 for secure authentication with Google, either on every startup or only when needed
-- Authentication mode is controlled via the forceOAuth parameter:
-  → true: OAuth2 flow is triggered every time the class is instantiated (ideal for security-critical apps)
-  → false: Tokens are loaded from the keystore and reused (ideal for automated services)
-- On first startup, a valid client_secret.json must be present in the configured directory
-  → It is read, the credentials are stored in the keystore, and the file is deleted for security
-- The keystore is automatically created in the configured directory if it doesn’t exist
-  → No manual setup required – perfect for portable or one-off tools
-- The path to client_secret.json can be configured via setInitialClientSecretFileReadDir(...)
-  → Enables flexible deployment across environments or containers
-- Access and refresh tokens are stored in the keystore
-  → They can be regenerated or reused depending on the authentication mode
-- A UUID is generated on first startup and stored in the keystore under clientId
-  → This UUID uniquely identifies the client
-  → It is automatically embedded in the applicationName and appears in the subject of every sent email
-- The getKeystore() method provides access to stored tokens and UUID
-  → Useful for custom logic, inspection, or token management
-- The send(MOutgoingMail mail) method handles the email delivery:
-  → Builds a MIME message with text and attachments
-  → Encodes it in Base64-url-safe format
-  → Sends it via the Gmail API and returns the message ID
+## Legal Notice
+
+ This software is proprietary and protected by copyright law.  
+ Idea, Author, and Copyright: Marco Scherzer  
+ All rights reserved.
+
+ Strictly prohibited:  
+ Forking, copying, reverse engineering, decompiling, modifying, redistributing, or any unauthorized use of this software.
+
+Contact: fahrservice.1@gmail.com
+
+<br>
+<br>
+<br>
+
+ ## Features
+<br>
+
+### - Gmail OAuth 2.0 authentication without persisting OAuth tokens.
+
+### - Application startup access password protection
+
+### - Files added to the local "Outgoing Things" Desktop link folder are sent automatically to a predefined recipient via Gmail.
+
+### - Google OAuth client secret json file is stored in secure encrypted PKCS#12 database 
+
+### - One Time setup of Sender and Receiver Address
+
+### - Generates at setup time internal Mail Folder Names using UUIDs for additional abuse prevention (application decides the real folder name).
+
+### - Uses the generated UUID in both the client name and email metadata for additional verifiability
+
+### - Moves sent files to a "Sent Things" Desktop link folder for archiving.
+
+### - Sender email address is stored in secure encrypted PKCS#12 database
+
+### - Recipient email address is stored in secure encrypted PKCS#12 database
+
+
+<br>
+
+## Runtime Output
+
+### > Please enter your password: testTesttest-123
+
+### loading keystore Z:\OAuth-Desktop-FileSend-Folder\mystore.p12
+
+### Please open the following address in your browser:
+###  https://accounts.google.com/o/oauth2/...
+
+==========================================================================
+##              OAuth Desktop FileSend Folder for GoogleMail 
+## (A mini project focusing on simplicity and security)
+## Author : Marco Scherzer Copyright: © Marco Scherzer. All rights reserved. 
+==========================================================================
+
+## Welcome Mail Sender!
+
+## Base Path: Z:\MarcoScherzer-Projects\MSendBackupMail\mail
+## Outgoing Folder: 6a132b05-9f36-49f0-8399-301e4692c643
+## Sent Folder: 6a132b05-9f36-49f0-8399-301e4692c643-sent
+
+## Sender Address : fahrservice.1@gmail.com 
+## Receiver Address : fahrservice.1@gmail.com
+
+## New files added to the 'Outgoing Things' folder on your Desktop 
+## will be automatically sent via email.
+## After sending, they will be moved to the 'Sent Things' folder.
+
+
+
+---
+<br>
+<br>
+<br>
+
+## Legal Notice
+
+This software is proprietary and protected by copyright law.  
+Idea, Author, and Copyright: Marco Scherzer 
+All rights reserved.
+
+Forking, copying, reverse engineering, decompiling, modifying, redistributing,  
+or any unauthorized use of this software is strictly forbidden.
+
+**Contact**: fahrservice.1@gmail.com
+
+
+
+
 
