@@ -1,4 +1,4 @@
-#MOneWayFileSendFolder for GoogleMail
+MOneWayFileSendFolder for GoogleMail
 
 A spontanius one week project. This software is proprietary and protected by copyright law. 
 Idea, Author and Copyright Marco Scherzer. All rights reserved. 
