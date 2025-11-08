@@ -29,6 +29,8 @@ Contact: fahrservice.1@gmail.com
 
 ### - Files added to the local "Outgoing Things" Desktop link folder are sent automatically to a predefined recipient via Gmail.
 
+### - Generates at setup time internal Mail Folder Names using UUIDs for additional abuse prevention (application decides the real folder name).
+
 ### - Moves sent files to a "Sent Things" Desktop link folder for archiving.
 
 ### - Google OAuth client secret json file is stored in secure encrypted PKCS#12 database 
