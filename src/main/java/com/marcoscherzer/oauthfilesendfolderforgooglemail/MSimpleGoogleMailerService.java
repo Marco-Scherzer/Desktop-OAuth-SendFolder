@@ -1,10 +1,9 @@
-package com.marcoscherzer.monewayfilesendfolderapp;
+package com.marcoscherzer.oauthfilesendfolderforgooglemail;
 
 import com.marcoscherzer.msimplegooglemailer.MOutgoingMail;
 import com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailer;
 import com.marcoscherzer.msimplegooglemailer.MSimpleKeystore;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,8 +12,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
-import static com.marcoscherzer.monewayfilesendfolderapp.MUtil.createFolderLink;
-import static com.marcoscherzer.monewayfilesendfolderapp.MUtil.createPathIfNotExists;
+import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createFolderLink;
+import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createPathIfNotExists;
 import static com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailerUtil.checkMailAddress;
 
 
