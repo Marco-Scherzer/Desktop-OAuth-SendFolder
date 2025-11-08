@@ -4,13 +4,13 @@
 <br>
 ## Legal Notice
 This software is proprietary and protected by copyright law.  
-**Idea, Author, and Copyright**: Marco Scherzer  
-**All rights reserved**
+Idea, Author, and Copyright: Marco Scherzer  
+All rights reserved.
 
-**Strictly prohibited**:  
+Strictly prohibited:  
 Forking, copying, reverse engineering, decompiling, modifying, redistributing, or any unauthorized use of this software.
 
-**Contact**: fahrservice.1@gmail.com
+Contact: fahrservice.1@gmail.com
 <br>
 <br>
 <br>
@@ -47,8 +47,8 @@ Forking, copying, reverse engineering, decompiling, modifying, redistributing, o
 ## Legal Notice
 
 This software is proprietary and protected by copyright law.  
-**Author**: Marco Scherzer  
-**All rights reserved**
+Idea, Author, and Copyright: Marco Scherzer 
+All rights reserved.
 
 Forking, copying, reverse engineering, decompiling, modifying, redistributing,  
 or any unauthorized use of this software is strictly forbidden.
