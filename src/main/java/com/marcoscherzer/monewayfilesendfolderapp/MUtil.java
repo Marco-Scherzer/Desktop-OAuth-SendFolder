@@ -19,8 +19,7 @@ public class MUtil {
     public static void createFolderLink(String targetFolderPath, String linkName) {
         try {
             Path desktopPath = getDesktopPath();
-            System.out.println("Creating Desktop link for \"" + targetFolderPath+"\" in Desktop folder " + desktopPath);
-            System.out.println();
+            System.out.println("Creating Desktop link for \"" + targetFolderPath+"\" in Desktop folder \"" + desktopPath+"\"");
 
             if (desktopPath == null || !Files.exists(desktopPath)) {
                 System.err.println("Desktop path is invalid");
@@ -65,6 +64,25 @@ public class MUtil {
         rawPath = rawPath.replace("%USERPROFILE%", System.getenv("USERPROFILE"));
         return Paths.get(rawPath);
     }
+
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public static final Path createPathIfNotExists(Path path, String descriptionName) throws Exception {
+        try {
+            if (!Files.exists(path)) {
+                Files.createDirectories(path);
+                System.out.println(descriptionName + " created: \"" + path+"\"");
+            } else {
+                System.out.println(descriptionName + " already exists: \"" + path+"\"");
+            }
+            return path;
+        } catch (IOException e) {
+            throw new Exception("Error while creating directory for '" + descriptionName + "': \"" + path+"\"", e);
+        }
+    }
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

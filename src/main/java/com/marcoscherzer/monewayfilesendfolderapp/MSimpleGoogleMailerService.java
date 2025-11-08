@@ -14,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 import static com.marcoscherzer.monewayfilesendfolderapp.MUtil.createFolderLink;
+import static com.marcoscherzer.monewayfilesendfolderapp.MUtil.createPathIfNotExists;
 import static com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailerUtil.checkMailAddress;
 
 
@@ -125,30 +126,11 @@ public final class MSimpleGoogleMailerService {
                     try {
                         out = checkMailAddress(input);
                     } catch (IllegalArgumentException e) {
-                        System.out.println("Invalid email format. Please try again.");
+                        System.out.println("Please try again.");
                     }
                 }
             return out;
         }
-
-
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public static final Path createPathIfNotExists(Path path, String descriptionName) throws Exception {
-        try {
-            if (!Files.exists(path)) {
-                Files.createDirectories(path);
-                System.out.println(descriptionName + " created: " + path);
-            } else {
-                System.out.println(descriptionName + " already exists: " + path);
-            }
-            return path;
-        } catch (IOException e) {
-            throw new Exception("Error while creating directory for \"" + descriptionName + "\": " + path, e);
-        }
-    }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -169,27 +151,28 @@ public final class MSimpleGoogleMailerService {
      */
     private static void printConfiguration(String fromAddress, String toAddress, String basePath, String outFolder, String sentFolder) {
         System.out.println(
-                "\n==================================================================" +
-                        "\n                       MOneWayFileSendFolder for GoogleMail" +
+                "\n==========================================================================" +
+                        "\n                     MOneWayFileSendFolder for GoogleMail" +
                         "\n  (A little spontaneous Mini Project focusing on simplicity and security)" +
                         "\n" +
                         "\n  Author   : Marco Scherzer" +
                         "\n  Copyright: © Marco Scherzer. All rights reserved." +
-                        "\n==================================================================" +
+                        "\n==========================================================================" +
                         "\n  Welcome Mail Sender!" +
                         "\n" +
                         "\n  Base Path:" +
                         "\n  " + basePath +
                         "\n" +
-                        "\n  Outgoing Folder:" + outFolder +
-                        "\n  Sent Folder:" + sentFolder +
+                        "\n  Outgoing Folder: " + outFolder +
+                        "\n  Sent Folder: " + sentFolder +
                         "\n" +
                         "\n  Sender Address   : " + fromAddress +
                         "\n  Receiver Address : " + toAddress +
                         "\n" +
-                        "\n  New files added to the path will be automatically sent via email." +
-                        "\n  After sending, they will be moved to the 'sent' folder." +
-                        "\n=================================================================="
+                        "\n  New files added to the 'Outgoing Things' Folder on your Desktop " +
+                        "\n  will be automatically sent via email." +
+                        "\n  After sending, they will be moved to the 'Sent Things' folder." +
+                        "\n=========================================================================="
         );
 
     }

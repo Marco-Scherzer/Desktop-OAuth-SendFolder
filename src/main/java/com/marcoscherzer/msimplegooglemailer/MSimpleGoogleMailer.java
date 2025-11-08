@@ -94,7 +94,7 @@ public final class MSimpleGoogleMailer {
                     }
 
                     UUID uuid = UUID.randomUUID();
-                    System.out.println("Client security UUID generated." + uuid + "saving UUID in encrypted keystore. ");
+                    System.out.println("Client security UUID generated. " + uuid + ". Saving UUID in encrypted keystore. ");
                     keystore.add("clientId", uuid.toString());
                 }
 

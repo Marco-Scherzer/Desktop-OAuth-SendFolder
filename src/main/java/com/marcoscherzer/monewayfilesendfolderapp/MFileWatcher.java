@@ -61,7 +61,7 @@ public abstract class MFileWatcher {
                 }
             });
 
-            System.out.println("MWatcher started for: " + watchDir);
+            System.out.println("MWatcher started for: \"" + watchDir+"\"");
             return true;
         } catch (IOException exc) {
             System.err.println("Error starting MWatcher: " + exc.getMessage());
