@@ -2,6 +2,7 @@
 # A spontaneous one-week project focused on simplicity and security.
 <br>
 <br>
+
 # Legal Notice
 # This software is proprietary and protected by copyright law.  
 # Idea, Author, and Copyright: Marco Scherzer  
