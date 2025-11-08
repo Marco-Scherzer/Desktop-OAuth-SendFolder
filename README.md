@@ -18,7 +18,25 @@ Contact: fahrservice.1@gmail.com
 <br>
 <br>
 ---
+OAuth 2.0 authentication for Gmail No plain-text passwords or app-specific passwords required
 
+Monitors a local folder for new files Automatically detects new files to be sent
+
+Automatically sends files to a predefined recipient One-way communication via Gmail
+
+Moves sent files to a "Sent" folder for archiving Regular folder used for tracking sent items
+
+Access password protection Application requires a password to launch
+
+Encrypted storage of sensitive data
+
+Google OAuth client secret JSON file
+
+Sender email address
+
+Recipient email address
+ 
+ 
 ## Runtime Output
 
 ### > Please enter your password: testTesttest-123
