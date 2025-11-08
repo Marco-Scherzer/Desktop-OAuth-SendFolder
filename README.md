@@ -1,5 +1,5 @@
 # MOneWayFileSendFolder for GoogleMail
-# A spontaneous one-week project focused on simplicity and security.
+## A spontaneous one-week project focused on simplicity and security.
 <br>
 <br>
 
