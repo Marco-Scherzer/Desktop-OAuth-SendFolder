@@ -1,4 +1,4 @@
-# MOneWayFileSendFolder for GoogleMail
+#  OneWayFileSendFolder for GoogleMail
 ## A spontaneous one-week project focused on simplicity and security.
 <br>
 <br>
@@ -22,7 +22,7 @@ Contact: fahrservice.1@gmail.com
 ## Runtime Output
 
 ==========================================================================
-##              MOneWayFileSendFolder for GoogleMail 
+##              OneWayFileSendFolder for GoogleMail 
 ## (A mini project focusing on simplicity and security)
 ## Author : Marco Scherzer Copyright: © Marco Scherzer. All rights reserved. 
 ==========================================================================
