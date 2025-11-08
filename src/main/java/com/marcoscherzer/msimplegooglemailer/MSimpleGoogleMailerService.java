@@ -138,7 +138,7 @@ public final class MSimpleGoogleMailerService {
     private static void printConfiguration(String fromAddress, String toAddress, String basePath, String outFolder, String sentFolder) {
         System.out.println(
                 "\n==================================================================" +
-                        "\n                       MOneWayCloudPusher for GoogleMail" +
+                        "\n                       MOneWayFileSendFolder for GoogleMail" +
                         "\n  (A little spontaneous Mini Project focusing on simplicity and security)" +
                         "\n" +
                         "\n  Author   : Marco Scherzer" +
