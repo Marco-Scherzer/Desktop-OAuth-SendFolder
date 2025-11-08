@@ -22,7 +22,7 @@ Contact: fahrservice.1@gmail.com
 <br>
 OAuth 2.0 authentication for Gmail No plain-text passwords or app-specific passwords required
 
-Monitors a local folder for new files Automatically detects new files to be sent
+Monitors a local Desktop linked folder for new files Automatically detects new files to be sent
 
 Automatically sends files to a predefined recipient One-way communication via Gmail
 
