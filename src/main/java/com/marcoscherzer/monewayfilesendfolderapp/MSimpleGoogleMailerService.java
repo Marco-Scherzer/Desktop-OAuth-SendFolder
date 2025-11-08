@@ -40,7 +40,6 @@ public final class MSimpleGoogleMailerService {
             System.setErr(System.out);
             Path keystorePath = Paths.get(userDir, "mystore.p12");
             boolean keystoreFileExists = Files.exists(keystorePath);
-            boolean argsLengthOK = args.length == 2;
 
             String pw = MUtil.promptPassword(!keystoreFileExists ? "Please set a password: " : "Please enter your password: ");
 

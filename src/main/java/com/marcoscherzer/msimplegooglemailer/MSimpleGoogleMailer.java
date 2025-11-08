@@ -85,10 +85,12 @@ public final class MSimpleGoogleMailer {
                             keystore.add("google-client-id", clientId).add("google-client-secret", clientSecret);
                             System.out.println("Tokens successfully saved");
                         } else {
-                            throw new IllegalStateException("client_secret.json does not contain valid credentials.");
+                           // System.err.println();
+                            throw new Exception("client_secret.json does not contain valid credentials.");
                         }
                     } else {
-                        throw new IllegalStateException("client_secret.json must be placed in the directory \"" + clientSecretDir + "\" before first launch.");
+                        //System.err.println();
+                        throw new Exception("client_secret.json must be placed in the directory \"" + clientSecretDir + "\" before first launch.");
                     }
 
                     UUID uuid = UUID.randomUUID();
@@ -138,7 +140,7 @@ public final class MSimpleGoogleMailer {
                         .build();
 
         } catch (Exception exc) {
-                System.err.println("Error in initialization.\n" + exc.getMessage());
+                System.err.println("Error in initialization. "+ exc.getMessage());
                     if (keystore.successfullyInitialized()) {
                         System.out.println("clearing KeyStore");
                         try {
@@ -148,7 +150,8 @@ public final class MSimpleGoogleMailer {
                             System.err.println("Initialization failed and keystore could not be cleared. Please delete it manually");
                             throw new Exception(exc2);
                         }
-                    } else throw exc;
+                    }
+                    throw exc;
         }
 
         if (jsonFile.exists()) {
