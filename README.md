@@ -31,22 +31,15 @@ Contact: fahrservice.1@gmail.com
 ==========================================================================
 
 ## Welcome Mail Sender!
-<br>
 ## Base Path: Z:\MarcoScherzer-Projects\MSendBackupMail\mail
-<br>
 ## Outgoing Folder: 6a132b05-9f36-49f0-8399-301e4692c643
-<br>
 ## Sent Folder: 6a132b05-9f36-49f0-8399-301e4692c643-sent
-<br>
 ## Sender Address : fahrservice.1@gmail.com 
-<br>
 ## Receiver Address : fahrservice.1@gmail.com
-<br>
 ## New files added to the 'Outgoing Things' folder on your Desktop 
-## will be automatically sent via email.
-<br>
+## and will be automatically sent via email.
 ## After sending, they will be moved to the 'Sent Things' folder.
-<br>
+
 
 
 ---
