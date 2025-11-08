@@ -37,9 +37,9 @@ Google OAuth client secret JSON file
 Sender email address
 
 Recipient email address
- 
- <br>
- <br>
+
+<br>
+
 ## Runtime Output
 
 ### > Please enter your password: testTesttest-123
