@@ -1,6 +1,10 @@
 package com.marcoscherzer.msimplegooglemailer;
 
+import java.io.BufferedReader;
 import java.io.Console;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.*;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
@@ -8,6 +12,65 @@ import java.util.regex.Pattern;
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
 public final class MUtil {
+
+        /**
+         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
+        public static void createFolderLink(String targetFolderPath, String linkName) {
+            try {
+                Path desktopPath= getDesktopPathViaPowerShell();
+                System.out.println(desktopPath);
+                if (desktopPath == null || !Files.exists(desktopPath)) {
+                    System.err.println("Desktop path is invalid.");
+                    return;
+                }
+
+                // Sonderzeichen aus dem Linknamen entfernen
+                String safeName = linkName.replaceAll("[^a-zA-Z0-9_\\- ]", "").trim();
+
+                Path linkFile = desktopPath.resolve(safeName + ".url");
+                String content =
+                        "[InternetShortcut]\n" +
+                                "URL=file:///" + targetFolderPath.replace("\\", "/") + "\n" +
+                                "IconIndex=0\n";
+
+                Files.write(linkFile, content.getBytes());
+                System.out.println("Link created: " + linkFile.toAbsolutePath());
+            } catch (IOException e) {
+                System.err.println("Error creating folder link: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+        public static Path getDesktopPathViaPowerShell() {
+            try {
+                ProcessBuilder builder = new ProcessBuilder(
+                        "powershell",
+                        "-NoProfile",
+                        "-Command",
+                        "[Environment]::GetFolderPath('Desktop')"
+                );
+                builder.redirectErrorStream(true);
+                Process process = builder.start();
+
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                    String line = reader.readLine();
+                    if (line != null && !line.trim().isEmpty()) {
+                        Path desktopPath = Paths.get(line.trim());
+                        System.out.println("Resolved desktop path: " + desktopPath);
+                        return desktopPath;
+                    }
+                }
+            } catch (IOException e) {
+                System.err.println("Error executing PowerShell: " + e.getMessage());
+                e.printStackTrace();
+            }
+            return null;
+        }
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

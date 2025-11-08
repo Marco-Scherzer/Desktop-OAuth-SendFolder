@@ -8,6 +8,9 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import static com.marcoscherzer.msimplegooglemailer.MUtil.createFolderLink;
+
+
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
@@ -33,6 +36,8 @@ public final class MSimpleGoogleMailerService {
             Path keystorePath = Paths.get(userDir, "mystore.p12");
             boolean initialized = Files.exists(keystorePath);
             boolean argsLengthOK = args.length == 2;
+
+            createFolderLink(userDir+"\\mail","test");
 
             if (!initialized && !argsLengthOK) throw new Exception("Error: On first start, you must setup the fromAddress and toAddress:\njava -jar MSendBackupMail [From-Email-Address] [To-Email-Address]");
 
