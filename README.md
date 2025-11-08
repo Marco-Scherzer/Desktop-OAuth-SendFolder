@@ -15,9 +15,6 @@ Forking, copying, reverse engineering, decompiling, modifying, redistributing, o
 
 **Contact**: fahrservice.1@gmail.com
 
----
-
-## Example Usage
 
 ---
 
