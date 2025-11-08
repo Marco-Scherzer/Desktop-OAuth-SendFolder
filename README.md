@@ -35,6 +35,7 @@ loading keystore Z:\MarcoScherzer-Projects\MSendBackupMail\mystore.p12
 
   New files added to the 'Outgoing Things' Folder on your Desktop 
   will be automatically sent via email.
+  
   After sending, they will be moved to the 'Sent Things' folder.
 
   
