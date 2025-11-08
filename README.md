@@ -1,6 +1,7 @@
 # MOneWayFileSendFolder for GoogleMail
 # A spontaneous one-week project focused on simplicity and security.
-
+<br>
+<br>
 ## Legal Notice
 This software is proprietary and protected by copyright law.  
 **Idea, Author, and Copyright**: Marco Scherzer  
@@ -10,6 +11,7 @@ This software is proprietary and protected by copyright law.
 Forking, copying, reverse engineering, decompiling, modifying, redistributing, or any unauthorized use of this software.
 
 **Contact**: fahrservice.1@gmail.com
+<br>
 <br>
 <br>
 ---
@@ -38,7 +40,9 @@ Forking, copying, reverse engineering, decompiling, modifying, redistributing, o
 
 
 ---
-
+<br>
+<br>
+<br>
 
 ## Legal Notice
 
