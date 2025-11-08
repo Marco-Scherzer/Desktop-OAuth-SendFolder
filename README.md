@@ -37,11 +37,10 @@ Forking, copying, reverse engineering, decompiling, modifying, redistributing, o
 # Sent Folder: 6a132b05-9f36-49f0-8399-301e4692c643-sent
 # Sender Address : m.scherzer@hotmail.com 
 # Receiver Address : m.scherzer@hotmail.com
+# New files added to the 'Outgoing Things' folder on your Desktop 
+# will be automatically sent via email.
 
-#New files added to the 'Outgoing Things' folder on your Desktop 
-#will be automatically sent via email.
-
-#After sending, they will be moved to the 'Sent Things' folder.
+# After sending, they will be moved to the 'Sent Things' folder.
 
 
 ---
