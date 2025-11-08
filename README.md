@@ -25,11 +25,11 @@ Contact: fahrservice.1@gmail.com
 
 ### - Application startup access password protection
 
-### - One Time setup of Sender and Receiver Address
-
 ### - Files added to the local "Outgoing Things" Desktop link folder are sent automatically to a predefined recipient via Gmail.
 
 ### - Google OAuth client secret json file is stored in secure encrypted PKCS#12 database 
+
+### - One Time setup of Sender and Receiver Address
 
 ### - Generates at setup time internal Mail Folder Names using UUIDs for additional abuse prevention (application decides the real folder name).
 
