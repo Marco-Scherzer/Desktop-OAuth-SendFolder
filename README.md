@@ -26,9 +26,11 @@ loading keystore Z:\MarcoScherzer-Projects\MSendBackupMail\mystore.p12
   Z:\MarcoScherzer-Projects\MSendBackupMail\mail
 
   Outgoing Folder: 6a132b05-9f36-49f0-8399-301e4692c643
+  
   Sent Folder: 6a132b05-9f36-49f0-8399-301e4692c643-sent
 
   Sender Address   : m.scherzer@hotmail.com
+  
   Receiver Address : m.scherzer@hotmail.com
 
   New files added to the 'Outgoing Things' Folder on your Desktop 
