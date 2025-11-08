@@ -25,6 +25,7 @@ Forking, copying, reverse engineering, decompiling, modifying, redistributing, o
 
 ========================================================================== 
               MOneWayFileSendFolder for GoogleMail 
+              
 (A little spontaneous Mini Project focusing on simplicity and security)
 
 Author : Marco Scherzer Copyright: © Marco Scherzer. All rights reserved. 
