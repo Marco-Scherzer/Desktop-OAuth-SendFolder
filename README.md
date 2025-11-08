@@ -24,8 +24,7 @@ Forking, copying, reverse engineering, decompiling, modifying, redistributing, o
 ## Runtime Output
 
 ==========================================================================
-
-              MOneWayFileSendFolder for GoogleMail 
+               MOneWayFileSendFolder for GoogleMail 
 
   (A little spontaneous Mini Project focusing on simplicity and security)
 
