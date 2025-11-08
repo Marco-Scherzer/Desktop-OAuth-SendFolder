@@ -1,12 +1,13 @@
 package com.marcoscherzer.msimplegooglemailer;
 
-import java.io.BufferedReader;
+import com.sun.jna.platform.win32.Advapi32Util;
+import com.sun.jna.platform.win32.WinReg;
 import java.io.Console;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.*;
 import java.util.Scanner;
 import java.util.regex.Pattern;
+
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -18,7 +19,7 @@ public final class MUtil {
          */
         public static void createFolderLink(String targetFolderPath, String linkName) {
             try {
-                Path desktopPath= getDesktopPathViaPowerShell();
+                Path desktopPath= getDesktopPath();
                 System.out.println(desktopPath);
                 if (desktopPath == null || !Files.exists(desktopPath)) {
                     System.err.println("Desktop path is invalid.");
@@ -45,32 +46,15 @@ public final class MUtil {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-        public static Path getDesktopPathViaPowerShell() {
-            try {
-                ProcessBuilder builder = new ProcessBuilder(
-                        "powershell",
-                        "-NoProfile",
-                        "-Command",
-                        "[Environment]::GetFolderPath('Desktop')"
-                );
-                builder.redirectErrorStream(true);
-                Process process = builder.start();
-
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                    String line = reader.readLine();
-                    if (line != null && !line.trim().isEmpty()) {
-                        Path desktopPath = Paths.get(line.trim());
-                        System.out.println("Resolved desktop path: " + desktopPath);
-                        return desktopPath;
-                    }
-                }
-            } catch (IOException e) {
-                System.err.println("Error executing PowerShell: " + e.getMessage());
-                e.printStackTrace();
-            }
-            return null;
-        }
-
+    public static Path getDesktopPath() {
+        String rawPath = Advapi32Util.registryGetStringValue(
+                WinReg.HKEY_CURRENT_USER,
+                "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders",
+                "Desktop"
+        );
+        rawPath = rawPath.replace("%USERPROFILE%", System.getenv("USERPROFILE"));
+        return Paths.get(rawPath);
+    }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

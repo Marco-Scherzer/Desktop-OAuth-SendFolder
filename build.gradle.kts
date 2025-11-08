@@ -14,6 +14,10 @@ repositories {
 }
 
 dependencies {
+    // JNA für native Windows-Zugriffe
+    implementation("net.java.dev.jna:jna:5.13.0")
+    implementation("net.java.dev.jna:jna-platform:5.13.0")
+
     // Google API Core
     implementation("com.google.api-client:google-api-client:2.4.0")
 
