@@ -31,6 +31,8 @@ Contact: fahrservice.1@gmail.com
 
 ### - Generates at setup time internal Mail Folder Names using UUIDs for additional abuse prevention (application decides the real folder name).
 
+### - Uses the generated UUID in both the client name and email metadata for additional verifiability
+
 ### - Moves sent files to a "Sent Things" Desktop link folder for archiving.
 
 ### - Google OAuth client secret json file is stored in secure encrypted PKCS#12 database 
