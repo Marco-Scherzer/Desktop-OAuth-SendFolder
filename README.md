@@ -3,7 +3,8 @@
 <br>
 <br>
 
- Legal Notice
+## Legal Notice
+
  This software is proprietary and protected by copyright law.  
  Idea, Author, and Copyright: Marco Scherzer  
  All rights reserved.
