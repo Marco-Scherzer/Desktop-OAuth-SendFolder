@@ -23,7 +23,7 @@ Contact: fahrservice.1@gmail.com
 
 ==========================================================================
 ##              MOneWayFileSendFolder for GoogleMail 
-## (A little spontaneous Mini Project focusing on simplicity and security)
+## (A mini project focusing on simplicity and security)
 ## Author : Marco Scherzer Copyright: © Marco Scherzer. All rights reserved. 
 ==========================================================================
 
