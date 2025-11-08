@@ -25,11 +25,11 @@ Forking, copying, reverse engineering, decompiling, modifying, redistributing, o
 
 ==========================================================================
 
-MOneWayFileSendFolder for GoogleMail 
+# MOneWayFileSendFolder for GoogleMail 
 
-  (A little spontaneous Mini Project focusing on simplicity and security)
+# (A little spontaneous Mini Project focusing on simplicity and security)
 
-Author : Marco Scherzer Copyright: © Marco Scherzer. All rights reserved. 
+# Author : Marco Scherzer Copyright: © Marco Scherzer. All rights reserved. 
 ==========================================================================
 
 Welcome Mail Sender!
