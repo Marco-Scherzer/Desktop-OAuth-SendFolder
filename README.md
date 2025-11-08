@@ -19,9 +19,6 @@ Forking, copying, reverse engineering, decompiling, modifying, redistributing, o
 ---
 
 ## Runtime Output
-#
-#
-
 ==========================================================================
 
 #              MOneWayFileSendFolder for GoogleMail 
@@ -54,7 +51,7 @@ This software is proprietary and protected by copyright law.
 Forking, copying, reverse engineering, decompiling, modifying, redistributing,  
 or any unauthorized use of this software is strictly forbidden.
 
-📬 **Contact**: fahrservice.1@gmail.com
+**Contact**: fahrservice.1@gmail.com
 
 
 
