@@ -46,6 +46,9 @@ Contact: fahrservice.1@gmail.com
 
 ### loading keystore Z:\OAuth-Desktop-FileSend-Folder\mystore.p12
 
+### Please open the following address in your browser:
+###  https://accounts.google.com/o/oauth2/...
+
 ==========================================================================
 ##              OAuth Desktop FileSend Folder for GoogleMail 
 ## (A mini project focusing on simplicity and security)
