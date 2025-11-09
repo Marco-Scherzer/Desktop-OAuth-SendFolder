@@ -14,26 +14,27 @@ public class MUtil {
     /**
      * Creates a junction on the desktop pointing to a target folder.
      * Works only on Windows and only for folders on the same volume.
+     * returns the absolute path of the created link if desktop path exists. null otherwise.
      * Author: Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static void createFolderLink(String targetFolderPath, String linkName) {
+    public static Path createFolderLink(String targetFolderPath, String linkName) throws Exception {
+        Path linkPath;
         try {
             Path desktopPath = getDesktopPath();
-            System.out.println("Creating Desktop link for \"" + targetFolderPath+"\" in Desktop folder \"" + desktopPath+"\"");
+            System.out.println("Creating Desktop link for \"" + targetFolderPath + "\" in Desktop folder \"" + desktopPath + "\"");
 
             if (desktopPath == null || !Files.exists(desktopPath)) {
                 System.err.println("Desktop path is invalid");
-                return;
+                return null;
             }
 
             Path targetPath = Paths.get(targetFolderPath);
             if (!Files.isDirectory(targetPath)) {
-                System.err.println("Target is not a directory. Junction Links only work with folders");
-                return;
+                throw new IllegalArgumentException("Target is not a directory. Junction Links only work with folders");
             }
 
             String safeName = linkName.replaceAll("[^a-zA-Z0-9_\\- ]", "").trim();
-            Path linkPath = desktopPath.resolve(safeName);
+            linkPath = desktopPath.resolve(safeName);
 
             String command = String.format("cmd /c mklink /J \"%s\" \"%s\"", linkPath.toAbsolutePath(), targetPath.toAbsolutePath());
 
@@ -46,10 +47,11 @@ public class MUtil {
                 System.err.println("Failed to create desktop link (already existing ?)");
             }
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IllegalArgumentException | IOException | InterruptedException e) {
             System.err.println("Error while creating desktop link " + e.getMessage());
-            e.printStackTrace();
+            throw new Exception(e);
         }
+        return linkPath.toAbsolutePath();
     }
 
     /**

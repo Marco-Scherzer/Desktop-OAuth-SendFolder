@@ -25,11 +25,13 @@ public final class MSimpleGoogleMailerService {
     private static final String userDir = System.getProperty("user.dir");
     private static final String basePath = userDir+"\\mail";
     private static String clientAndPathUUID;
-    private static MFileWatcher watcher;
+    private static MFolderWatcher watcher;
     private static Path sentFolder;
     private static Path outFolder;
     private static String fromAdress;
     private static String toAdress;
+    private static MFileNameWatcher outgoingDesktopLinkWatcher;
+    private static MFileNameWatcher sentDesktopLinkWatcher;
 
 
     /**
@@ -69,7 +71,7 @@ public final class MSimpleGoogleMailerService {
             /**
              *@author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
              */
-            watcher = new MFileWatcher() {
+            watcher = new MFolderWatcher() {
                 @Override
                 protected void onFileChangedAndUnlocked(Path file) {
                     boolean sent = false;
@@ -99,8 +101,16 @@ public final class MSimpleGoogleMailerService {
             };
 
             watcher.startWatching(outFolder);
-            createFolderLink(outFolder.toString(), "Outgoing Things");
-            createFolderLink(sentFolder.toString(), "Sent Things");
+            Path absoluteOutgoingLinkPath = createFolderLink(outFolder.toString(), "Outgoing Things");
+            Path absoluteSentLinkPath = createFolderLink(sentFolder.toString(), "Sent Things");
+            if(absoluteOutgoingLinkPath != null || absoluteSentLinkPath != null){
+                outgoingDesktopLinkWatcher = new MFileNameWatcher(absoluteOutgoingLinkPath);
+                sentDesktopLinkWatcher = new MFileNameWatcher(absoluteSentLinkPath);
+                outgoingDesktopLinkWatcher.startWatching();
+                sentDesktopLinkWatcher.startWatching();
+            } else System.out.println("No Desktop links could be created. Please create links manually"); //ask next startup for linknamaes
+
+
             printConfiguration(fromAdress, toAdress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
 
         } catch (Exception exc) {
@@ -137,6 +147,8 @@ public final class MSimpleGoogleMailerService {
     private static void exit(int code) {
         try {
             if (watcher != null) watcher.shutdown();
+            if(outgoingDesktopLinkWatcher != null ) outgoingDesktopLinkWatcher.shutdown();
+            if(sentDesktopLinkWatcher != null ) sentDesktopLinkWatcher.shutdown();
         } catch (Exception exc) {
             exc.printStackTrace();
         }
