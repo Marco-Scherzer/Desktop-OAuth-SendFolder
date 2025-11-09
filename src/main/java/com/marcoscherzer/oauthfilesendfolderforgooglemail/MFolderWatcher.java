@@ -14,7 +14,7 @@ import static java.nio.file.StandardWatchEventKinds.*;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public abstract class MFileWatcher {
+public abstract class MFolderWatcher {
 
     private final ExecutorService pool;
     private final Map<Path, MObservedFile> fileStates;
@@ -24,7 +24,7 @@ public abstract class MFileWatcher {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MFileWatcher() {
+    public MFolderWatcher() {
         pool = Executors.newCachedThreadPool();
         fileStates = new ConcurrentHashMap<>();
         activeMonitors = ConcurrentHashMap.newKeySet();
