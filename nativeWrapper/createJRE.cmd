@@ -1,7 +1,6 @@
 @echo off
 color 09
 
-
 echo Author Marco Scherzer
 echo.
 echo BEST USABILITY/SELFREMINDER: ADD THIS SCRIPT TO THE CENTRAL SCRIPT 
@@ -20,14 +19,20 @@ echo.
 echo To list available modules
 pause
 echo.
-dir /b Z:\jdks\%version%\jdk-fx\jmods
-echo.
+
+for %%f in (Z:\jdks\%version%\jdk-fx\jmods\*.jmod) do (
+    echo %%~nxf - %%~zf bytes
+)
+
 echo.
 echo Adjustable example buildline for building a custom JRE
 echo.
 echo.
-echo %jhome%\jlink --module-path %jhome%\jmods --add-modules java.base,java.desktop --output %prodir%\jre
+echo %jhome%\jlink --module-path %jhome%\jmods --add-modules java.base,java.logging,java.net.http,java.security.sasl,jdk.crypto.ec,jdk.httpserver,jdk.security.auth,jdk.unsupported,java.xml --output %prodir%\jre
+
 echo.
 echo.
 cmd /k
+
+
 

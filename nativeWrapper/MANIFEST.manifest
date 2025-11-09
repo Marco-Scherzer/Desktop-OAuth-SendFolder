@@ -1,9 +1,15 @@
-Manifest-Version: 1.0
-Main-Class: com.marcoscherzer.oauthfilesendfolderforgooglemail.MSimpleGoogleMailerService
-Class-Path: .
-Implementation-Title: OAuth Desktop FileSend Folder for GoogleMail
-Implementation-Version: 0.1 beta
-Implementation-Vendor: Marco Scherzer
-Specification-Title: OAuth Desktop FileSend Folder for GoogleMail
-Specification-Version: 0.1 beta
-Specification-Vendor: Marco Scherzer
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <description>OAuth Desktop FileSend Folder for GoogleMail</description>
+  <assemblyIdentity
+    version="0.1.0.0"
+    name="MarcoScherzer.OAuthFileSendFolder"
+    processorArchitecture="x86" />
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
+    <security>
+      <requestedPrivileges>
+        <requestedExecutionLevel level="asInvoker" uiAccess="false"/>
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+</assembly>
