@@ -104,7 +104,7 @@ public final class MSimpleGoogleMailerService {
             printConfiguration(fromAdress, toAdress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
 
         } catch (Exception exc) {
-            //exc.printStackTrace();
+            exc.printStackTrace();
             exit(1);
         }
     }

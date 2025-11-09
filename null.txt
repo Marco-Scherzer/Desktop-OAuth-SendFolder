@@ -1,0 +1,12 @@
+Datei wurde gel”scht - Z:\MarcoScherzer-Projects\MSendBackupMail\nativeBuild\config\jni-config.json
+Datei wurde gel”scht - Z:\MarcoScherzer-Projects\MSendBackupMail\nativeBuild\config\predefined-classes-config.json
+Datei wurde gel”scht - Z:\MarcoScherzer-Projects\MSendBackupMail\nativeBuild\config\proxy-config.json
+Datei wurde gel”scht - Z:\MarcoScherzer-Projects\MSendBackupMail\nativeBuild\config\reflect-config.json
+Datei wurde gel”scht - Z:\MarcoScherzer-Projects\MSendBackupMail\nativeBuild\config\resource-config.json
+Datei wurde gel”scht - Z:\MarcoScherzer-Projects\MSendBackupMail\nativeBuild\config\serialization-config.json
+Datei wurde gel”scht - Z:\MarcoScherzer-Projects\MSendBackupMail\nativeBuild\config\agent-pid7164-20251109T131605Z.tmp9323650167946797436\jni-config.json
+Datei wurde gel”scht - Z:\MarcoScherzer-Projects\MSendBackupMail\nativeBuild\config\agent-pid7164-20251109T131605Z.tmp9323650167946797436\predefined-classes-config.json
+Datei wurde gel”scht - Z:\MarcoScherzer-Projects\MSendBackupMail\nativeBuild\config\agent-pid7164-20251109T131605Z.tmp9323650167946797436\proxy-config.json
+Datei wurde gel”scht - Z:\MarcoScherzer-Projects\MSendBackupMail\nativeBuild\config\agent-pid7164-20251109T131605Z.tmp9323650167946797436\reflect-config.json
+Datei wurde gel”scht - Z:\MarcoScherzer-Projects\MSendBackupMail\nativeBuild\config\agent-pid7164-20251109T131605Z.tmp9323650167946797436\resource-config.json
+Datei wurde gel”scht - Z:\MarcoScherzer-Projects\MSendBackupMail\nativeBuild\config\agent-pid7164-20251109T131605Z.tmp9323650167946797436\serialization-config.json

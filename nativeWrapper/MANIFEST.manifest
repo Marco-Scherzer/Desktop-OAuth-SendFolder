@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Main-Class: com.marcoscherzer.oauthfilesendfolderforgooglemail.MSimpleGoogleMailerService
+Class-Path: .
+Implementation-Title: OAuth Desktop FileSend Folder for GoogleMail
+Implementation-Version: 0.1 beta
+Implementation-Vendor: Marco Scherzer
+Specification-Title: OAuth Desktop FileSend Folder for GoogleMail
+Specification-Version: 0.1 beta
+Specification-Vendor: Marco Scherzer
