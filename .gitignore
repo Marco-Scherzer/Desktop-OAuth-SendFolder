@@ -45,3 +45,4 @@ bin/
 ### Keystore & OAuth ###
 mystore.p12
 client_secret.json
+/nativeWrapper/jre/

@@ -1,5 +1,7 @@
 @echo off
 color 09
+set jhome=Z:\jdks\21_J21_FX21\jdk-fx\bin
+
 echo Author Marco Scherzer
 echo.
 echo Builds a custom JRE.
@@ -10,10 +12,10 @@ echo.
 dir /b Z:\jdks\21_J21_FX21\jdk-fx\jmods
 echo.
 echo.
-echo Example BuildLine for wrapped JRE
+echo Adjustable example buildline for building a custom JRE
 echo.
 echo.
-echo Z:\jdks\21_J21_FX21\jdk-fx\bin\jlink --module-path Z:\jdks\21_J21_FX21\jdk-fx\jmods --add-modules java.base,java.desktop --output jre
+echo %jhome%\jlink --module-path %jhome%\jmods --add-modules java.base,java.desktop --output jre
 echo.
 echo.
 cmd /k
