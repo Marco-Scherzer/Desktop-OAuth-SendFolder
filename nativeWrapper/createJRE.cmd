@@ -1,21 +1,29 @@
 @echo off
 color 09
-set jhome=Z:\jdks\21_J21_FX21\jdk-fx\bin
+
 
 echo Author Marco Scherzer
 echo.
 echo Builds a custom JRE.
 echo.
+echo PLEASE ENTER JDK-FX-VERSION ( FOR EXAMPLE 21_J21_FX21 ):
+set /p version=
+set jhome=Z:\jdks\%version%\jdk-fx\bin
+echo.
+echo PLEASE ENTER PROJECT-NAME ( FOR EXAMPLE MSendBackupMail ): 
+set /p name=
+set prodir=Z:\MarcoScherzer-Projects\%name%\nativeWrapper
+echo.
 echo To list available modules
 pause
 echo.
-dir /b Z:\jdks\21_J21_FX21\jdk-fx\jmods
+dir /b Z:\jdks\%version%\jdk-fx\jmods
 echo.
 echo.
 echo Adjustable example buildline for building a custom JRE
 echo.
 echo.
-echo %jhome%\jlink --module-path %jhome%\jmods --add-modules java.base,java.desktop --output jre
+echo %jhome%\jlink --module-path %jhome%\jmods --add-modules java.base,java.desktop --output %prodir%\jre
 echo.
 echo.
 cmd /k
