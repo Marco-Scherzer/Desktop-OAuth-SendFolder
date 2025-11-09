@@ -18,6 +18,8 @@ Contact: fahrservice.1@gmail.com
 <br>
 <br>
 
+ ### A simple, secure OAuth GoogleMail client for sending files. Creates native Explorer folders linked on the desktop. Contents added to the folder are sent automatically from the configured sender email address to the configured receiver email address.
+<br>
  ## Features
 <br>
 
