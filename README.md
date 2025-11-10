@@ -29,7 +29,7 @@ Contact: fahrservice.1@gmail.com
 
 ### - Files added to the local "Outgoing Things" Desktop link folder are sent automatically to a predefined recipient via Gmail.
 
-### - Google client_secrets.json file is stored in secure encrypted PKCS#12 database
+### - Google client_secret.json file is stored in secure encrypted PKCS#12 database
 
 ### - One Time setup of Sender and Receiver Address
 
