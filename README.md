@@ -31,6 +31,8 @@ Contact: fahrservice.1@gmail.com
 
 ### - Google OAuth client secret json file is stored in secure encrypted PKCS#12 database 
 
+### - Integrity monitoring of created Desktop link names to prevent rename phishing attacks targeting the outgoing and sent folder
+
 ### - One Time setup of Sender and Receiver Address
 
 ### - Generates at setup time internal Mail Folder Names using UUIDs for additional abuse prevention (application decides the real folder name).
