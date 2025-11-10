@@ -20,25 +20,29 @@ public abstract class MFolderWatcher {
     private final Map<Path, MObservedFile> fileStates;
     private final Set<Path> activeMonitors;
     private WatchService watchService;
+    private Path watchDir;
+    private boolean running;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MFolderWatcher() {
+    public MFolderWatcher(Path watchDir) {
         pool = Executors.newCachedThreadPool();
         fileStates = new ConcurrentHashMap<>();
         activeMonitors = ConcurrentHashMap.newKeySet();
+        this.watchDir = watchDir;
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final boolean startWatching(Path watchDir) {
+    public final boolean startWatching() {
         try {
             watchService = FileSystems.getDefault().newWatchService();
             watchDir.register(watchService, ENTRY_CREATE, ENTRY_MODIFY);
 
-            pool.submit(() -> {
+            if(!running) pool.submit(() -> {
+                running = true;
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
                         WatchKey key = watchService.take();
@@ -73,7 +77,7 @@ public abstract class MFolderWatcher {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final void shutdown() throws Exception {
-        System.out.println("Shutting down MWatcher...");
+        System.out.println("Shutting down FolderWatcher for \""+watchDir+"\" ...");
         try {
             if (watchService != null) watchService.close();
         } catch (IOException exc) {

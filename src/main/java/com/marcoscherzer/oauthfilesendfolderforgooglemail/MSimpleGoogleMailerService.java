@@ -4,10 +4,7 @@ import com.marcoscherzer.msimplegooglemailer.MOutgoingMail;
 import com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailer;
 import com.marcoscherzer.msimplegooglemailer.MSimpleKeystore;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
@@ -71,7 +68,7 @@ public final class MSimpleGoogleMailerService {
             /**
              *@author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
              */
-            watcher = new MFolderWatcher() {
+            watcher = new MFolderWatcher(outFolder) {
                 @Override
                 protected void onFileChangedAndUnlocked(Path file) {
                     boolean sent = false;
@@ -100,14 +97,28 @@ public final class MSimpleGoogleMailerService {
                 }
             };
 
-            watcher.startWatching(outFolder);
+            watcher.startWatching();
             Path absoluteOutgoingLinkPath = createFolderLink(outFolder.toString(), "Outgoing Things");
             Path absoluteSentLinkPath = createFolderLink(sentFolder.toString(), "Sent Things");
             if(absoluteOutgoingLinkPath != null || absoluteSentLinkPath != null){
-                outgoingDesktopLinkWatcher = new MFileNameWatcher(absoluteOutgoingLinkPath);
-                sentDesktopLinkWatcher = new MFileNameWatcher(absoluteSentLinkPath);
+                outgoingDesktopLinkWatcher = new MFileNameWatcher(absoluteOutgoingLinkPath) {
+                    @Override
+                    protected void onFileNameChanged(WatchEvent.Kind<?> kind, Path fileName) {
+                        System.out.println("Security integrity violated. Desktop Folder Link \""+absoluteSentLinkPath+"\" changed. Shutting down.");
+                        exit(0);
+                    }
+                };
+                sentDesktopLinkWatcher = new MFileNameWatcher(absoluteSentLinkPath) {
+                    @Override
+                    protected void onFileNameChanged(WatchEvent.Kind<?> kind, Path fileName) {
+                        System.out.println("Security integrity violated. Desktop Folder Link \""+absoluteSentLinkPath+"\" changed. Shutting down.");
+                        exit(0);
+                    }
+                };
                 outgoingDesktopLinkWatcher.startWatching();
+                System.out.println("Monitoring \"" + absoluteOutgoingLinkPath + "\" for name integrity violations...");;
                 sentDesktopLinkWatcher.startWatching();
+                System.out.println("Monitoring \""+absoluteSentLinkPath+"\" for name integrity violations...");
             } else System.out.println("No Desktop links could be created. Please create links manually"); //ask next startup for linknamaes
 
 
@@ -167,7 +178,7 @@ public final class MSimpleGoogleMailerService {
                         "\n  (A little spontaneous Mini Project focusing on simplicity and security)" +
                         "\n" +
                         "\n  Author   : Marco Scherzer" +
-                        "\n  Copyright: © Marco Scherzer. All rights reserved." +
+                        "\n  Copyright: Marco Scherzer. All rights reserved." +
                         "\n==========================================================================" +
                         "\n  Welcome Mail Sender!" +
                         "\n" +
