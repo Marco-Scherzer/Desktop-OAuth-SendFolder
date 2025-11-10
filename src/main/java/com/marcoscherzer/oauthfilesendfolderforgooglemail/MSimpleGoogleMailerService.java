@@ -31,8 +31,9 @@ public final class MSimpleGoogleMailerService {
     private static String toAdress;
     private static MFileNameWatcher outgoingDesktopLinkWatcher;
     private static MFileNameWatcher sentDesktopLinkWatcher;
-    private static boolean askConsent;
-    private static int consentDelayMillis;
+    private static boolean askConsent = true;
+    private static int consentDelayMillis = 3000;
+    static ArrayList<MOutgoingMail> toSendMails = new ArrayList<>();
 
 
     /**
@@ -74,13 +75,8 @@ public final class MSimpleGoogleMailerService {
              */
             watcher = new MFolderWatcher(outFolder) {
                 private long t0 = 0; // Initialwert: kein Versand bisher
-
                 @Override
                 protected void onFileChangedAndUnlocked(Path file) {
-                    ArrayList<MOutgoingMail> toSendMails = new ArrayList<>();
-                    askConsent = true;
-                    consentDelayMillis = 3000;
-
                     long t = System.currentTimeMillis();
                     String sendTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                     MOutgoingMail mail = new MOutgoingMail(fromAdress, toAdress, clientAndPathUUID + ", sendTime " + sendTime)
