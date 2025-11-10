@@ -25,13 +25,17 @@ Contact: fahrservice.1@gmail.com
 
 ### - Gmail OAuth 2.0 authentication without persisting OAuth tokens.
 
-### - Application startup access password protection
-
-### - Files added to the local "Outgoing Things" Desktop link folder are sent automatically to a predefined recipient via Gmail.
-
 ### - Google client_secret.json file is stored in secure encrypted PKCS#12 database
 
+### - Application startup access password protection
+
+### - Sender email address is stored in secure encrypted PKCS#12 database
+
+### - Recipient email address is stored in secure encrypted PKCS#12 database
+
 ### - One Time setup of Sender and Receiver Address
+
+### - Files added to the local "Outgoing Things" Desktop link folder are sent automatically to a predefined recipient via Gmail.
 
 ### - Generates at setup time internal Mail Folder Names using UUIDs for additional abuse prevention (application decides the real folder name).
 
@@ -39,9 +43,8 @@ Contact: fahrservice.1@gmail.com
 
 ### - Moves sent files to a "Sent Things" Desktop link folder for archiving.
 
-### - Sender email address is stored in secure encrypted PKCS#12 database
 
-### - Recipient email address is stored in secure encrypted PKCS#12 database
+
 
 
 <br>
