@@ -8,7 +8,7 @@ import static java.nio.file.StandardWatchEventKinds.*;
 /** @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved */
 public abstract class MFileNameWatcher {
 
-    private final WatchService watcher;
+    private WatchService watcher;
     private final Path directory;
     private final String fileName;
     private final ExecutorService pool = Executors.newSingleThreadExecutor();
@@ -20,31 +20,41 @@ public abstract class MFileNameWatcher {
         this.filePath = filePath;
         this.directory = filePath.getParent();
         this.fileName = filePath.getFileName().toString();
-        this.watcher = FileSystems.getDefault().newWatchService();
-        directory.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
-        startWatching();
     }
     /** @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved */
-    public final void startWatching() {
-        if(!running) pool.submit(() -> {
-            running=true;
-            try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    WatchKey key = watcher.take();
-                    for (WatchEvent<?> event : key.pollEvents()) {
-                        Path changed = (Path) event.context();
-                        if (changed.toString().equals(fileName)) {
-                            onFileNameChanged(event.kind(), changed);
+    public final boolean startWatching() {
+        try{
+        if(!running){
+            this.watcher = FileSystems.getDefault().newWatchService();
+            directory.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+            pool.submit(() -> {
+                running=true;
+                    while (!Thread.currentThread().isInterrupted()) {
+                        try {
+                            WatchKey key = watcher.take();
+                            for (WatchEvent<?> event : key.pollEvents()) {
+                                Path changed = (Path) event.context();
+                                if (changed.toString().equals(fileName)) {
+                                    onFileNameChanged(event.kind(), changed);
+                                }
+                            }
+                            key.reset();
+                        } catch (InterruptedException exc) {
+                            Thread.currentThread().interrupt();
+                            System.err.println("MWatcher thread was interrupted.");
+                        } catch (ClosedWatchServiceException exc) {
+                            System.err.println("WatchService has been closed.");
+                            break;
                         }
                     }
-                    key.reset();
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+            });
+        }
+            System.out.println("MWatcher started for: \"" + fileName+"\"");
+            return true;
+        } catch (IOException exc) {
+            System.err.println("Error starting MWatcher: " + exc.getMessage());
+            return false;
+        }
     }
 
     /**

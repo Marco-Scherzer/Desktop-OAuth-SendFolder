@@ -41,7 +41,7 @@ public final class MSimpleGoogleMailerService {
             boolean keystoreFileExists = Files.exists(keystorePath);
 
             String pw = MUtil.promptPassword(!keystoreFileExists ? "Please set a password: " : "Please enter your password: ");
-
+            pw = "testTesttest-123";
             System.out.println();
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);
             MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);
@@ -87,6 +87,7 @@ public final class MSimpleGoogleMailerService {
 
                     if (sent) {
                         try {
+
                             Path targetFile = sentFolder.resolve(file.getFileName());
                             Files.move(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
                             System.out.println("File moved to: " + targetFile);
@@ -123,7 +124,9 @@ public final class MSimpleGoogleMailerService {
 
 
             printConfiguration(fromAdress, toAdress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
-
+            System.out.println("To end the Program please press a key");
+            new Scanner(System.in).nextLine() ;
+            exit(0);
         } catch (Exception exc) {
             exc.printStackTrace();
             exit(1);

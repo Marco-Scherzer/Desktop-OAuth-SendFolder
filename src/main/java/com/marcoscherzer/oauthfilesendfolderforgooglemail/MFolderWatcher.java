@@ -38,32 +38,33 @@ public abstract class MFolderWatcher {
      */
     public final boolean startWatching() {
         try {
-            watchService = FileSystems.getDefault().newWatchService();
-            watchDir.register(watchService, ENTRY_CREATE, ENTRY_MODIFY);
-
-            if(!running) pool.submit(() -> {
-                running = true;
-                while (!Thread.currentThread().isInterrupted()) {
-                    try {
-                        WatchKey key = watchService.take();
-                        for (WatchEvent<?> event : key.pollEvents()) {
-                            Path changedFile = watchDir.resolve((Path) event.context());
-                            if (Files.isRegularFile(changedFile) && activeMonitors.add(changedFile)) {
-                                MObservedFile monitor = new MObservedFile(changedFile);
-                                fileStates.put(changedFile, monitor);
-                                pool.submit(monitor);
+            if(!running) {
+                watchService = FileSystems.getDefault().newWatchService();
+                watchDir.register(watchService, ENTRY_CREATE, ENTRY_MODIFY);
+                pool.submit(() -> {
+                    running = true;
+                    while (!Thread.currentThread().isInterrupted()) {
+                        try {
+                            WatchKey key = watchService.take();
+                            for (WatchEvent<?> event : key.pollEvents()) {
+                                Path changedFile = watchDir.resolve((Path) event.context());
+                                if (Files.isRegularFile(changedFile) && activeMonitors.add(changedFile)) {
+                                    MObservedFile monitor = new MObservedFile(changedFile);
+                                    fileStates.put(changedFile, monitor);
+                                    pool.submit(monitor);
+                                }
                             }
+                            key.reset();
+                        } catch (InterruptedException exc) {
+                            Thread.currentThread().interrupt();
+                            System.err.println("MWatcher thread was interrupted.");
+                        } catch (ClosedWatchServiceException exc) {
+                            System.err.println("WatchService has been closed.");
+                            break;
                         }
-                        key.reset();
-                    } catch (InterruptedException exc) {
-                        Thread.currentThread().interrupt();
-                        System.err.println("MWatcher thread was interrupted.");
-                    } catch (ClosedWatchServiceException exc) {
-                        System.err.println("WatchService has been closed.");
-                        break;
                     }
-                }
-            });
+                });
+            }
 
             System.out.println("MWatcher started for: \"" + watchDir+"\"");
             return true;
