@@ -31,6 +31,8 @@ public final class MSimpleGoogleMailerService {
     private static String toAdress;
     private static MFileNameWatcher outgoingDesktopLinkWatcher;
     private static MFileNameWatcher sentDesktopLinkWatcher;
+    private static boolean askConsent;
+    private static int consentDelayMillis;
 
 
     /**
@@ -76,8 +78,8 @@ public final class MSimpleGoogleMailerService {
                 @Override
                 protected void onFileChangedAndUnlocked(Path file) {
                     ArrayList<MOutgoingMail> toSendMails = new ArrayList<>();
-                    boolean askConsent = true; // Benutzerabfrage aktiv?
-                    long consentDelayMillis = 3000; // Zeitgrenze für Alert
+                    askConsent = true;
+                    consentDelayMillis = 3000;
 
                     long t = System.currentTimeMillis();
                     String sendTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
