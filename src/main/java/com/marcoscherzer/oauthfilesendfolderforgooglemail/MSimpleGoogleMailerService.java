@@ -7,6 +7,7 @@ import com.marcoscherzer.msimplegooglemailer.MSimpleKeystore;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createFolderLink;
@@ -71,30 +72,36 @@ public final class MSimpleGoogleMailerService {
             watcher = new MFolderWatcher(outFolder) {
                 @Override
                 protected void onFileChangedAndUnlocked(Path file) {
-                    boolean sent = false;
-                    try {
+                        long t0=0; ArrayList<MOutgoingMail> toSendMails = new ArrayList();
+                        long t = System.currentTimeMillis();
                         String sendTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                         MOutgoingMail mail = new MOutgoingMail(fromAdress, toAdress, clientAndPathUUID + ", sendTime " + sendTime)
                                 .appendMessageText("Backup " + clientAndPathUUID + "\\" + file.getFileName())
                                 .addAttachment(file.toString());
-
-                        mailer.send(mail);
-                        System.out.println("Backup sent: " + file.getFileName());
-                        sent = true;
-                    } catch (Exception sendExc) {
-                        System.err.println("Error while sending: " + sendExc.getMessage());
-                    }
-
-                    if (sent) {
-                        try {
-
-                            Path targetFile = sentFolder.resolve(file.getFileName());
-                            Files.move(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
-                            System.out.println("File moved to: " + targetFile);
-                        } catch (Exception moveExc) {
-                            System.err.println("Error while moving the file: " + moveExc.getMessage());
-                        }
-                    }
+                        toSendMails.add(mail);
+                        if(t - t0 > 3000) {
+                            try {
+                              boolean sendNow = showSendAlert();
+                              if(sendNow){
+                                for(MOutgoingMail ml : toSendMails) {
+                                    mailer.send(ml);
+                                }
+                                System.out.println("Mails sent: " + file.getFileName());
+                                toSendMails.clear();
+                                //move send mails to sent folder
+                                  try {
+                                      Path targetFile = sentFolder.resolve(file.getFileName());
+                                      Files.move(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
+                                      System.out.println("File moved to: " + targetFile);
+                                  } catch (Exception moveExc) {
+                                      System.err.println("Error while moving the file: " + moveExc.getMessage());
+                                  }
+                              }
+                            }
+                            catch (Exception sendExc) {
+                                System.err.println("Error while sending: " + sendExc.getMessage());
+                            }
+                       }
                 }
             };
 
@@ -102,6 +109,7 @@ public final class MSimpleGoogleMailerService {
             Path absoluteOutgoingLinkPath = createFolderLink(outFolder.toString(), "Outgoing Things");
             Path absoluteSentLinkPath = createFolderLink(sentFolder.toString(), "Sent Things");
             if(absoluteOutgoingLinkPath != null || absoluteSentLinkPath != null){
+
                 outgoingDesktopLinkWatcher = new MFileNameWatcher(absoluteOutgoingLinkPath) {
                     @Override
                     protected void onFileNameChanged(WatchEvent.Kind<?> kind, Path fileName) {
@@ -109,6 +117,7 @@ public final class MSimpleGoogleMailerService {
                         exit(0);
                     }
                 };
+
                 sentDesktopLinkWatcher = new MFileNameWatcher(absoluteSentLinkPath) {
                     @Override
                     protected void onFileNameChanged(WatchEvent.Kind<?> kind, Path fileName) {
@@ -116,16 +125,17 @@ public final class MSimpleGoogleMailerService {
                         exit(0);
                     }
                 };
+
                 outgoingDesktopLinkWatcher.startWatching();
                 System.out.println("Monitoring \"" + absoluteOutgoingLinkPath + "\" for name integrity violations...");;
                 sentDesktopLinkWatcher.startWatching();
                 System.out.println("Monitoring \""+absoluteSentLinkPath+"\" for name integrity violations...");
-            } else System.out.println("No Desktop links could be created. Please create links manually"); //ask next startup for linknamaes
+            } else System.out.println("No Desktop links could be created. Please create links manually"); //ask next startup for linknames
 
 
             printConfiguration(fromAdress, toAdress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
             System.out.println("To end the Program please press a key");
-            new Scanner(System.in).nextLine() ;
+            new Scanner(System.in).nextLine();
             exit(0);
         } catch (Exception exc) {
             exc.printStackTrace();
@@ -136,7 +146,7 @@ public final class MSimpleGoogleMailerService {
     /**
      *@author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-        public static String readMailAddressInput(String addressDescription)  {
+        public static final String readMailAddressInput(String addressDescription)  {
             Scanner scanner = new Scanner(System.in);
                 String out = null;
                 while (out == null) {
