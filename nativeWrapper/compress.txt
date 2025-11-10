@@ -1,7 +1,0 @@
---compress=2 → maximale Kompression der Module.
-
---strip-debug → entfernt Debug-Infos.
-
---no-header-files
-
---no-man-pages
