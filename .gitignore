@@ -45,4 +45,8 @@ bin/
 ### Keystore & OAuth ###
 mystore.p12
 client_secret.json
+/nativeWrapper/mystore.p12
+/nativeWrapper/client_secret.json
 /nativeWrapper/jre/
+/nativeWrapper/MSendBackupMail.jar
+/nativeWrapper/OAuthFileSendFolder.exe
