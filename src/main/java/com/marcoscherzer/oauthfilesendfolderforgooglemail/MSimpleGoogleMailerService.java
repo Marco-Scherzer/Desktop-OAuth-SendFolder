@@ -4,6 +4,7 @@ import com.marcoscherzer.msimplegooglemailer.MOutgoingMail;
 import com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailer;
 import com.marcoscherzer.msimplegooglemailer.MSimpleKeystore;
 
+import javax.swing.*;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -67,43 +68,51 @@ public final class MSimpleGoogleMailerService {
 
 
             /**
-             *@author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+             * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
              */
             watcher = new MFolderWatcher(outFolder) {
+                private long t0 = 0; // Initialwert: kein Versand bisher
+
                 @Override
                 protected void onFileChangedAndUnlocked(Path file) {
-                        long t0=0; ArrayList<MOutgoingMail> toSendMails = new ArrayList();
-                        long t = System.currentTimeMillis();
-                        String sendTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                        MOutgoingMail mail = new MOutgoingMail(fromAdress, toAdress, clientAndPathUUID + ", sendTime " + sendTime)
-                                .appendMessageText("Backup " + clientAndPathUUID + "\\" + file.getFileName())
-                                .addAttachment(file.toString());
-                        toSendMails.add(mail);
-                        if(t - t0 > 3000) {
+                    ArrayList<MOutgoingMail> toSendMails = new ArrayList<>();
+                    boolean askConsent = true; // Benutzerabfrage aktiv?
+                    long consentDelayMillis = 3000; // Zeitgrenze für Alert
+
+                    long t = System.currentTimeMillis();
+                    String sendTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                    MOutgoingMail mail = new MOutgoingMail(fromAdress, toAdress, clientAndPathUUID + ", sendTime " + sendTime)
+                            .appendMessageText("Backup " + clientAndPathUUID + "\\" + file.getFileName())
+                            .addAttachment(file.toString());
+                    toSendMails.add(mail);
+
+                    boolean sendNow = true;
+                    if (askConsent && (t - t0 > consentDelayMillis)) {
+                        sendNow = showSendAlert();
+                        t0 = System.currentTimeMillis(); // Zeitstempel aktualisieren nach Alert
+                    }
+
+                    if (!askConsent || sendNow) {
+                        try {
+                            for (MOutgoingMail ml : toSendMails) {
+                                mailer.send(ml);
+                            }
+                            System.out.println("Mails sent: " + file.getFileName());
+                            toSendMails.clear();
                             try {
-                              boolean sendNow = showSendAlert();
-                              if(sendNow){
-                                for(MOutgoingMail ml : toSendMails) {
-                                    mailer.send(ml);
-                                }
-                                System.out.println("Mails sent: " + file.getFileName());
-                                toSendMails.clear();
-                                //move send mails to sent folder
-                                  try {
-                                      Path targetFile = sentFolder.resolve(file.getFileName());
-                                      Files.move(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
-                                      System.out.println("File moved to: " + targetFile);
-                                  } catch (Exception moveExc) {
-                                      System.err.println("Error while moving the file: " + moveExc.getMessage());
-                                  }
-                              }
+                                Path targetFile = sentFolder.resolve(file.getFileName());
+                                Files.move(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
+                                System.out.println("File moved to: " + targetFile);
+                            } catch (Exception moveExc) {
+                                System.err.println("Error while moving the file: " + moveExc.getMessage());
                             }
-                            catch (Exception sendExc) {
-                                System.err.println("Error while sending: " + sendExc.getMessage());
-                            }
-                       }
+                        } catch (Exception sendExc) {
+                            System.err.println("Error while sending: " + sendExc.getMessage());
+                        }
+                    }
                 }
             };
+
 
             watcher.startWatching();
             Path absoluteOutgoingLinkPath = createFolderLink(outFolder.toString(), "Outgoing Things");
@@ -141,6 +150,20 @@ public final class MSimpleGoogleMailerService {
             exc.printStackTrace();
             exit(1);
         }
+    }
+
+    /**
+     *@author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private static boolean showSendAlert() {
+        int result = JOptionPane.showConfirmDialog(
+                null,
+                "Do you want to send the backup mail now?",
+                "Send Mail",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+        );
+        return result == JOptionPane.YES_OPTION;
     }
 
     /**
