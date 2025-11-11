@@ -13,6 +13,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createFolderLink;
 import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createPathIfNotExists;
@@ -36,7 +40,7 @@ public final class MSimpleGoogleMailerService {
     private static MFileNameWatcher sentDesktopLinkWatcher;
     private static boolean askConsent = true;
     private static int consentDelayMillis = 3000;
-    static List<MOutgoingMail> toSendMails = Collections.synchronizedList(new ArrayList<>());
+
 
 
     /**
@@ -78,62 +82,69 @@ public final class MSimpleGoogleMailerService {
             /**
              * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
              */
+            /**
+             * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+             */
             watcher = new MFolderWatcher(outFolder) {
-                private long t0 = 0;
                 private boolean userConsentActive = false;
+                private final ScheduledExecutorService consentTimer = Executors.newSingleThreadScheduledExecutor();
+                private ScheduledFuture<?> pendingSessionEnd = null;
+                private final List<MOutgoingMail> toSendMails = Collections.synchronizedList(new ArrayList<>());
+                private final long sessionIdleMillis = 15000; // z.B. 15 Sekunden Ruhezeit
 
                 @Override
                 protected final void onFileChangedAndUnlocked(Path file) {
-                    long t = System.currentTimeMillis();
                     String sendDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                     MOutgoingMail mail = new MOutgoingMail(fromAdress, toAdress, clientAndPathUUID + ", sendTime " + sendDateTime)
                             .appendMessageText("" + clientAndPathUUID + "\\" + file.getFileName())
                             .addAttachment(file.toString());
-                    toSendMails.add(mail);
-
-                    boolean sendNow = false;
 
                     if (!askConsent) {
-                        sendNow = true;
-                    } else if (t - t0 > consentDelayMillis) {
-                        sendNow = showSendAlert();
-                        userConsentActive = sendNow;
-                        t0 = System.currentTimeMillis();
-
-                        if (!sendNow) {
-                            try {
-                                Path targetFile = notSentFolder.resolve(file.getFileName());
-                                Files.move(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
-                                System.out.println("File moved to NotSent: " + targetFile);
-                            } catch (Exception moveExc) {
-                                System.err.println("Error while moving to NotSent: " + moveExc.getMessage());
-                            }
-                            return;
-                        }
-                    } else if (userConsentActive) {
-                        sendNow = true;
+                        toSendMails.add(mail);
+                        scheduleSessionEnd();
+                        return;
                     }
 
-                    if (sendNow) {
+                    if (userConsentActive) {
+                        toSendMails.add(mail);
+                        scheduleSessionEnd();
+                        return;
+                    }
+
+                    if (showSendAlert()) {
+                        userConsentActive = true;
+                        toSendMails.add(mail);
+                        scheduleSessionEnd();
+                    } else {
+                        try {
+                            Path targetFile = notSentFolder.resolve(file.getFileName());
+                            Files.move(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
+                            System.out.println("File moved to NotSent: " + targetFile);
+                        } catch (Exception moveExc) {
+                            System.err.println("Error while moving to NotSent: " + moveExc.getMessage());
+                        }
+                    }
+                }
+
+                private void scheduleSessionEnd() {
+                    if (pendingSessionEnd != null && !pendingSessionEnd.isDone()) {
+                        pendingSessionEnd.cancel(false);
+                    }
+                    pendingSessionEnd = consentTimer.schedule(() -> {
                         try {
                             for (MOutgoingMail ml : toSendMails) {
                                 mailer.send(ml);
                             }
-                            System.out.println("Mails sent: " + file.getFileName());
+                            System.out.println("Mails sent: " + toSendMails.size());
                             toSendMails.clear();
-                            try {
-                                Path targetFile = sentFolder.resolve(file.getFileName());
-                                Files.move(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
-                                System.out.println("File moved to: " + targetFile);
-                            } catch (Exception moveExc) {
-                                System.err.println("Error while moving the file: " + moveExc.getMessage());
-                            }
                         } catch (Exception sendExc) {
                             System.err.println("Error while sending: " + sendExc.getMessage());
                         }
-                    }
+                        userConsentActive = false;
+                    }, sessionIdleMillis, TimeUnit.MILLISECONDS);
                 }
             };
+
 
             watcher.startWatching();
 
