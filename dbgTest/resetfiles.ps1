@@ -1,3 +1,7 @@
+<#
+    (c) Marco Scherzer. All rights reserved.
+    This script is part of MSendBackupMail dbgTest.
+#>
 param (
     [string]$sourceFolder,
     [string]$targetFolder
