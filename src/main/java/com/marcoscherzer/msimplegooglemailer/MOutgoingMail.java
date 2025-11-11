@@ -24,6 +24,7 @@ public final class MOutgoingMail {
         this.messageText = new StringBuilder();
     }
 
+
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -50,6 +51,14 @@ public final class MOutgoingMail {
     public final String[] getAttachments() {
         return attachmentList.toArray(new String[0]);
     }
+
+    /**
+     * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final String getAttachment(int index) {
+        return attachmentList.get(index);
+    }
+
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */

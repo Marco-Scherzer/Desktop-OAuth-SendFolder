@@ -8,12 +8,10 @@ import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -89,6 +87,7 @@ public final class MSimpleGoogleMailerService {
                 private final ScheduledExecutorService consentTimer = Executors.newSingleThreadScheduledExecutor();
                 private ScheduledFuture<?> pendingSessionEnd = null;
                 private final List<MOutgoingMail> toSendMails = Collections.synchronizedList(new ArrayList<>());
+                private final List<MOutgoingMail> sentMails = Collections.synchronizedList(new ArrayList<>());
                 private final long sessionIdleMillis = 15000; // 15 Sekunden Ruhezeit
                 private final Object consentLock = new Object(); // Synchronisierung
 
@@ -98,7 +97,7 @@ public final class MSimpleGoogleMailerService {
                 @Override
                 protected final void onFileChangedAndUnlocked(Path file) {
                     if (!Files.exists(file)) {
-                        System.out.println("User deleted File. nothing to send.");
+                        System.out.println("User deleted file. Nothing to send.");
                         return;
                     }
 
@@ -140,16 +139,55 @@ public final class MSimpleGoogleMailerService {
 
                     pendingSessionEnd = consentTimer.schedule(() -> {
                         synchronized (consentLock) {
+                            List<MOutgoingMail> successfullySent = new ArrayList<>();
+
                             try {
+                                File sentFolder = new File("D:\\User\\Marco Scherzer\\Desktop\\Sent Mails");
+                                File notSentFolder = new File("D:\\User\\Marco Scherzer\\Desktop\\Not Sent Mails");
+                                sentFolder.mkdirs();
+                                notSentFolder.mkdirs();
+
+                                SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS");
+
                                 for (MOutgoingMail ml : toSendMails) {
-                                    // mailer.send(ml);
-                                    // Optional: move file to sentFolder
+                                    File sourceFile = new File(ml.getAttachment(0)) ;
+                                    String originalName = sourceFile.getName();
+                                    String extension = "";
+                                    int dotIndex = originalName.lastIndexOf('.');
+                                    if (dotIndex != -1) {
+                                        extension = originalName.substring(dotIndex);
+                                        originalName = originalName.substring(0, dotIndex);
+                                    }
+                                    String timestamp = timestampFormat.format(new Date());
+                                    String newName = originalName + "_" + timestamp + extension;
+
+                                    try {
+                                        mailer.send(ml); // dein echter Versand
+
+                                        File targetFile = new File(sentFolder, newName);
+                                        Files.move(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                                        System.out.println("Sent and moved: " + newName);
+
+                                        successfullySent.add(ml);
+                                        sentMails.add(ml);
+                                    } catch (Exception e) {
+                                        try {
+                                            File fallbackFile = new File(notSentFolder, newName);
+                                            Files.move(sourceFile.toPath(), fallbackFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                                            System.err.println("Send failed, moved to NOT SENT: " + newName);
+                                        } catch (IOException moveFail) {
+                                            System.err.println("Failed to move unsent file: " + sourceFile.getName() + " -> " + moveFail.getMessage());
+                                        }
+                                        System.err.println("Error sending: " + sourceFile.getName() + " -> " + e.getMessage());
+                                    }
                                 }
-                                System.out.println("Mails sent: " + toSendMails.size());
-                                toSendMails.clear();
+
+                                toSendMails.removeAll(successfullySent);
+                                System.out.println("Mails sent: " + successfullySent.size());
                             } catch (Exception sendExc) {
-                                System.err.println("Error while sending: " + sendExc.getMessage());
+                                System.err.println("Error during session end: " + sendExc.getMessage());
                             }
+
                             userConsentActive = false;
                         }
                     }, sessionIdleMillis, TimeUnit.MILLISECONDS);
