@@ -66,12 +66,14 @@ public final class MSimpleGoogleMailerService {
 
             Path outPath = Paths.get(basePath, clientAndPathUUID);
             Path sentPath = Paths.get(basePath, clientAndPathUUID + "-sent");
+            Path notSentPath = Paths.get(basePath, clientAndPathUUID + "-notSent");
+
             outFolder = createPathIfNotExists(outPath, "Out folder");
             sentFolder = createPathIfNotExists(sentPath, "Sent folder");
+            Path notSentFolder = createPathIfNotExists(notSentPath, "NotSent folder");
 
             fromAdress = store.get("fromAddress");
             toAdress = store.get("toAddress");
-
 
             /**
              * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -95,10 +97,21 @@ public final class MSimpleGoogleMailerService {
                         sendNow = true;
                     } else if (t - t0 > consentDelayMillis) {
                         sendNow = showSendAlert();
-                        userConsentActive = sendNow; // nur bei Zustimmung aktivieren
+                        userConsentActive = sendNow;
                         t0 = System.currentTimeMillis();
+
+                        if (!sendNow) {
+                            try {
+                                Path targetFile = notSentFolder.resolve(file.getFileName());
+                                Files.move(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
+                                System.out.println("File moved to NotSent: " + targetFile);
+                            } catch (Exception moveExc) {
+                                System.err.println("Error while moving to NotSent: " + moveExc.getMessage());
+                            }
+                            return;
+                        }
                     } else if (userConsentActive) {
-                        sendNow = true; // innerhalb der Zeitspanne nach Zustimmung: senden ohne neuen Alert
+                        sendNow = true;
                     }
 
                     if (sendNow) {
@@ -122,9 +135,9 @@ public final class MSimpleGoogleMailerService {
                 }
             };
 
-
             watcher.startWatching();
-            // Bei start prüfen ob zu versendende dateien enthalten sind (z.b durch spontanes beenden oder einkopieren während die Application nicht läuft)
+
+            // Startup-Scan: verarbeite liegengebliebene Dateien
             File[] files = outFolder.toFile().listFiles();
             if (files != null) {
                 for (File f : files) {
@@ -134,15 +147,16 @@ public final class MSimpleGoogleMailerService {
                 }
             }
 
-
             Path absoluteOutgoingLinkPath = createFolderLink(outFolder.toString(), "Outgoing Things");
             Path absoluteSentLinkPath = createFolderLink(sentFolder.toString(), "Sent Things");
-            if(absoluteOutgoingLinkPath != null || absoluteSentLinkPath != null){
+            Path absoluteNotSentLinkPath = createFolderLink(notSentFolder.toString(), "NotSent Things");
+
+            if (absoluteOutgoingLinkPath != null || absoluteSentLinkPath != null || absoluteNotSentLinkPath != null) {
 
                 outgoingDesktopLinkWatcher = new MFileNameWatcher(absoluteOutgoingLinkPath) {
                     @Override
                     protected void onFileNameChanged(WatchEvent.Kind<?> kind, Path fileName) {
-                        System.out.println("Security integrity violated. Desktop Folder Link \""+absoluteSentLinkPath+"\" changed. Shutting down.");
+                        System.out.println("Security integrity violated. Desktop Folder Link \"" + absoluteOutgoingLinkPath + "\" changed. Shutting down.");
                         exit(0);
                     }
                 };
@@ -150,17 +164,28 @@ public final class MSimpleGoogleMailerService {
                 sentDesktopLinkWatcher = new MFileNameWatcher(absoluteSentLinkPath) {
                     @Override
                     protected void onFileNameChanged(WatchEvent.Kind<?> kind, Path fileName) {
-                        System.out.println("Security integrity violated. Desktop Folder Link \""+absoluteSentLinkPath+"\" changed. Shutting down.");
+                        System.out.println("Security integrity violated. Desktop Folder Link \"" + absoluteSentLinkPath + "\" changed. Shutting down.");
+                        exit(0);
+                    }
+                };
+
+                MFileNameWatcher notSentDesktopLinkWatcher = new MFileNameWatcher(absoluteNotSentLinkPath) {
+                    @Override
+                    protected void onFileNameChanged(WatchEvent.Kind<?> kind, Path fileName) {
+                        System.out.println("Security integrity violated. Desktop Folder Link \"" + absoluteNotSentLinkPath + "\" changed. Shutting down.");
                         exit(0);
                     }
                 };
 
                 outgoingDesktopLinkWatcher.startWatching();
-                System.out.println("Monitoring \"" + absoluteOutgoingLinkPath + "\" for name integrity violations...");;
+                System.out.println("Monitoring \"" + absoluteOutgoingLinkPath + "\" for name integrity violations...");
                 sentDesktopLinkWatcher.startWatching();
-                System.out.println("Monitoring \""+absoluteSentLinkPath+"\" for name integrity violations...");
-            } else System.out.println("No Desktop links could be created. Please create links manually"); //ask next startup for linknames
-
+                System.out.println("Monitoring \"" + absoluteSentLinkPath + "\" for name integrity violations...");
+                notSentDesktopLinkWatcher.startWatching();
+                System.out.println("Monitoring \"" + absoluteNotSentLinkPath + "\" for name integrity violations...");
+            } else {
+                System.out.println("No Desktop links could be created. Please create links manually");
+            }
 
             printConfiguration(fromAdress, toAdress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
             System.out.println("To end the Program please press a key");
@@ -171,6 +196,7 @@ public final class MSimpleGoogleMailerService {
             exit(1);
         }
     }
+
 
     /**
      *@author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
