@@ -2,20 +2,20 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>console</headerType>
-  <jar>Z:\MarcoScherzer-Projects\MSendBackupMail\out\artifacts\MSendBackupMail_jar\MSendBackupMail.jar</jar>
-  <outfile>Z:\MarcoScherzer-Projects\MSendBackupMail\nativeWrapper\OAuthFileSendFolder.exe</outfile>
+  <jar>Z:\MarcoScherzer-Projects\MSendBackupMail_TestDbg\out\artifacts\MSendBackupMail_TestDbg_jar\MSendBackupMail_TestDbg.jar</jar>
+  <outfile>Z:\MarcoScherzer-Projects\MSendBackupMail\dbgTest\MSendBackupMailTestDbg.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
   <priority>normal</priority>
   <downloadUrl></downloadUrl>
   <supportUrl></supportUrl>
-  <stayAlive>false</stayAlive>
+  <stayAlive>true</stayAlive>
   <restartOnCrash>false</restartOnCrash>
-  <manifest>Z:\MarcoScherzer-Projects\MSendBackupMail\nativeWrapper\MSendBackupMail.manifest</manifest>
-  <icon>Z:\MarcoScherzer-Projects\MSendBackupMail\nativeWrapper\2.ico</icon>
+  <manifest>Z:\MarcoScherzer-Projects\MSendBackupMail\dbgTest\MSendBackupMailTestDbg.manifest</manifest>
+  <icon>Z:\MarcoScherzer-Projects\MSendBackupMail\nativeWrapper\5.ico</icon>
   <jre>
-    <path>jre</path>
+    <path>Z:\MarcoScherzer-Projects\MSendBackupMail\nativeWrapper\jre</path>
     <requiresJdk>false</requiresJdk>
     <requires64Bit>true</requires64Bit>
     <minVersion>21</minVersion>
@@ -24,14 +24,14 @@
   <versionInfo>
     <fileVersion>0.1.0.0</fileVersion>
     <txtFileVersion>preBeta</txtFileVersion>
-    <fileDescription>A simple, secure OAuth GoogleMail client for sending files. Creates native Explorer folder desktop links.</fileDescription>
+    <fileDescription>MSendBackupMailTestDbg</fileDescription>
     <copyright>Marco Scherzer</copyright>
     <productVersion>0.1.0.0</productVersion>
     <txtProductVersion>preBeta</txtProductVersion>
-    <productName>OAuth Desktop FileSend Folder for GoogleMail</productName>
+    <productName>MSendBackupMailTestDbg</productName>
     <companyName>Marco Scherzer</companyName>
-    <internalName>OAuth Desktop FileSend Folder for GoogleMail</internalName>
-    <originalFilename>OAuthFileSendFolder.exe</originalFilename>
+    <internalName>MSendBackupMailTestDbg</internalName>
+    <originalFilename>MSendBackupMailTestDbg.exe</originalFilename>
     <trademarks></trademarks>
     <language>ENGLISH_US</language>
   </versionInfo>

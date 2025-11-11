@@ -6,6 +6,7 @@ import com.marcoscherzer.msimplegooglemailer.MSimpleKeystore;
 
 import javax.swing.*;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -39,7 +40,6 @@ public final class MSimpleGoogleMailerService {
     private static MFileNameWatcher outgoingDesktopLinkWatcher;
     private static MFileNameWatcher sentDesktopLinkWatcher;
     private static boolean askConsent = true;
-    private static int consentDelayMillis = 3000;
 
 
 
@@ -56,7 +56,8 @@ public final class MSimpleGoogleMailerService {
             pw = "testTesttest-123";
             System.out.println();
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);
-            MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);
+            MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, false); //dbg
+            //MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);
             MSimpleKeystore store = mailer.getKeystore();
 
             if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
@@ -79,68 +80,78 @@ public final class MSimpleGoogleMailerService {
             fromAdress = store.get("fromAddress");
             toAdress = store.get("toAddress");
 
-            /**
-             * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-             */
+
             /**
              * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
              */
             watcher = new MFolderWatcher(outFolder) {
-                private boolean userConsentActive = false;
+                private volatile boolean userConsentActive = false;
                 private final ScheduledExecutorService consentTimer = Executors.newSingleThreadScheduledExecutor();
                 private ScheduledFuture<?> pendingSessionEnd = null;
                 private final List<MOutgoingMail> toSendMails = Collections.synchronizedList(new ArrayList<>());
-                private final long sessionIdleMillis = 15000; // z.B. 15 Sekunden Ruhezeit
+                private final long sessionIdleMillis = 15000; // 15 Sekunden Ruhezeit
+                private final Object consentLock = new Object(); // Synchronisierung
 
+                /**
+                 * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+                 */
                 @Override
                 protected final void onFileChangedAndUnlocked(Path file) {
+                    if (!Files.exists(file)) {
+                        System.out.println("User deleted File. nothing to send.");
+                        return;
+                    }
+
                     String sendDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                     MOutgoingMail mail = new MOutgoingMail(fromAdress, toAdress, clientAndPathUUID + ", sendTime " + sendDateTime)
-                            .appendMessageText("" + clientAndPathUUID + "\\" + file.getFileName())
+                            .appendMessageText(clientAndPathUUID + "\\" + file.getFileName())
                             .addAttachment(file.toString());
 
-                    if (!askConsent) {
-                        toSendMails.add(mail);
-                        scheduleSessionEnd();
-                        return;
-                    }
+                    synchronized (consentLock) {
+                        if (!askConsent || userConsentActive) {
+                            toSendMails.add(mail);
+                            scheduleSessionEnd();
+                            return;
+                        }
 
-                    if (userConsentActive) {
-                        toSendMails.add(mail);
-                        scheduleSessionEnd();
-                        return;
-                    }
-
-                    if (showSendAlert()) {
-                        userConsentActive = true;
-                        toSendMails.add(mail);
-                        scheduleSessionEnd();
-                    } else {
-                        try {
-                            Path targetFile = notSentFolder.resolve(file.getFileName());
-                            Files.move(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
-                            System.out.println("File moved to NotSent: " + targetFile);
-                        } catch (Exception moveExc) {
-                            System.err.println("Error while moving to NotSent: " + moveExc.getMessage());
+                        if (showSendAlert()) {
+                            userConsentActive = true;
+                            toSendMails.add(mail);
+                            scheduleSessionEnd();
+                        } else {
+                            try {
+                                Path targetFile = notSentFolder.resolve(file.getFileName());
+                                Files.move(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
+                                System.out.println("User denied sending mail. File moved to NotSent: " + targetFile);
+                            } catch (Exception moveExc) {
+                                System.err.println("Error while moving to NotSent: " + moveExc.getMessage());
+                            }
                         }
                     }
                 }
 
+                /**
+                 * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+                 */
                 private void scheduleSessionEnd() {
                     if (pendingSessionEnd != null && !pendingSessionEnd.isDone()) {
                         pendingSessionEnd.cancel(false);
                     }
+
                     pendingSessionEnd = consentTimer.schedule(() -> {
-                        try {
-                            for (MOutgoingMail ml : toSendMails) {
-                                mailer.send(ml);
+                        synchronized (consentLock) {
+                            try {
+                                for (MOutgoingMail ml : toSendMails) {
+                                    // mailer.send(ml);
+                                    // Optional: move file to sentFolder
+                                }
+                                System.out.println("Mails sent: " + toSendMails.size());
+                                toSendMails.clear();
+                            } catch (Exception sendExc) {
+                                System.err.println("Error while sending: " + sendExc.getMessage());
                             }
-                            System.out.println("Mails sent: " + toSendMails.size());
-                            toSendMails.clear();
-                        } catch (Exception sendExc) {
-                            System.err.println("Error while sending: " + sendExc.getMessage());
+                            userConsentActive = false;
                         }
-                        userConsentActive = false;
                     }, sessionIdleMillis, TimeUnit.MILLISECONDS);
                 }
             };
@@ -199,6 +210,7 @@ public final class MSimpleGoogleMailerService {
             }
 
             printConfiguration(fromAdress, toAdress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
+
             System.out.println("To end the Program please press a key");
             new Scanner(System.in).nextLine();
             exit(0);
@@ -210,18 +222,26 @@ public final class MSimpleGoogleMailerService {
 
 
     /**
-     *@author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     private static boolean showSendAlert() {
+        JFrame frame = new JFrame();
+        frame.setAlwaysOnTop(true);
+        frame.setUndecorated(true);
+        frame.setLocationRelativeTo(null);
+
         int result = JOptionPane.showConfirmDialog(
-                null,
-                "Do you want to send the backup mail now?",
+                frame,
+                "Do you want to send the mail ?",
                 "Send Mail",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE
         );
+
+        frame.dispose(); // sauber schließen
         return result == JOptionPane.YES_OPTION;
     }
+
 
     /**
      *@author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -267,7 +287,7 @@ public final class MSimpleGoogleMailerService {
     private static void printConfiguration(String fromAddress, String toAddress, String basePath, String outFolder, String sentFolder) {
         System.out.println(
                 "\n==========================================================================" +
-                        "\n                     OneWay FileSendFolder for GoogleMail" +
+                        "\n                     OAuth FileSendFolder for GoogleMail" +
                         "\n  (A little spontaneous Mini Project focusing on simplicity and security)" +
                         "\n" +
                         "\n  Author   : Marco Scherzer" +

@@ -30,7 +30,7 @@ public abstract class MFolderWatcher {
     public MFolderWatcher(Path watchDir) {
         this.watchDir = watchDir;
         this.watcherThread = Executors.newSingleThreadExecutor();
-        this.monitorQueue = Executors.newSingleThreadExecutor();
+        this.monitorQueue = Executors.newCachedThreadPool();
         this.fileStates = new ConcurrentHashMap<>();
         this.activeMonitors = ConcurrentHashMap.newKeySet();
     }
@@ -144,7 +144,6 @@ public abstract class MFolderWatcher {
                     done = !locked && size == lastSize && modified == lastModified;
                     lastSize = size;
                     lastModified = modified;
-
                     if (!done) Thread.sleep(1000);
                 }
 

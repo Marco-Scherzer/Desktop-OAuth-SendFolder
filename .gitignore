@@ -50,3 +50,4 @@ client_secret.json
 /nativeWrapper/jre/
 /nativeWrapper/MSendBackupMail.jar
 /nativeWrapper/OAuthFileSendFolder.exe
+/dbgtest/parallelFilesOutgoingFolderTest/files/

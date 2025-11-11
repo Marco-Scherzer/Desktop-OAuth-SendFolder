@@ -28,7 +28,8 @@ echo.
 echo Adjustable example buildline for building a custom JRE
 echo.
 echo.
-echo %jhome%\jlink --compress=2 --strip-debug --no-header-files --no-man-pages --module-path %jhome%\jmods --add-modules java.base,java.logging,java.net.http,java.security.sasl,jdk.crypto.ec,jdk.httpserver,jdk.security.auth,jdk.unsupported,java.xml --output %prodir%\jre
+rem jdk.unsupported,java.xml
+echo %jhome%\jlink --compress=2 --strip-debug --no-header-files --no-man-pages --module-path %jhome%\jmods --add-modules java.base,java.desktop,java.logging,java.net.http,java.security.sasl,jdk.crypto.ec,jdk.httpserver,jdk.security.auth --output %prodir%\jre
 
 echo.
 echo.
