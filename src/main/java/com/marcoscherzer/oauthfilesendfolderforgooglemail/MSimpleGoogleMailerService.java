@@ -74,23 +74,31 @@ public final class MSimpleGoogleMailerService {
              * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
              */
             watcher = new MFolderWatcher(outFolder) {
-                private long t0 = 0; // Initialwert: kein Versand bisher
+                private long t0 = 0;
+                private boolean userConsentActive = false;
+
                 @Override
                 protected void onFileChangedAndUnlocked(Path file) {
                     long t = System.currentTimeMillis();
-                    String sendTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                    MOutgoingMail mail = new MOutgoingMail(fromAdress, toAdress, clientAndPathUUID + ", sendTime " + sendTime)
-                            .appendMessageText("Backup " + clientAndPathUUID + "\\" + file.getFileName())
+                    String sendDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                    MOutgoingMail mail = new MOutgoingMail(fromAdress, toAdress, clientAndPathUUID + ", sendTime " + sendDateTime)
+                            .appendMessageText("" + clientAndPathUUID + "\\" + file.getFileName())
                             .addAttachment(file.toString());
                     toSendMails.add(mail);
 
-                    boolean sendNow = true;
-                    if (askConsent && (t - t0 > consentDelayMillis)) {
+                    boolean sendNow = false;
+
+                    if (!askConsent) {
+                        sendNow = true;
+                    } else if (t - t0 > consentDelayMillis) {
                         sendNow = showSendAlert();
-                        t0 = System.currentTimeMillis(); // Zeitstempel aktualisieren nach Alert
+                        userConsentActive = sendNow; // nur bei Zustimmung aktivieren
+                        t0 = System.currentTimeMillis();
+                    } else if (userConsentActive) {
+                        sendNow = true; // innerhalb der Zeitspanne nach Zustimmung: senden ohne neuen Alert
                     }
 
-                    if (!askConsent || sendNow) {
+                    if (sendNow) {
                         try {
                             for (MOutgoingMail ml : toSendMails) {
                                 mailer.send(ml);
@@ -110,6 +118,7 @@ public final class MSimpleGoogleMailerService {
                     }
                 }
             };
+
 
 
             watcher.startWatching();
