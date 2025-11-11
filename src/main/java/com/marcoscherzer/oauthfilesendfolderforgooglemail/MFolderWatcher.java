@@ -117,19 +117,9 @@ public abstract class MFolderWatcher {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     private final class MObservedFile implements Runnable {
-        /**
-         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-         */
+
         private final Path file;
-
-        /**
-         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-         */
         private long lastSize = -1;
-
-        /**
-         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-         */
         private long lastModified = -1;
 
         /**

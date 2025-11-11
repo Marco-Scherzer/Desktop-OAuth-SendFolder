@@ -5,6 +5,7 @@ import com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailer;
 import com.marcoscherzer.msimplegooglemailer.MSimpleKeystore;
 
 import javax.swing.*;
+import java.io.File;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -80,7 +81,7 @@ public final class MSimpleGoogleMailerService {
                 private boolean userConsentActive = false;
 
                 @Override
-                protected void onFileChangedAndUnlocked(Path file) {
+                protected final void onFileChangedAndUnlocked(Path file) {
                     long t = System.currentTimeMillis();
                     String sendDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                     MOutgoingMail mail = new MOutgoingMail(fromAdress, toAdress, clientAndPathUUID + ", sendTime " + sendDateTime)
@@ -122,8 +123,18 @@ public final class MSimpleGoogleMailerService {
             };
 
 
-
             watcher.startWatching();
+            // Bei start prüfen ob zu versendende dateien enthalten sind (z.b durch spontanes beenden oder einkopieren während die Application nicht läuft)
+            File[] files = outFolder.toFile().listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    if (f.isFile()) {
+                        watcher.onFileChangedAndUnlocked(f.toPath());
+                    }
+                }
+            }
+
+
             Path absoluteOutgoingLinkPath = createFolderLink(outFolder.toString(), "Outgoing Things");
             Path absoluteSentLinkPath = createFolderLink(sentFolder.toString(), "Sent Things");
             if(absoluteOutgoingLinkPath != null || absoluteSentLinkPath != null){
