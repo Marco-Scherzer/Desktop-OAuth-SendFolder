@@ -16,7 +16,8 @@ import static java.nio.file.StandardWatchEventKinds.*;
  */
 public abstract class MFolderWatcher {
 
-    private final ExecutorService pool;
+    private final ExecutorService watcherThread; // Haupt-Thread (WatchService)
+    private final ExecutorService monitorQueue; // Sequentielle Verarbeitung der Datei-Monitore
     private final Map<Path, MObservedFile> fileStates;
     private final Set<Path> activeMonitors;
     private WatchService watchService;
@@ -27,10 +28,11 @@ public abstract class MFolderWatcher {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public MFolderWatcher(Path watchDir) {
-        pool = Executors.newCachedThreadPool();
-        fileStates = new ConcurrentHashMap<>();
-        activeMonitors = ConcurrentHashMap.newKeySet();
         this.watchDir = watchDir;
+        this.watcherThread = Executors.newSingleThreadExecutor();
+        this.monitorQueue = Executors.newSingleThreadExecutor();
+        this.fileStates = new ConcurrentHashMap<>();
+        this.activeMonitors = ConcurrentHashMap.newKeySet();
     }
 
     /**
@@ -38,10 +40,10 @@ public abstract class MFolderWatcher {
      */
     public final boolean startWatching() {
         try {
-            if(!running) {
+            if (!running) {
                 watchService = FileSystems.getDefault().newWatchService();
                 watchDir.register(watchService, ENTRY_CREATE, ENTRY_MODIFY);
-                pool.submit(() -> {
+                watcherThread.submit(() -> {
                     running = true;
                     while (!Thread.currentThread().isInterrupted()) {
                         try {
@@ -51,7 +53,7 @@ public abstract class MFolderWatcher {
                                 if (Files.isRegularFile(changedFile) && activeMonitors.add(changedFile)) {
                                     MObservedFile monitor = new MObservedFile(changedFile);
                                     fileStates.put(changedFile, monitor);
-                                    pool.submit(monitor);
+                                    monitorQueue.submit(monitor);
                                 }
                             }
                             key.reset();
@@ -66,7 +68,7 @@ public abstract class MFolderWatcher {
                 });
             }
 
-            System.out.println("MWatcher started for: \"" + watchDir+"\"");
+            System.out.println("MWatcher started for: \"" + watchDir + "\"");
             return true;
         } catch (IOException exc) {
             System.err.println("Error starting MWatcher: " + exc.getMessage());
@@ -78,14 +80,15 @@ public abstract class MFolderWatcher {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final void shutdown() throws Exception {
-        System.out.println("Shutting down FolderWatcher for \""+watchDir+"\" ...");
+        System.out.println("Shutting down FolderWatcher for \"" + watchDir + "\" ...");
         try {
             if (watchService != null) watchService.close();
         } catch (IOException exc) {
-            System.err.println("Error closing WatchService:" + exc.getMessage());
+            System.err.println("Error closing WatchService: " + exc.getMessage());
             throw new Exception("Error closing WatchService: ", exc);
         }
-        pool.shutdown();
+        watcherThread.shutdown();
+        monitorQueue.shutdown();
     }
 
     /**
@@ -96,10 +99,11 @@ public abstract class MFolderWatcher {
         try {
             if (watchService != null) watchService.close();
         } catch (IOException exc) {
-            System.err.println("Error closing WatchService:" + exc.getMessage());
+            System.err.println("Error closing WatchService: " + exc.getMessage());
             throw new RuntimeException("Error closing WatchService: ", exc);
         }
-        List<Runnable> dropped = pool.shutdownNow();
+        List<Runnable> dropped = monitorQueue.shutdownNow();
+        dropped.addAll(watcherThread.shutdownNow());
         System.out.println("Cancelled tasks: " + dropped.size());
         return dropped;
     }
@@ -113,8 +117,19 @@ public abstract class MFolderWatcher {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     private final class MObservedFile implements Runnable {
+        /**
+         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
         private final Path file;
+
+        /**
+         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
         private long lastSize = -1;
+
+        /**
+         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
         private long lastModified = -1;
 
         /**
@@ -172,5 +187,6 @@ public abstract class MFolderWatcher {
         }
     }
 }
+
 
 

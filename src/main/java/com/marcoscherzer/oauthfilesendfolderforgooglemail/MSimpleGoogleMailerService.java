@@ -9,6 +9,8 @@ import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Scanner;
 
 import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createFolderLink;
@@ -33,7 +35,7 @@ public final class MSimpleGoogleMailerService {
     private static MFileNameWatcher sentDesktopLinkWatcher;
     private static boolean askConsent = true;
     private static int consentDelayMillis = 3000;
-    static ArrayList<MOutgoingMail> toSendMails = new ArrayList<>();
+    static List<MOutgoingMail> toSendMails = Collections.synchronizedList(new ArrayList<>());
 
 
     /**
