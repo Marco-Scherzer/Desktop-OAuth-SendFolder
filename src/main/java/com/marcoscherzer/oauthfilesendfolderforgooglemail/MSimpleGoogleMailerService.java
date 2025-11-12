@@ -84,9 +84,7 @@ public final class MSimpleGoogleMailerService {
                 private JLabel counterLabel;
 
                 @Override
-                protected void onConsent(MOutgoingMail mail,
-                                                 Consumer<MOutgoingMail> onSendPermitted,
-                                                 Runnable onSendCanceled) {
+                protected void onAskForConsent(MOutgoingMail mail, Consumer<MOutgoingMail> onSendPermitted, Runnable onSendCanceled) {
                     SwingUtilities.invokeLater(() -> {
                         consentFrame = new JFrame("Send Mail");
                         consentFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

@@ -3,7 +3,6 @@ package com.marcoscherzer.oauthfilesendfolderforgooglemail;
 import com.marcoscherzer.msimplegooglemailer.MOutgoingMail;
 import com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailer;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -65,7 +64,7 @@ public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher {
                 MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress)
                         .setSubject(clientAndPathUUID + ", started " +
                                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                onConsent(mail,
+                onAskForConsent(mail,
                         this::sendAllPending,
                         this::moveAllToNotSent);
             }
@@ -76,9 +75,9 @@ public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    protected abstract void onConsent(MOutgoingMail mail,
-                                     Consumer<MOutgoingMail> onSendPermitted,
-                                     Runnable onSendCanceled);
+    protected abstract void onAskForConsent(MOutgoingMail mail,
+                                            Consumer<MOutgoingMail> onSendPermitted,
+                                            Runnable onSendCanceled);
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
