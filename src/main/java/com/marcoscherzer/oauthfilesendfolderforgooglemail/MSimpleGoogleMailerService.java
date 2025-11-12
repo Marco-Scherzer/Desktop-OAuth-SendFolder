@@ -1,8 +1,10 @@
 package com.marcoscherzer.oauthfilesendfolderforgooglemail;
 
+import com.marcoscherzer.msimplegooglemailer.MOutgoingMail;
 import com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailer;
 import com.marcoscherzer.msimplegooglemailer.MSimpleKeystore;
 
+import javax.swing.*;
 import java.io.File;
 import java.nio.file.*;
 import java.util.*;
@@ -42,8 +44,8 @@ public final class MSimpleGoogleMailerService {
             pw = "testTesttest-123";
             System.out.println();
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);
-            MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, false); //dbg
-            //MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);
+            //MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, false); //dbg
+            MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);
             MSimpleKeystore store = mailer.getKeystore();
 
             if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
@@ -58,11 +60,7 @@ public final class MSimpleGoogleMailerService {
             Path outPath = Paths.get(basePath, clientAndPathUUID);
             Path sentPath = Paths.get(basePath, clientAndPathUUID + "-sent");
             Path notSentPath = Paths.get(basePath, clientAndPathUUID + "-notSent");
-/*
 
-                    sentFolder.mkdirs();
-                    notSentFolder.toFile().mkdirs();
- */
             outFolder = createPathIfNotExists(outPath, "Out folder");
             sentFolder = createPathIfNotExists(sentPath, "Sent folder");
             notSentFolder = createPathIfNotExists(notSentPath, "NotSent folder");
@@ -79,7 +77,27 @@ public final class MSimpleGoogleMailerService {
                     toAddress,
                     clientAndPathUUID,
                     askConsent
-            );
+            ) {
+                @Override
+                protected boolean showSendAlert(MOutgoingMail mail) {
+                        JFrame frame = new JFrame();
+                        frame.setAlwaysOnTop(true);
+                        frame.setUndecorated(true);
+                        frame.setLocationRelativeTo(null);
+
+                        int result = JOptionPane.showConfirmDialog(
+                                frame,
+                                "Do you want to send the mail?",
+                                "Send Mail",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.QUESTION_MESSAGE
+                        );
+
+                        frame.dispose();
+                        return result == JOptionPane.YES_OPTION;
+
+                }
+            };
 
             watcher.startWatching();
 

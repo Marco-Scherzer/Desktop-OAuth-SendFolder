@@ -18,7 +18,7 @@ import java.util.concurrent.*;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public class MConsentOutgoingMailWatcher extends MFolderWatcher{
+public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher{
 
     private final String fromAddress;
     private final String toAddress;
@@ -63,7 +63,8 @@ public class MConsentOutgoingMailWatcher extends MFolderWatcher{
         }
 
         String sendDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress, clientAndPathUUID + ", sendTime " + sendDateTime)
+        MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress)
+                .setSubject(clientAndPathUUID + ", sendTime " + sendDateTime)
                 .appendMessageText(clientAndPathUUID + "\\" + file.getFileName())
                 .addAttachment(file.toString());
 
@@ -74,7 +75,7 @@ public class MConsentOutgoingMailWatcher extends MFolderWatcher{
                 return;
             }
 
-            if (showSendAlert()) {
+            if (showSendAlert(mail)) {
                 userConsentActive = true;
                 toSendMails.add(mail);
                 scheduleSessionEnd();
@@ -105,7 +106,6 @@ public class MConsentOutgoingMailWatcher extends MFolderWatcher{
                 try {
 
                     SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS");
-
                     for (MOutgoingMail ml : toSendMails) {
                         File sourceFile = new File(ml.getAttachment(0));
                         String originalName = sourceFile.getName();
@@ -119,7 +119,7 @@ public class MConsentOutgoingMailWatcher extends MFolderWatcher{
                         String newName = originalName + "_" + timestamp + extension;
 
                         try {
-                            mailer.send(ml);
+                            //mailer.send(ml);
 
                             File targetFile = new File(sentFolder.toFile(), newName);
                             Files.move(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -153,23 +153,7 @@ public class MConsentOutgoingMailWatcher extends MFolderWatcher{
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private boolean showSendAlert() {
-        JFrame frame = new JFrame();
-        frame.setAlwaysOnTop(true);
-        frame.setUndecorated(true);
-        frame.setLocationRelativeTo(null);
-
-        int result = JOptionPane.showConfirmDialog(
-                frame,
-                "Do you want to send the mail?",
-                "Send Mail",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE
-        );
-
-        frame.dispose();
-        return result == JOptionPane.YES_OPTION;
-    }
+    protected abstract boolean showSendAlert(MOutgoingMail mail);
 
 
 }

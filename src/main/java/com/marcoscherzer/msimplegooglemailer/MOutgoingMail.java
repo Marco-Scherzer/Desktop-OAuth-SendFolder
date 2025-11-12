@@ -15,15 +15,21 @@ public final class MOutgoingMail {
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MOutgoingMail(String from, String to, String subject) {
+    public MOutgoingMail(String from, String to) {
         MSimpleGoogleMailerUtil.checkMailAddress(from);
         MSimpleGoogleMailerUtil.checkMailAddress(to);
         this.from = from;
         this.to = to;
-        this.subject = subject;
         this.messageText = new StringBuilder();
     }
 
+    /**
+     * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final MOutgoingMail setSubject(String subject){
+        this.subject = subject;
+        return this;
+    }
 
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
