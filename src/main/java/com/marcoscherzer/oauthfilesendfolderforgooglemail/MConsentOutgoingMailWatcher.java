@@ -64,9 +64,7 @@ public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher {
                 MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress)
                         .setSubject(clientAndPathUUID + ", started " +
                                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                onAskForConsent(mail,
-                        this::sendAllPending,
-                        this::moveAllToNotSent);
+                onAskForConsent(mail, this::sendAllPending, this::moveAllToNotSent);
             }
             onNewAttachmentAdded(pendingAttachments.size());
         }
