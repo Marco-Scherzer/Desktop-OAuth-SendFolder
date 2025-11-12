@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -30,7 +29,7 @@ public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher{
     private volatile boolean userConsentActive = false;
     private final ScheduledExecutorService consentTimer = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> pendingSessionEnd = null;
-    private final List<MOutgoingMail> toSendMails = Collections.synchronizedList(new ArrayList<>());
+    private final List<String> pendingAttachments = Collections.synchronizedList(new ArrayList<>());
     private final List<MOutgoingMail> sentMails = Collections.synchronizedList(new ArrayList<>());
     private final long sessionIdleMillis = 15000;
     private final Object consentLock = new Object();
@@ -56,40 +55,36 @@ public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher{
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
+    @Override
     public void onFileChangedAndUnlocked(Path file) {
         if (!Files.exists(file)) {
             System.out.println("User deleted file. Nothing to send.");
             return;
         }
-
-        String sendDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress)
-                .setSubject(clientAndPathUUID + ", sendTime " + sendDateTime)
-                .appendMessageText(clientAndPathUUID + "\\" + file.getFileName())
-                .addAttachment(file.toString());
-
         synchronized (consentLock) {
+            pendingAttachments.add(file.toString());
+
             if (!askConsent || userConsentActive) {
-                toSendMails.add(mail);
                 scheduleSessionEnd();
                 return;
             }
 
-            if (showSendAlert(mail)) {
+            if (showSendAlert(null)) {
                 userConsentActive = true;
-                toSendMails.add(mail);
                 scheduleSessionEnd();
             } else {
                 try {
                     Path targetFile = notSentFolder.resolve(file.getFileName());
                     Files.move(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
                     System.out.println("User denied sending mail. File moved to NotSent: " + targetFile);
+                    pendingAttachments.remove(file.toString());
                 } catch (Exception moveExc) {
                     System.err.println("Error while moving to NotSent: " + moveExc.getMessage());
                 }
             }
         }
     }
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -101,32 +96,35 @@ public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher{
 
         pendingSessionEnd = consentTimer.schedule(() -> {
             synchronized (consentLock) {
-                List<MOutgoingMail> successfullySent = new ArrayList<>();
+                if (pendingAttachments.isEmpty()) return;
+
+                String sendDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress)
+                        .setSubject(clientAndPathUUID + ", sendTime " + sendDateTime);
+
+                List<String> successfullySentPaths = new ArrayList<>();
 
                 try {
+                    for (String path : pendingAttachments) {
+                        File file = new File(path);
+                        mail.addAttachment(path);
+                        mail.appendMessageText(clientAndPathUUID + "\\" + file.getName());
+                    }
 
-                    SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS");
-                    for (MOutgoingMail ml : toSendMails) {
-                        File sourceFile = new File(ml.getAttachment(0));
-                        String originalName = sourceFile.getName();
-                        String extension = "";
-                        int dotIndex = originalName.lastIndexOf('.');
-                        if (dotIndex != -1) {
-                            extension = originalName.substring(dotIndex);
-                            originalName = originalName.substring(0, dotIndex);
-                        }
-                        String timestamp = timestampFormat.format(new Date());
-                        String newName = originalName + "_" + timestamp + extension;
+                    try {
+                        mailer.send(mail);
+                    } catch (Exception sendFail) {
+                        System.err.println("Mail send failed: " + sendFail.getMessage());
+                    }
 
+                    for (String path : pendingAttachments) {
+                        File sourceFile = new File(path);
+                        String newName = MUtil.createTimeStampFileName(sourceFile);
                         try {
-                            //mailer.send(ml);
-
                             File targetFile = new File(sentFolder.toFile(), newName);
                             Files.move(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                             System.out.println("Sent and moved: " + newName);
-
-                            successfullySent.add(ml);
-                            sentMails.add(ml);
+                            successfullySentPaths.add(path);
                         } catch (Exception e) {
                             try {
                                 File fallbackFile = new File(notSentFolder.toFile(), newName);
@@ -139,8 +137,9 @@ public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher{
                         }
                     }
 
-                    toSendMails.removeAll(successfullySent);
-                    System.out.println("Mails sent: " + successfullySent.size());
+                    sentMails.add(mail);
+                    pendingAttachments.removeAll(successfullySentPaths);
+                    System.out.println("Mail sent with " + successfullySentPaths.size() + " attachments.");
                 } catch (Exception sendExc) {
                     System.err.println("Error during session end: " + sendExc.getMessage());
                 }
@@ -149,6 +148,7 @@ public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher{
             }
         }, sessionIdleMillis, TimeUnit.MILLISECONDS);
     }
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

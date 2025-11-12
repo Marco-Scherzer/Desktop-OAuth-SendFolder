@@ -27,7 +27,7 @@ public final class MSimpleGoogleMailerService {
     private static Path sentFolder;
     private static Path outFolder;
     private static String clientAndPathUUID;
-    private static MFolderWatcher watcher;
+    private static MConsentOutgoingMailWatcher watcher;
     private static String fromAddress;
     private static String toAddress;
 
@@ -68,7 +68,7 @@ public final class MSimpleGoogleMailerService {
             fromAddress = store.get("fromAddress");
             toAddress = store.get("toAddress");
 
-            MConsentOutgoingMailWatcher watcher = new MConsentOutgoingMailWatcher(
+            watcher = new MConsentOutgoingMailWatcher(
                     outFolder,
                     sentFolder,
                     notSentFolder,

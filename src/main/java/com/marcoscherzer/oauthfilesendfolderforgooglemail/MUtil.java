@@ -4,10 +4,13 @@ import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.WinReg;
 
 import java.io.Console;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 
 public class MUtil {
@@ -98,6 +101,21 @@ public class MUtil {
             System.out.print(promptText);
             return new Scanner(System.in).nextLine();
         }
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public static final String createTimeStampFileName(File file){
+            String originalName = file.getName();
+            String extension = "";
+            int dotIndex = originalName.lastIndexOf('.');
+            if (dotIndex != -1) {
+                extension = originalName.substring(dotIndex);
+                originalName = originalName.substring(0, dotIndex);
+            }
+            String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS").format(new Date());
+            return originalName + "_" + timestamp + extension;
     }
 
 }
