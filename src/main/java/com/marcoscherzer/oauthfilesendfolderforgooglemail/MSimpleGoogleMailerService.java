@@ -79,7 +79,7 @@ public final class MSimpleGoogleMailerService {
                     askConsent
             ) {
                 @Override
-                protected boolean showSendAlert(MOutgoingMail mail) {
+                protected final boolean showSendAlert(MOutgoingMail mail) {
                         JFrame frame = new JFrame();
                         frame.setAlwaysOnTop(true);
                         frame.setUndecorated(true);
