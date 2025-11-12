@@ -84,7 +84,7 @@ public final class MSimpleGoogleMailerService {
                 private JLabel counterLabel;
 
                 @Override
-                protected void showConsentDialog(MOutgoingMail mail,
+                protected void onConsent(MOutgoingMail mail,
                                                  Consumer<MOutgoingMail> onSendPermitted,
                                                  Runnable onSendCanceled) {
                     SwingUtilities.invokeLater(() -> {
@@ -113,7 +113,7 @@ public final class MSimpleGoogleMailerService {
                 }
 
                 @Override
-                protected void updateCounter(int size) {
+                protected void onNewAttachmentAdded(int size) {
                     if (counterLabel != null) {
                         counterLabel.setText("Attachments: " + size);
                     }

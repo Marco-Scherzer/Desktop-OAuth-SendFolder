@@ -31,9 +31,6 @@ public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher {
     private final List<MOutgoingMail> sentMails = Collections.synchronizedList(new ArrayList<>());
     private final Object consentLock = new Object();
 
-    private JFrame consentFrame;
-    private JLabel counterLabel;
-
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -68,25 +65,25 @@ public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher {
                 MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress)
                         .setSubject(clientAndPathUUID + ", started " +
                                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                showConsentDialog(mail,
+                onConsent(mail,
                         this::sendAllPending,
                         this::moveAllToNotSent);
             }
-            updateCounter(pendingAttachments.size());
+            onNewAttachmentAdded(pendingAttachments.size());
         }
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    protected abstract void showConsentDialog(MOutgoingMail mail,
+    protected abstract void onConsent(MOutgoingMail mail,
                                      Consumer<MOutgoingMail> onSendPermitted,
                                      Runnable onSendCanceled);
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    protected abstract void updateCounter(int size);
+    protected abstract void onNewAttachmentAdded(int size);
 
 
     /**
