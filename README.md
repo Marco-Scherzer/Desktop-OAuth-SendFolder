@@ -12,8 +12,24 @@
  Strictly prohibited:  
  Forking, copying, reverse engineering, decompiling, modifying, redistributing, or any unauthorized use of this software.
 
-Contact: fahrservice.1@gmail.com
+About this Software:
+Until now, all of my work has been closed-source. I have always worked independently and entirely on my own. 
+Everything I have built has been done only on my local computer, and everything I create is formally protected by law. 
+Only now, in my later years, I have published something here on GitHub for the first time. 
+Except for what I publish here on this GitHub page (https://github.com/Marco-Scherzer), 
+all of my software projects remain closed-source.
 
+To prevent abuse or phishing, there are no other websites, email addresses, or communication channels connected to the software on this page except the listed email address.  
+If you find the code or binaries anywhere else than on
+https://github.com/Marco-Scherzer it is abuse, a scam, and theft of law-protected intellectual property.  
+In such a case, please inform GitHub and send me an email.
+
+My source code and any compiled versions that may sometimes appear here are protected by copyright.  
+All rights are reserved, which means that any kind of use, copying, linking or downloading and many things more is not permitted.
+If I ever decide to write a license for the binary, so that other people may at least be allowed to download the executable or installer,  
+this text will also include the license and the exact location where the binaries can be downloaded.
+
+Contact: fahrservice.1@gmail.com
 <br>
 <br>
 <br>
