@@ -5,9 +5,11 @@ import com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailer;
 import com.marcoscherzer.msimplegooglemailer.MSimpleKeystore;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.nio.file.*;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createFolderLink;
 import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createPathIfNotExists;
@@ -45,7 +47,7 @@ public final class MSimpleGoogleMailerService {
             System.out.println();
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);
             //MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, false); //dbg
-            MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);
+            MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, false);
             MSimpleKeystore store = mailer.getKeystore();
 
             if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
@@ -78,23 +80,43 @@ public final class MSimpleGoogleMailerService {
                     clientAndPathUUID,
                     askConsent
             ) {
+                private JFrame consentFrame;
+                private JLabel counterLabel;
+
                 @Override
-                protected final boolean showSendAlert(MOutgoingMail mail) {
-                        JFrame frame = new JFrame();
-                        frame.setAlwaysOnTop(true);
-                        frame.setUndecorated(true);
-                        frame.setLocationRelativeTo(null);
+                protected void showConsentDialog(MOutgoingMail mail,
+                                                 Consumer<MOutgoingMail> onSendPermitted,
+                                                 Runnable onSendCanceled) {
+                    SwingUtilities.invokeLater(() -> {
+                        consentFrame = new JFrame("Send Mail");
+                        consentFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                        consentFrame.setAlwaysOnTop(true);
+                        consentFrame.setLocationRelativeTo(null);
+                        counterLabel = new JLabel("Attachments: 0");
+                        JButton sendButton = new JButton("Senden");
+                        JButton cancelButton = new JButton("Abbrechen");
+                        sendButton.addActionListener(e -> {
+                            onSendPermitted.accept(mail);
+                        });
+                        cancelButton.addActionListener(e -> {
+                            onSendCanceled.run();
+                        });
+                        JPanel panel = new JPanel();
+                        panel.add(counterLabel);
+                        panel.add(sendButton);
+                        panel.add(cancelButton);
 
-                        int result = JOptionPane.showConfirmDialog(
-                                frame,
-                                "Do you want to send the mail?",
-                                "Send Mail",
-                                JOptionPane.YES_NO_OPTION,
-                                JOptionPane.QUESTION_MESSAGE
-                        );
+                        consentFrame.add(panel);
+                        consentFrame.pack();
+                        consentFrame.setVisible(true);
+                    });
+                }
 
-                        frame.dispose();
-                        return result == JOptionPane.YES_OPTION;
+                @Override
+                protected void updateCounter(int size) {
+                    if (counterLabel != null) {
+                        counterLabel.setText("Attachments: " + size);
+                    }
 
                 }
             };

@@ -2,8 +2,8 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>console</headerType>
-  <jar>Z:\MarcoScherzer-Projects\MSendBackupMail_TestDbg\out\artifacts\MSendBackupMail_TestDbg_jar\MSendBackupMail_TestDbg.jar</jar>
-  <outfile>Z:\MarcoScherzer-Projects\MSendBackupMail\dbgTest\MSendBackupMailTestDbg.exe</outfile>
+  <jar>D:\User\Marco Scherzer\Desktop\dbgTest\MSendBackupMail_TestDbg.jar</jar>
+  <outfile>D:\User\Marco Scherzer\Desktop\dbgTest\MSendBackupMailTestDbg.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
@@ -12,10 +12,10 @@
   <supportUrl></supportUrl>
   <stayAlive>true</stayAlive>
   <restartOnCrash>false</restartOnCrash>
-  <manifest>Z:\MarcoScherzer-Projects\MSendBackupMail\dbgTest\MSendBackupMailTestDbg.manifest</manifest>
-  <icon>Z:\MarcoScherzer-Projects\MSendBackupMail\nativeWrapper\5.ico</icon>
+  <manifest>D:\User\Marco Scherzer\Desktop\dbgTest\MSendBackupMailTestDbg.manifest</manifest>
+  <icon>D:\User\Marco Scherzer\Desktop\dbgTest\5.ico</icon>
   <jre>
-    <path>Z:\MarcoScherzer-Projects\MSendBackupMail\nativeWrapper\jre</path>
+    <path>D:\User\Marco Scherzer\Desktop\dbgTest\jre</path>
     <requiresJdk>false</requiresJdk>
     <requires64Bit>true</requires64Bit>
     <minVersion>21</minVersion>
