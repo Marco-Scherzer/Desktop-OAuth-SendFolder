@@ -46,6 +46,7 @@ public final class MSimpleGoogleMailer {
     private static String clientSecretDir = System.getProperty("user.dir");
     private final List<String> scopes = Collections.singletonList(GmailScopes.GMAIL_SEND);
     private final Credential credential;
+    private final boolean doNotPersistOAuthToken;
     private Gmail service;
     private MSimpleKeystore keystore;
 
@@ -62,7 +63,7 @@ public final class MSimpleGoogleMailer {
     public MSimpleGoogleMailer(String applicationName, String keystorePassword, boolean doNotPersistOAuthToken) throws Exception {
         File keystoreFile = new File(clientSecretDir, "mystore.p12");
         File jsonFile = new File(clientSecretDir, "client_secret.json");
-
+        this.doNotPersistOAuthToken = doNotPersistOAuthToken;
             if (!keystoreFile.exists()) checkParameters(applicationName, keystorePassword);
             try {
 
@@ -187,7 +188,7 @@ public final class MSimpleGoogleMailer {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * analog des löschens von OAuth cookies im browser so dass diese nicht verbleiben
      */
-    public final void cleanUpPersistetOAuthTokenIfNotSecureOAuthMode() throws Exception {
+    public final void cleanUpPersistetOAuthTokenIfStartetInPersistMode() throws Exception {
         try {
            if(keystore.contains("OAuth")) this.keystore.remove("OAuth");
         } catch (Exception exc) {
@@ -197,6 +198,14 @@ public final class MSimpleGoogleMailer {
             throw new Exception(exc);
         }
     }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final boolean isInDoNotPersistOAuthTokenMode() throws Exception {
+               return this.doNotPersistOAuthToken;
+    }
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -225,10 +234,7 @@ public final class MSimpleGoogleMailer {
 
             // Body als x-www-form-urlencoded
             String body = "token=" + token;
-            ByteArrayContent content = new ByteArrayContent(
-                    "application/x-www-form-urlencoded",
-                    body.getBytes(StandardCharsets.UTF_8)
-            );
+            ByteArrayContent content = new ByteArrayContent("application/x-www-form-urlencoded", body.getBytes(StandardCharsets.UTF_8));
 
             HttpRequest request = requestFactory.buildPostRequest(url, content);
             HttpResponse response = request.execute();
