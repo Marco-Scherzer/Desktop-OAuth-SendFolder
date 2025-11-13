@@ -94,7 +94,7 @@ public final class MSimpleGoogleMailerService {
 
                         // 1. Zeile: Betreff
                         JTextField subjectField = new JTextField("Betreff: " + mail.getSubject());
-                        subjectField.setEditable(false);
+                        subjectField.setEditable(true);
                         subjectField.setMaximumSize(new Dimension(Integer.MAX_VALUE, subjectField.getPreferredSize().height));
                         innerPanel.add(subjectField);
                         innerPanel.add(Box.createVerticalStrut(10));
@@ -140,9 +140,6 @@ public final class MSimpleGoogleMailerService {
                         consentFrame.setVisible(true);
                     });
                 }
-
-
-
 
                 @Override
                 protected void onNewAttachmentAdded(int size) {

@@ -41,7 +41,6 @@ public final class MSimpleGoogleMailer {
 
     private static String clientSecretDir = System.getProperty("user.dir");
     private final List<String> scopes = Collections.singletonList(GmailScopes.GMAIL_SEND);
-    private final boolean secureOAuthMode;
     private Gmail service;
     private MSimpleKeystore keystore;
 
@@ -56,7 +55,6 @@ public final class MSimpleGoogleMailer {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public MSimpleGoogleMailer(String applicationName, String keystorePassword, boolean useSecureOAuthMode) throws Exception {
-        this.secureOAuthMode =useSecureOAuthMode;
         File keystoreFile = new File(clientSecretDir, "mystore.p12");
         File jsonFile = new File(clientSecretDir, "client_secret.json");
 
@@ -187,7 +185,7 @@ public final class MSimpleGoogleMailer {
      */
     public final void cleanUpOAuthTokenIfNotSecureOAuthMode() throws Exception {
         try {
-           if(!secureOAuthMode) this.keystore.remove("OAuth");
+           if(keystore.contains("OAuth")) this.keystore.remove("OAuth");
         } catch (Exception exc) {
             System.err.println("Error removing OAuth token from Keystore. " +
                     "\nPlease delete the keystore file manually and restart the program (you have to setup pw and mail adresses new)." +
