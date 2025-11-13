@@ -16,7 +16,7 @@ import java.util.List;
  * Dieses File beginnt vor Entwicklungbeginn durchdachten Plan B: Client-Server Architektur mit einem Client
  * der mindestens in einem BatchFile eine FileListe annehmen kann.
  * Da jedoch ohnehin keine Netzwerkfunktionalität benötigt wird(die mit folders durchs system gegeben gewesen wäre)
- * wird diese spontane Projekt aus Zeitgründen nun abgegekürzt und die main methoden schnittstelle des Programms
+ * wird diese spontane Projekt aus Zeitgründen nun abgegekürzt und die main methoden schnittstelle von MSimpleGoogleMailerService
  * per file drag and drop als Schnittstelle zum Filelinks sammeln Verwendung finden.
  * Sollte auch mit einem Programm-link auf dem Desktop funktionieren.
  */
@@ -38,15 +38,7 @@ public class MLinkCollectorFolderClient {
                 System.err.println("Pfad nicht gefunden: " + path);
             }
         }
+        System.out.println("Gesamt eingesammelt: " + collectedFiles.size());
     }
 
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public static void main(String[] args) {
-        MLinkCollectorFolderClient client = new MLinkCollectorFolderClient();
-        client.addFiles(args);
-
-        System.out.println("Gesamt eingesammelt: " + client.collectedFiles.size());
-    }
 }
