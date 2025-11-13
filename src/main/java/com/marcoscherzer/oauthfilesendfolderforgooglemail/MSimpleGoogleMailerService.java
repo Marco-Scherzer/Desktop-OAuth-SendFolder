@@ -214,6 +214,7 @@ public final class MSimpleGoogleMailerService {
      */
     private static void exit(int code) {
         try {
+            mailer.revokeOAuthTokenFromServer();
             if (watcher != null) watcher.shutdown();
             if(outgoingDesktopLinkWatcher != null ) outgoingDesktopLinkWatcher.shutdown();
             if(sentDesktopLinkWatcher != null ) sentDesktopLinkWatcher.shutdown();

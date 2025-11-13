@@ -198,9 +198,8 @@ public final class MSimpleGoogleMailer {
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * @param credential the OAuth credential to revoke
      */
-    public void revokeOAuthTokenFromServer(Credential credential) throws GeneralSecurityException, IOException {
+    public void revokeOAuthTokenFromServer() throws GeneralSecurityException, IOException {
         try {
             if (credential == null) {
                 System.out.println("No credential available to revoke.");
