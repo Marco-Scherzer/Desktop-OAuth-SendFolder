@@ -11,10 +11,14 @@ import java.util.List;
  * nun nicht mehr hinnehmbar. Dies war für einfache ein-attachment-pro mail dinge sinnvoll,
  * da der code einfach blieb und backuper oder batch files einfach in die folder schreiben konnten.
  * Neben dem Speicherverbauchsnachteil hat
- * die Komplexität des Folderwatchings im kontext der Gui nun aber mehr Aufwand als eine kleine Client-Server
- * Architektur einzuführen den den Speichernachteil von Anfang an vermeidet.
+ * die Komplexität des Folderwatchings im Kontext der Gui nun aber mehr Aufwand als eine kleine Client-Server
+ * Architektur einzuführen und den Speichernachteil von Anfang an vermeidet.
  * Dieses File beginnt vor Entwicklungbeginn durchdachten Plan B: Client-Server Architektur mit einem Client
  * der mindestens in einem BatchFile eine FileListe annehmen kann.
+ * Da jedoch ohnehin keine Netzwerkfunktionalität benötigt wird(die mit folders durchs system gegeben gewesen wäre)
+ * wird diese spontane Projekt aus Zeitgründen nun abgegekürzt und die main methoden schnittstelle des Programms
+ * per file drag and drop als Schnittstelle zum Filelinks sammeln Verwendung finden.
+ * Sollte auch mit einem Programm-link auf dem Desktop funktionieren.
  */
 public class MLinkCollectorFolderClient {
 
