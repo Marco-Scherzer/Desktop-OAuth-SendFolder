@@ -1,5 +1,6 @@
 package com.marcoscherzer.msimplegooglemailer;
 
+import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -27,6 +28,7 @@ import org.apache.commons.codec.binary.Base64;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -108,6 +110,7 @@ public final class MSimpleGoogleMailer {
                         .setTokenUri("https://oauth2.googleapis.com/token");
 
                 GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
+                LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
                 GoogleAuthorizationCodeFlow flow;
 
                 if (doNotPersistOAuthToken) {
@@ -117,18 +120,25 @@ public final class MSimpleGoogleMailer {
                     }
                     flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
                             .setAccessType("online")
-                            .setApprovalPrompt("force")
                             .setCredentialDataStore(new MemoryDataStoreFactory().getDataStore("tempsession"))
                             .build();
+                    // damit prompt=login IMMER gesetzt wird
+                    AuthorizationCodeInstalledApp app = new AuthorizationCodeInstalledApp(flow, receiver) {
+                        @Override
+                        protected void onAuthorization(AuthorizationCodeRequestUrl authorizationUrl) throws IOException {
+                            // erzwingt neuen Login, auch wenn Browser noch Cookies/Tokens hat
+                            authorizationUrl.set("prompt", "login");
+                            super.onAuthorization(authorizationUrl);
+                        }
+                    };
+                    credential = app.authorize("OAuth");
                 } else {
                     flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
                             .setAccessType("offline")
                             .setCredentialDataStore(new MSimpleKeystoreDataStoreFactory(keystore).getDataStore("OAuth"))
                             .build();
+                    credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("OAuth");
                 }
-
-                LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-                credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("OAuth");
                 if (credential == null) {
                     throw new IllegalStateException("No stored OAuth credential found.");
                 }

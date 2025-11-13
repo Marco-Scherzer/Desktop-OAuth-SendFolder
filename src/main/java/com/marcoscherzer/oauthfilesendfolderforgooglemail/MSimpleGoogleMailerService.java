@@ -177,46 +177,6 @@ public final class MSimpleGoogleMailerService {
         }
     }
 
-
-    /**
-     *@author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-        public static final String readMailAddressInput(String addressDescription)  {
-            Scanner scanner = new Scanner(System.in);
-                String out = null;
-                while (out == null) {
-                    System.out.print("Enter "+ addressDescription +" email address (or type 'exit' to cancel): ");
-                    String input = scanner.nextLine().trim();
-                    if (input.equalsIgnoreCase("exit")) {
-                        System.out.println("Aborted by user.");
-                        exit(0);
-                    }
-                    try {
-                        out = checkMailAddress(input);
-                    } catch (IllegalArgumentException e) {
-                        System.out.println("Please try again.");
-                    }
-                }
-            return out;
-        }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    private static void exit(int code) {
-        try {
-            if (watcher != null) watcher.shutdown();
-            if(outgoingDesktopLinkWatcher != null ) outgoingDesktopLinkWatcher.shutdown();
-            if(sentDesktopLinkWatcher != null ) sentDesktopLinkWatcher.shutdown();
-        } catch (Exception exc) {
-            exc.printStackTrace();
-        }
-        System.out.println("Program terminated. Exit code: " + code);
-        System.exit(code);
-    }
-
-
-
     /**
      * @author Marco Scherzer
      * Copyright © Marco Scherzer. All rights reserved.
@@ -248,6 +208,46 @@ public final class MSimpleGoogleMailerService {
         );
 
     }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private static void exit(int code) {
+        try {
+            if (watcher != null) watcher.shutdown();
+            if(outgoingDesktopLinkWatcher != null ) outgoingDesktopLinkWatcher.shutdown();
+            if(sentDesktopLinkWatcher != null ) sentDesktopLinkWatcher.shutdown();
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        }
+        System.out.println("Program terminated. Exit code: " + code);
+        System.exit(code);
+    }
+
+
+    /**
+     *@author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public static final String readMailAddressInput(String addressDescription)  {
+        Scanner scanner = new Scanner(System.in);
+        String out = null;
+        while (out == null) {
+            System.out.print("Enter "+ addressDescription +" email address (or type 'exit' to cancel): ");
+            String input = scanner.nextLine().trim();
+            if (input.equalsIgnoreCase("exit")) {
+                System.out.println("Aborted by user.");
+                exit(0);
+            }
+            try {
+                out = checkMailAddress(input);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Please try again.");
+            }
+        }
+        return out;
+    }
+
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
