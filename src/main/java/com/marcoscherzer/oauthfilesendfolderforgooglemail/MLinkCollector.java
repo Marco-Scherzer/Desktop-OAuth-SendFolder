@@ -20,7 +20,7 @@ import java.util.List;
  * per file drag and drop als Schnittstelle zum Filelinks sammeln Verwendung finden.
  * Sollte auch mit einem Programm-link auf dem Desktop funktionieren.
  */
-public class MLinkCollectorFolderClient {
+public class MLinkCollector {
 
     // Liste der eingesammelten Dateien
     private final List<File> collectedFiles = new ArrayList<>();
