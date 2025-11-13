@@ -50,7 +50,7 @@ public final class MSimpleGoogleMailerService {
             System.out.println();
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);
             //MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, false); //dbg
-            mailer = new MSimpleGoogleMailer("BackupMailer", pw, false);
+            mailer = new MSimpleGoogleMailer("BackupMailer", pw, false);//false because of dbg
             MSimpleKeystore store = mailer.getKeystore();
 
             if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
