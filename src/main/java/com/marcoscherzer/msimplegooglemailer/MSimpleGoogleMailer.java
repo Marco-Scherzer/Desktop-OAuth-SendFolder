@@ -6,7 +6,7 @@ import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.*;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.MemoryDataStoreFactory;
@@ -27,6 +27,8 @@ import org.apache.commons.codec.binary.Base64;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -41,6 +43,7 @@ public final class MSimpleGoogleMailer {
 
     private static String clientSecretDir = System.getProperty("user.dir");
     private final List<String> scopes = Collections.singletonList(GmailScopes.GMAIL_SEND);
+    private final Credential credential;
     private Gmail service;
     private MSimpleKeystore keystore;
 
@@ -66,10 +69,8 @@ public final class MSimpleGoogleMailer {
 
                 HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
                 JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-                Credential credential;
                 String clientId;
                 String clientSecret;
-
 
                 //versucht die parameter immer neu einzulesen bis irgendwann mal ein json file ins verzeichnis gelegt wird
                 // danach wird der block nur neu betreten falls der keystore manuell gelöscht wird.
@@ -184,7 +185,7 @@ public final class MSimpleGoogleMailer {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * analog des löschens von OAuth cookies im browser so dass diese nicht verbleiben
      */
-    public final void cleanUpOAuthTokenIfNotSecureOAuthMode() throws Exception {
+    public final void cleanUpPersistetOAuthTokenIfNotSecureOAuthMode() throws Exception {
         try {
            if(keystore.contains("OAuth")) this.keystore.remove("OAuth");
         } catch (Exception exc) {
@@ -194,6 +195,47 @@ public final class MSimpleGoogleMailer {
             throw new Exception(exc);
         }
     }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * @param credential the OAuth credential to revoke
+     */
+    public void revokeOAuthTokenFromServer(Credential credential) throws GeneralSecurityException, IOException {
+        try {
+            if (credential == null) {
+                System.out.println("No credential available to revoke.");
+                return;
+            }
+
+            String token = credential.getAccessToken();
+            if (token == null && credential.getRefreshToken() != null) {
+                token = credential.getRefreshToken();
+            }
+
+            if (token == null) {
+                System.out.println("No access or refresh token found to revoke.");
+                return;
+            }
+
+            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            HttpRequestFactory requestFactory = httpTransport.createRequestFactory();
+            GenericUrl url = new GenericUrl("https://oauth2.googleapis.com/revoke");
+            url.put("token", token);
+
+            HttpRequest request = requestFactory.buildPostRequest(url, null);
+            HttpResponse response = request.execute();
+
+            if (response.getStatusCode() == 200) {
+                System.out.println("OAuth token successfully revoked at server.");
+            } else {
+                System.err.println("Failed to revoke token. HTTP status: " + response.getStatusCode());
+            }
+        } catch (Exception exc) {
+            System.err.println("Error while revoking OAuth token: " + exc.getMessage());
+            throw exc;
+        }
+    }
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
