@@ -1,0 +1,48 @@
+package com.marcoscherzer.oauthfilesendfolderforgooglemail;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+ * Da die komplexität mit Einführung einer consent gui(sicherheitsgründe) overhead hat
+ * ist eigentlich auch der zusatzspeicherverbrauch durch einkopieren in die Windows folder
+ * nun nicht mehr hinnehmbar. Dies war für einfache ein-attachment-pro mail dinge sinnvoll,
+ * da der code einfach blieb und backuper oder batch files einfach in die folder schreiben konnten.
+ * Neben dem Speicherverbauchsnachteil hat
+ * die Komplexität des Folderwatchings im kontext der Gui nun aber mehr Aufwand als eine kleine Client-Server
+ * Architektur einzuführen den den Speichernachteil von Anfang an vermeidet.
+ * Dieses File beginnt vor Entwicklungbeginn durchdachten Plan B: Client-Server Architektur mit einem Client
+ * der mindestens in einem BatchFile eine FileListe annehmen kann.
+ */
+public class MLinkCollectorFolderClient {
+
+    // Liste der eingesammelten Dateien
+    private final List<File> collectedFiles = new ArrayList<>();
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public void addFiles(String[] paths) {
+        for (String path : paths) {
+            File f = new File(path);
+            if (f.exists()) {
+                collectedFiles.add(f);
+                System.out.println("Eingesammelt: " + f.getAbsolutePath());
+            } else {
+                System.err.println("Pfad nicht gefunden: " + path);
+            }
+        }
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public static void main(String[] args) {
+        MLinkCollectorFolderClient client = new MLinkCollectorFolderClient();
+        client.addFiles(args);
+
+        System.out.println("Gesamt eingesammelt: " + client.collectedFiles.size());
+    }
+}
