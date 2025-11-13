@@ -17,12 +17,15 @@ import static java.nio.file.StandardWatchEventKinds.*;
 public abstract class MFolderWatcher {
 
     private final ExecutorService watcherThread; // Haupt-Thread (WatchService)
-    private final ExecutorService monitorQueue; // Sequentielle Verarbeitung der Datei-Monitore
+    private final ExecutorService monitorQueue;  // Sequentielle Verarbeitung der Datei-Monitore
     private final Map<Path, MObservedFile> fileStates;
     private final Set<Path> activeMonitors;
     private WatchService watchService;
     private Path watchDir;
     private boolean running;
+
+    // Zeitstempel für "alle Dateien fertig"
+    private volatile long allReadySince = -1;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -116,6 +119,21 @@ public abstract class MFolderWatcher {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
+    public boolean allFilesReadyWrittenSince(long millis) {
+        if (activeMonitors.isEmpty()) {
+            if (allReadySince < 0) {
+                allReadySince = System.currentTimeMillis();
+            }
+            return (System.currentTimeMillis() - allReadySince) >= millis;
+        } else {
+            allReadySince = -1;
+            return false;
+        }
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     private final class MObservedFile implements Runnable {
 
         private final Path file;
@@ -176,6 +194,7 @@ public abstract class MFolderWatcher {
         }
     }
 }
+
 
 
 
