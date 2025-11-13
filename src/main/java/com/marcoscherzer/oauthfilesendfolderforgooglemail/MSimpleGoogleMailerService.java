@@ -148,6 +148,11 @@ public final class MSimpleGoogleMailerService {
                     }
 
                 }
+
+                @Override
+                protected void onAttachmentCntIsStable() {
+
+                }
             };
 
             watcher.startWatching();
