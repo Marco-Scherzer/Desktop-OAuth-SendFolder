@@ -81,8 +81,12 @@ public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    protected abstract void onNewAttachmentAdded(int currentAttachmentCnt, boolean attachmentCntIsStable);
+    protected abstract void onNewAttachmentAdded(int currentAttachmentCnt);
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    protected abstract void onAttachmentCntIsStable();
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
