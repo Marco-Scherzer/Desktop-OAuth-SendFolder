@@ -24,10 +24,12 @@ import jakarta.activation.DataSource;
 import jakarta.activation.FileDataSource;
 import org.apache.commons.codec.binary.Base64;
 
+import javax.swing.text.StringContent;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
@@ -218,10 +220,17 @@ public final class MSimpleGoogleMailer {
 
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             HttpRequestFactory requestFactory = httpTransport.createRequestFactory();
-            GenericUrl url = new GenericUrl("https://oauth2.googleapis.com/revoke");
-            url.put("token", token);
 
-            HttpRequest request = requestFactory.buildPostRequest(url, null);
+            GenericUrl url = new GenericUrl("https://oauth2.googleapis.com/revoke");
+
+            // Body als x-www-form-urlencoded
+            String body = "token=" + token;
+            ByteArrayContent content = new ByteArrayContent(
+                    "application/x-www-form-urlencoded",
+                    body.getBytes(StandardCharsets.UTF_8)
+            );
+
+            HttpRequest request = requestFactory.buildPostRequest(url, content);
             HttpResponse response = request.execute();
 
             if (response.getStatusCode() == 200) {
@@ -234,6 +243,8 @@ public final class MSimpleGoogleMailer {
             throw exc;
         }
     }
+
+
 
 
     /**
