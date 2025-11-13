@@ -62,13 +62,8 @@ public final class MSimpleGoogleMailerService {
 
             clientAndPathUUID = store.get("clientId");
 
-            Path outPath = Paths.get(basePath, clientAndPathUUID);
-            Path sentPath = Paths.get(basePath, clientAndPathUUID + "-sent");
-            Path notSentPath = Paths.get(basePath, clientAndPathUUID + "-notSent");
-
-            outFolder = createPathIfNotExists(outPath, "Out folder");
-            sentFolder = createPathIfNotExists(sentPath, "Sent folder");
-            notSentFolder = createPathIfNotExists(notSentPath, "NotSent folder");
+            sentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-sent"), "Sent folder");
+            notSentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-notSent"), "NotSent folder");
 
             fromAddress = store.get("fromAddress");
             toAddress = store.get("toAddress");
@@ -83,8 +78,9 @@ public final class MSimpleGoogleMailerService {
                     }
                 }
             }
+            //server singlethreadexec als attribut und runloop der auf clientnachrichten mit pfadlisten lauscht und diese
 
-            outgoingDesktopLinkWatcher = createAndWatchFolderDesktopLink(outFolder.toString(), "Outgoing Things", "Outgoing");
+
             sentDesktopLinkWatcher     = createAndWatchFolderDesktopLink(sentFolder.toString(), "Sent Things", "Sent");
             MFileNameWatcher notSent   = createAndWatchFolderDesktopLink(notSentFolder.toString(), "NotSent Things", "NotSent");
 

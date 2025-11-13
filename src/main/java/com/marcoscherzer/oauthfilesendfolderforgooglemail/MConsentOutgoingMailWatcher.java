@@ -4,14 +4,13 @@ import com.marcoscherzer.msimplegooglemailer.MOutgoingMail;
 import com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailer;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Consumer;
+
+import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createFolderDesktopLink;
+import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createFolderLink;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -27,9 +26,8 @@ public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher {
     private final MSimpleGoogleMailer mailer;
     private final Path sentFolder;
     private volatile boolean userConsentActive = false;
-    private final List<String> pendingAttachments = Collections.synchronizedList(new ArrayList<>());
-    private final List<MOutgoingMail> sentMails = Collections.synchronizedList(new ArrayList<>());
-    private final Object consentLock = new Object();
+    private final List<String> fileLinkList = new ArrayList<>();
+    private int attachedFilesCnt;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -52,106 +50,56 @@ public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    @Override
-    public void onFileChangedAndUnlocked(Path file) {
-        if (!Files.exists(file)) {
-            System.out.println("User deleted file. Nothing to send.");
-            return;
-        }
-        synchronized (consentLock) {
-            pendingAttachments.add(file.toString());
-            if (askConsent && !userConsentActive) {
-                userConsentActive = true;
-                MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress)
-                        .setSubject(clientAndPathUUID + ", started " +
-                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                onAskForConsent(mail, this::sendAllPending, this::moveAllToNotSent);
-            }
-            onNewAttachmentAdded(pendingAttachments.size());
-        }
+
+    public void onNewAttachmentList() {
+
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    protected abstract void onAskForConsent(MOutgoingMail mail,
-                                            Consumer<MOutgoingMail> onSendPermitted,
-                                            Runnable onSendCanceled);
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    protected abstract void onNewAttachmentAdded(int currentAttachmentCnt);
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    protected abstract void onAttachmentCntIsStable();
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    private void sendAllPending(MOutgoingMail mail) {
+    private void sendAndCollect(MOutgoingMail mail) {
         String sendDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         mail.setSubject(clientAndPathUUID + ", sendTime " + sendDateTime);
 
-        List<String> successfullySentPaths = new ArrayList<>();
         try {
-            for (String path : pendingAttachments) {
+            for (String path : fileLinkList) {
                 File file = new File(path);
                 mail.addAttachment(path);
+                attachedFilesCnt++;
                 mail.appendMessageText(clientAndPathUUID + "\\" + file.getName());
             }
             try {
-                mailer.send(mail);
+                showSendGui(mail, this.send(), this::moveAllToFolder(notSentFolder));
             } catch (Exception sendFail) {
                 System.err.println("Mail send failed: " + sendFail.getMessage());
             }
-            for (String path : pendingAttachments) {
-                File sourceFile = new File(path);
-                String newName = MUtil.createTimeStampFileName(sourceFile);
-                try {
-                    File targetFile = new File(sentFolder.toFile(), newName);
-                    Files.move(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    System.out.println("Sent and moved: " + newName);
-                    successfullySentPaths.add(path);
-                } catch (Exception e) {
-                    try {
-                        File fallbackFile = new File(notSentFolder.toFile(), newName);
-                        Files.move(sourceFile.toPath(), fallbackFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                        System.err.println("Send failed, moved to NOT SENT: " + newName);
-                    } catch (IOException moveFail) {
-                        System.err.println("Failed to move unsent file: " + sourceFile.getName() + " -> " + moveFail.getMessage());
-                    }
-                    System.err.println("Error sending: " + sourceFile.getName() + " -> " + e.getMessage());
-                }
-            }
-            sentMails.add(mail);
-            pendingAttachments.removeAll(successfullySentPaths);
-            System.out.println("Mail sent with " + successfullySentPaths.size() + " attachments.");
+
+            System.out.println("Mail sent with " + attachedFilesCnt + " attachments.");
         } catch (Exception sendExc) {
             System.err.println("Error during send: " + sendExc.getMessage());
         }
     }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private final void moveAllToFolder(Path folder){
+        for (String path : fileLinkList) {
+            File sourceFile = new File(path);
+            String newName = MUtil.createTimeStampFileName(sourceFile);
+            try {
+                createFolderLink(sourceFile.getPath(), folder, newName );
+                System.out.println("Sent and moved: " + newName);
+            } catch (Exception exc) {
+                System.err.println("Failed to move unsent file: " + sourceFile.getName() + " " + exc.getMessage());
+            }
+    }
+    }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private void moveAllToNotSent() {
-        for (String path : pendingAttachments) {
-            File sourceFile = new File(path);
-            String newName = MUtil.createTimeStampFileName(sourceFile);
-            try {
-                File targetFile = new File(notSentFolder.toFile(), newName);
-                Files.move(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("Denied, moved to NotSent: " + newName);
-            } catch (IOException moveFail) {
-                System.err.println("Failed to move unsent file: " + sourceFile.getName() + " -> " + moveFail.getMessage());
-            }
-        }
-        pendingAttachments.clear();
-    }
-
+    abstract void showSendGui();
 
 }
 

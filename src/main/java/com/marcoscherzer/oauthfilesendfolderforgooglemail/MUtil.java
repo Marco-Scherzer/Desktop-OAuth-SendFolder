@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.Scanner;
 
 public class MUtil {
+
     /**
      * Creates a junction on the desktop pointing to a target folder.
      * Works only on Windows and only for folders on the same volume.
@@ -21,15 +22,27 @@ public class MUtil {
      * Author: Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public static Path createFolderDesktopLink(String targetFolderPath, String linkName) throws Exception {
-        Path linkPath;
-        try {
-            Path desktopPath = getDesktopPath();
+
+     Path desktopPath = getDesktopPath();
             System.out.println("Creating Desktop link for \"" + targetFolderPath + "\" in Desktop folder \"" + desktopPath + "\"");
 
             if (desktopPath == null || !Files.exists(desktopPath)) {
                 System.err.println("Desktop path is invalid");
                 return null;
             }
+            return createFolderLink(targetFolderPath, desktopPath, linkName);
+    }
+
+
+    /**
+     * Creates a junction  pointing to a target folder.
+     * Works only on Windows and only for folders on the same volume.
+     * returns the absolute path of the created link if desktop path exists. null otherwise.
+     * Author: Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public static Path createFolderLink(String targetFolderPath, Path linkPath_, String linkName) throws Exception {
+        Path linkPath;
+        try {
 
             Path targetPath = Paths.get(targetFolderPath);
             if (!Files.isDirectory(targetPath)) {
@@ -37,7 +50,7 @@ public class MUtil {
             }
 
             String safeName = linkName.replaceAll("[^a-zA-Z0-9_\\- ]", "").trim();
-            linkPath = desktopPath.resolve(safeName);
+            linkPath = linkPath_.resolve(safeName);
 
             String command = String.format("cmd /c mklink /J \"%s\" \"%s\"", linkPath.toAbsolutePath(), targetPath.toAbsolutePath());
 
