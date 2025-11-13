@@ -41,20 +41,22 @@ public final class MSimpleGoogleMailer {
 
     private static String clientSecretDir = System.getProperty("user.dir");
     private final List<String> scopes = Collections.singletonList(GmailScopes.GMAIL_SEND);
+    private final boolean secureOAuthMode;
     private Gmail service;
     private MSimpleKeystore keystore;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static void setClientKeystoreDir(String clientSecretFileDir) {
+    public static final void setClientKeystoreDir(String clientSecretFileDir) {
         clientSecretDir = clientSecretFileDir;
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleGoogleMailer(String applicationName, String keystorePassword, boolean forceOAuth) throws Exception {
+    public MSimpleGoogleMailer(String applicationName, String keystorePassword, boolean useSecureOAuthMode) throws Exception {
+        this.secureOAuthMode =useSecureOAuthMode;
         File keystoreFile = new File(clientSecretDir, "mystore.p12");
         File jsonFile = new File(clientSecretDir, "client_secret.json");
 
@@ -110,7 +112,7 @@ public final class MSimpleGoogleMailer {
                 GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
                 GoogleAuthorizationCodeFlow flow;
 
-                if (forceOAuth) {
+                if (useSecureOAuthMode) {
                     if (keystore.contains("OAuth")) {
                         System.out.println("Securer OAuth Mode was chosen. Not keeping old tokens. Removing persistent OAuth token.");
                         keystore.remove("OAuth");
@@ -175,13 +177,29 @@ public final class MSimpleGoogleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleKeystore getKeystore() {
+    public final MSimpleKeystore getKeystore() {
         return this.keystore;
     }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * analog des löschens von OAuth cookies im browser so dass diese nicht verbleiben
+     */
+    public final void cleanUpOAuthTokenIfNotSecureOAuthMode() throws Exception {
+        try {
+           if(!secureOAuthMode) this.keystore.remove("OAuth");
+        } catch (Exception exc) {
+            System.err.println("Error removing OAuth token from Keystore. " +
+                    "\nPlease delete the keystore file manually and restart the program (you have to setup pw and mail adresses new)." +
+                    "\nConsider to use secure OAuthMode Parameter next time."+ exc.getMessage());
+            throw new Exception(exc);
+        }
+    }
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public void send(MOutgoingMail mail) throws Exception {
+    public final void send(MOutgoingMail mail) throws Exception {
         try {
             Properties props = new Properties();
             Session session = Session.getDefaultInstance(props, null);

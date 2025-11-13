@@ -33,6 +33,7 @@ public final class MSimpleGoogleMailerService {
     private static MConsentOutgoingMailWatcher watcher;
     private static String fromAddress;
     private static String toAddress;
+    private static MSimpleGoogleMailer mailer;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -49,7 +50,7 @@ public final class MSimpleGoogleMailerService {
             System.out.println();
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);
             //MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, false); //dbg
-            MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, false);
+            mailer = new MSimpleGoogleMailer("BackupMailer", pw, false);
             MSimpleKeystore store = mailer.getKeystore();
 
             if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
@@ -205,6 +206,7 @@ public final class MSimpleGoogleMailerService {
      */
     private static void exit(int code) {
         try {
+            mailer.cleanUpOAuthTokenIfNotSecureOAuthMode();
             if (watcher != null) watcher.shutdown();
             if(outgoingDesktopLinkWatcher != null ) outgoingDesktopLinkWatcher.shutdown();
             if(sentDesktopLinkWatcher != null ) sentDesktopLinkWatcher.shutdown();
