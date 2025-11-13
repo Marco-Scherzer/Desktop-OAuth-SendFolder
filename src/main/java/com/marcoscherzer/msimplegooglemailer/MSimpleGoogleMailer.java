@@ -188,9 +188,10 @@ public final class MSimpleGoogleMailer {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * analog des löschens von OAuth cookies im browser so dass diese nicht verbleiben
      */
-    public final void cleanUpPersistetOAuthTokenIfStartetInPersistMode() throws Exception {
+    public final void removePersistetOAuthToken() throws Exception {
         try {
-           if(keystore.contains("OAuth")) this.keystore.remove("OAuth");
+            System.out.println("Removing persistet OAuth Token from KeyStore.");
+           if(keystore.contains("OAuth")) this.keystore.remove("OAuth"); else System.out.println("OAuth Token not contained. Started in doNotPersistOAuthToken Mode ?)");
         } catch (Exception exc) {
             System.err.println("Error removing OAuth token from Keystore. " +
                     "\nPlease delete the keystore file manually and restart the program (you have to setup pw and mail adresses new)." +
