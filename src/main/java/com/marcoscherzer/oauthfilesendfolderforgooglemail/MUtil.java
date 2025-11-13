@@ -20,7 +20,7 @@ public class MUtil {
      * returns the absolute path of the created link if desktop path exists. null otherwise.
      * Author: Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static Path createFolderLink(String targetFolderPath, String linkName) throws Exception {
+    public static Path createFolderDesktopLink(String targetFolderPath, String linkName) throws Exception {
         Path linkPath;
         try {
             Path desktopPath = getDesktopPath();

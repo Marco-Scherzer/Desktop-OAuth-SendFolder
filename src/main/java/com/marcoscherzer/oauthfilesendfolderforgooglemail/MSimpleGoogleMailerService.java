@@ -11,7 +11,7 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createFolderLink;
+import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createFolderDesktopLink;
 import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createPathIfNotExists;
 import static com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailerUtil.checkMailAddress;
 
@@ -162,7 +162,9 @@ public final class MSimpleGoogleMailerService {
                 }
             }
 
-            createDesktopLinksAndStartWatchingNames();
+            outgoingDesktopLinkWatcher = createAndWatchFolderDesktopLink(outFolder.toString(), "Outgoing Things", "Outgoing");
+            sentDesktopLinkWatcher     = createAndWatchFolderDesktopLink(sentFolder.toString(), "Sent Things", "Sent");
+            MFileNameWatcher notSent   = createAndWatchFolderDesktopLink(notSentFolder.toString(), "NotSent Things", "NotSent");
 
             printConfiguration(fromAddress, toAddress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
 
@@ -213,50 +215,7 @@ public final class MSimpleGoogleMailerService {
         System.exit(code);
     }
 
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    private static void  createDesktopLinksAndStartWatchingNames() throws Exception {
-        Path absoluteOutgoingLinkPath = createFolderLink(outFolder.toString(), "Outgoing Things");
-        Path absoluteSentLinkPath = createFolderLink(sentFolder.toString(), "Sent Things");
-        Path absoluteNotSentLinkPath = createFolderLink(notSentFolder.toString(), "NotSent Things");
 
-        if (absoluteOutgoingLinkPath != null || absoluteSentLinkPath != null || absoluteNotSentLinkPath != null) {
-
-            outgoingDesktopLinkWatcher = new MFileNameWatcher(absoluteOutgoingLinkPath) {
-                @Override
-                protected void onFileNameChanged(WatchEvent.Kind<?> kind, Path fileName) {
-                    System.out.println("Security integrity violated. Desktop Folder Link \"" + absoluteOutgoingLinkPath + "\" changed. Shutting down.");
-                    exit(0);
-                }
-            };
-
-            sentDesktopLinkWatcher = new MFileNameWatcher(absoluteSentLinkPath) {
-                @Override
-                protected void onFileNameChanged(WatchEvent.Kind<?> kind, Path fileName) {
-                    System.out.println("Security integrity violated. Desktop Folder Link \"" + absoluteSentLinkPath + "\" changed. Shutting down.");
-                    exit(0);
-                }
-            };
-
-            MFileNameWatcher notSentDesktopLinkWatcher = new MFileNameWatcher(absoluteNotSentLinkPath) {
-                @Override
-                protected void onFileNameChanged(WatchEvent.Kind<?> kind, Path fileName) {
-                    System.out.println("Security integrity violated. Desktop Folder Link \"" + absoluteNotSentLinkPath + "\" changed. Shutting down.");
-                    exit(0);
-                }
-            };
-
-            outgoingDesktopLinkWatcher.startWatching();
-            System.out.println("Monitoring \"" + absoluteOutgoingLinkPath + "\" for name integrity violations...");
-            sentDesktopLinkWatcher.startWatching();
-            System.out.println("Monitoring \"" + absoluteSentLinkPath + "\" for name integrity violations...");
-            notSentDesktopLinkWatcher.startWatching();
-            System.out.println("Monitoring \"" + absoluteNotSentLinkPath + "\" for name integrity violations...");
-        } else {
-            System.out.println("No Desktop links could be created. Please create links manually");
-        }
-    }
 
     /**
      * @author Marco Scherzer
@@ -289,6 +248,31 @@ public final class MSimpleGoogleMailerService {
         );
 
     }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private static MFileNameWatcher createAndWatchFolderDesktopLink(String folderPath, String linkName, String label) throws Exception {
+        Path linkPath = createFolderDesktopLink(folderPath, linkName);
+        if (linkPath == null) {
+            System.out.println("Desktop link for '" + linkName + "' (" + label + ") could not be created. Please create it manually.");
+            return null;
+        }
+
+        MFileNameWatcher watcher = new MFileNameWatcher(linkPath) {
+            @Override
+            protected void onFileNameChanged(WatchEvent.Kind<?> kind, Path fileName) {
+                System.out.println("Security integrity violated. Desktop Folder Link \""
+                        + linkPath + "\" (" + label + ") changed. Shutting down.");
+                exit(0);
+            }
+        };
+
+        watcher.startWatching();
+        System.out.println("Monitoring \"" + linkPath + "\" (" + label + ") for name integrity violations...");
+        return watcher;
+    }
+
 
 }
 
