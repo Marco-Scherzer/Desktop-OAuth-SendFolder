@@ -142,9 +142,9 @@ public final class MSimpleGoogleMailerService {
                 }
 
                 @Override
-                protected void onNewAttachmentAdded(int size) {
+                protected void onNewAttachmentAdded(int currentAttachmentCnt, boolean attachmentCntIsStable) {
                     if (counterLabel != null) {
-                        counterLabel.setText("Attachments: " + size);
+                        counterLabel.setText("Attachments: " + currentAttachmentCnt);
                     }
 
                 }
