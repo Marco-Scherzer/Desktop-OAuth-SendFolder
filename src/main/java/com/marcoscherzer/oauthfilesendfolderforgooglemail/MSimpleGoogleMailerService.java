@@ -203,7 +203,6 @@ public final class MSimpleGoogleMailerService {
      */
     private static void exit(int code) {
         try {
-            mailer.cleanUpOAuthTokenIfNotSecureOAuthMode();
             if (watcher != null) watcher.shutdown();
             if(outgoingDesktopLinkWatcher != null ) outgoingDesktopLinkWatcher.shutdown();
             if(sentDesktopLinkWatcher != null ) sentDesktopLinkWatcher.shutdown();
