@@ -35,6 +35,7 @@ public final class MSimpleGoogleMailerService {
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
      */
     public static final void main(String[] args) {
         try {
@@ -70,42 +71,54 @@ public final class MSimpleGoogleMailerService {
             fromAddress = store.get("fromAddress");
             toAddress = store.get("toAddress");
 
-            watcher = new MConsentOutgoingMailWatcher(
-                    outFolder,
-                    sentFolder,
-                    notSentFolder,
-                    mailer,
-                    fromAddress,
-                    toAddress,
-                    clientAndPathUUID,
-                    askConsent
-            ) {
+            watcher = new MConsentOutgoingMailWatcher(outFolder, sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID, askConsent) {
                 private JFrame consentFrame;
                 private JLabel counterLabel;
 
                 @Override
-                protected void onAskForConsent(MOutgoingMail mail, Consumer<MOutgoingMail> onSendPermitted, Runnable onSendCanceled) {
+                protected void onAskForConsent(MOutgoingMail mail,
+                                               Consumer<MOutgoingMail> onSendPermitted,
+                                               Runnable onSendCanceled) {
                     SwingUtilities.invokeLater(() -> {
                         consentFrame = new JFrame("Send Mail");
                         consentFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                         consentFrame.setAlwaysOnTop(true);
                         consentFrame.setLocationRelativeTo(null);
+
+                        // Neues Label für die Betreffzeile
+                        JLabel subjectLabel = new JLabel("Betreff: " + mail.getSubject());
+
                         counterLabel = new JLabel("Attachments: 0");
+
                         JButton sendButton = new JButton("Senden");
                         JButton cancelButton = new JButton("Abbrechen");
+
                         sendButton.addActionListener(e -> {
                             onSendPermitted.accept(mail);
+                            userConsentActive = false;
+                            consentFrame.dispose();
                         });
+
                         cancelButton.addActionListener(e -> {
                             onSendCanceled.run();
+                            userConsentActive = false;
+                            consentFrame.dispose();
                         });
+
+                        // Panel mit vertikalem Layout
                         JPanel panel = new JPanel();
+                        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+                        panel.add(subjectLabel);
                         panel.add(counterLabel);
-                        panel.add(sendButton);
-                        panel.add(cancelButton);
+
+                        JPanel buttonPanel = new JPanel();
+                        buttonPanel.add(sendButton);
+                        buttonPanel.add(cancelButton);
+
+                        panel.add(buttonPanel);
 
                         consentFrame.add(panel);
-                        consentFrame.pack();
+                        consentFrame.setSize(400, 150);   // feste Größe
                         consentFrame.setVisible(true);
                     });
                 }

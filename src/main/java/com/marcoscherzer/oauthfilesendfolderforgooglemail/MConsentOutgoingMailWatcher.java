@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+ * unready
  */
 public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher {
 
