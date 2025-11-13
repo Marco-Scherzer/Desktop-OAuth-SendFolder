@@ -54,7 +54,7 @@ public final class MSimpleGoogleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleGoogleMailer(String applicationName, String keystorePassword, boolean useSecureOAuthMode) throws Exception {
+    public MSimpleGoogleMailer(String applicationName, String keystorePassword, boolean doNotPersistOAuthToken) throws Exception {
         File keystoreFile = new File(clientSecretDir, "mystore.p12");
         File jsonFile = new File(clientSecretDir, "client_secret.json");
 
@@ -110,7 +110,7 @@ public final class MSimpleGoogleMailer {
                 GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
                 GoogleAuthorizationCodeFlow flow;
 
-                if (useSecureOAuthMode) {
+                if (doNotPersistOAuthToken) {
                     if (keystore.contains("OAuth")) {
                         System.out.println("Securer OAuth Mode was chosen. Not keeping old tokens. Removing persistent OAuth token.");
                         keystore.remove("OAuth");
