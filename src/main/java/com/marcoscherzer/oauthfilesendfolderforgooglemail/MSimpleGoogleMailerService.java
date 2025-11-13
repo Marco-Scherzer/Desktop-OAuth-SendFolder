@@ -17,6 +17,7 @@ import static com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailerUtil.chec
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+ * unready
  */
 public final class MSimpleGoogleMailerService {
 
@@ -80,48 +81,67 @@ public final class MSimpleGoogleMailerService {
                                                Consumer<MOutgoingMail> onSendPermitted,
                                                Runnable onSendCanceled) {
                     SwingUtilities.invokeLater(() -> {
-                        consentFrame = new JFrame("Send Mail");
+                        consentFrame = new JFrame("OAuthFileSendFolder for GoogleMail (Prototype,preAlpha 0.1) - Send Mail");
                         consentFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                         consentFrame.setAlwaysOnTop(true);
                         consentFrame.setLocationRelativeTo(null);
 
-                        // Neues Label für die Betreffzeile
-                        JLabel subjectLabel = new JLabel("Betreff: " + mail.getSubject());
+                        // Innerer Container mit Padding
+                        JPanel innerPanel = new JPanel();
+                        innerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+                        innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.Y_AXIS));
 
-                        counterLabel = new JLabel("Attachments: 0");
+                        // 1. Zeile: Betreff
+                        JTextField subjectField = new JTextField("Betreff: " + mail.getSubject());
+                        subjectField.setEditable(false);
+                        subjectField.setMaximumSize(new Dimension(Integer.MAX_VALUE, subjectField.getPreferredSize().height));
+                        innerPanel.add(subjectField);
+                        innerPanel.add(Box.createVerticalStrut(10));
 
+                        // 2. Zeile: TextArea für Mailtext (nimmt maximale Höhe ein)
+                        JTextArea messageArea = new JTextArea();
+                        messageArea.setLineWrap(true);
+                        messageArea.setWrapStyleWord(true);
+                        JScrollPane scrollPane = new JScrollPane(messageArea);
+                        scrollPane.setPreferredSize(new Dimension(580, 200));
+                        scrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+                        innerPanel.add(scrollPane);
+                        innerPanel.add(Box.createVerticalStrut(10));
+
+                        // 3. Zeile: Counter + Buttons gleich verteilt (feste Höhe)
+                        counterLabel = new JLabel("Attachments: 0", SwingConstants.CENTER);
                         JButton sendButton = new JButton("Senden");
                         JButton cancelButton = new JButton("Abbrechen");
 
                         sendButton.addActionListener(e -> {
+                            mail.appendMessageText(messageArea.getText());
                             onSendPermitted.accept(mail);
-                            userConsentActive = false;
+                            //userConsteActive=false
                             consentFrame.dispose();
                         });
 
                         cancelButton.addActionListener(e -> {
                             onSendCanceled.run();
-                            userConsentActive = false;
+                            //userConsteActive=false
                             consentFrame.dispose();
                         });
 
-                        // Panel mit vertikalem Layout
-                        JPanel panel = new JPanel();
-                        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-                        panel.add(subjectLabel);
-                        panel.add(counterLabel);
+                        JPanel bottomRow = new JPanel(new GridLayout(1, 3, 10, 0));
+                        bottomRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40)); // feste Höhe für Buttons
+                        bottomRow.add(counterLabel);
+                        bottomRow.add(sendButton);
+                        bottomRow.add(cancelButton);
 
-                        JPanel buttonPanel = new JPanel();
-                        buttonPanel.add(sendButton);
-                        buttonPanel.add(cancelButton);
+                        innerPanel.add(bottomRow);
 
-                        panel.add(buttonPanel);
-
-                        consentFrame.add(panel);
-                        consentFrame.setSize(400, 150);   // feste Größe
+                        consentFrame.add(innerPanel);
+                        consentFrame.setSize(600, 400);   // größer, TextArea dominiert
                         consentFrame.setVisible(true);
                     });
                 }
+
+
+
 
                 @Override
                 protected void onNewAttachmentAdded(int size) {

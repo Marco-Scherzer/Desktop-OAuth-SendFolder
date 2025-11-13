@@ -48,13 +48,18 @@ Contact: fahrservice.1@gmail.com
 
 ### - Application startup access password protection
 
+### - Attachments Desktop Folder triggerd email window appearance:
+    If attachments are added to the outgoing mail folder link on the Desktop, an Email Send dialog appears.
+    Purpose: The dialog requests user consent before sending.
+    Options: The user can change the subject line or write a simple text message.
+
 ### - Sender email address is stored in secure encrypted PKCS#12 database
 
 ### - Recipient email address is stored in secure encrypted PKCS#12 database
 
 ### - One Time setup of Sender and Receiver Address
 
-### - Files added to the local "Outgoing Things" Desktop link folder are sent automatically to a predefined recipient via Gmail.
+### - Files added to the local "Outgoing Things" Desktop link folder are sent after user consent to a predefined recipient via Gmail.
 
 ### - Generates at setup time internal Mail Folder Names using UUIDs for additional abuse prevention (application decides the real folder name).
 
