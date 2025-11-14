@@ -30,7 +30,7 @@ public final class MSimpleGoogleMailerService {
     private static String fromAddress;
     private static String toAddress;
     private static MSimpleGoogleMailer mailer;
-    private static MFileNameWatcher notSent;
+    private static MFileNameWatcher notSentDesktopLinkWatcher;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -65,17 +65,16 @@ public final class MSimpleGoogleMailerService {
             fromAddress = store.get("fromAddress");
             toAddress = store.get("toAddress");
 
-            //server singlethreadexec als attribut und runloop der auf clientnachrichten mit pfadlisten lauscht und diese
-            MAttachmentWatcher m = new MAttachmentWatcher() {
+            MAttachmentWatcher m = watcher = new MAttachmentWatcher(outFolder, sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID, askConsent) {
                 @Override
-                MConsentQuestionResult askForConsent(MOutgoingMail mail) {
-
+                public final MConsentQuestionResult askForConsent(MOutgoingMail mail) {
+                    return () -> true;
                 }
-            };
+            }.startServer();
 
 
             sentDesktopLinkWatcher     = createAndWatchFolderDesktopLink(sentFolder.toString(), "Sent Things", "Sent");
-            notSent   = createAndWatchFolderDesktopLink(notSentFolder.toString(), "NotSent Things", "NotSent");
+            notSentDesktopLinkWatcher = createAndWatchFolderDesktopLink(notSentFolder.toString(), "NotSent Things", "NotSent");
 
             printConfiguration(fromAddress, toAddress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
 
