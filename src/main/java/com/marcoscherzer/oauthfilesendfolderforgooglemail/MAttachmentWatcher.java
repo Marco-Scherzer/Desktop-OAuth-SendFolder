@@ -28,7 +28,6 @@ public abstract class MAttachmentWatcher {
         private final String fromAddress;
         private final String toAddress;
         private final String clientAndPathUUID;
-        private final boolean askConsent;
         private final Path sentFolder;
         private final Path notSentFolder;
         private final MSimpleGoogleMailer mailer;
@@ -38,20 +37,17 @@ public abstract class MAttachmentWatcher {
         // Server-Attribute
         private final ExecutorService executor = Executors.newSingleThreadExecutor();
         private ServerSocket serverSocket;
+        private boolean busy;
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
-        public MAttachmentWatcher(Path outFolder, Path sentFolder, Path notSentFolder, MSimpleGoogleMailer mailer,
-                                  String fromAddress,
-                                  String toAddress,
-                                  String clientAndPathUUID,
-                                  boolean askConsent) {
+        public MAttachmentWatcher(Path sentFolder, Path notSentFolder, MSimpleGoogleMailer mailer, String fromAddress, String toAddress, String clientAndPathUUID) {
             this.sentFolder = sentFolder;
             this.fromAddress = fromAddress;
             this.toAddress = toAddress;
             this.clientAndPathUUID = clientAndPathUUID;
-            this.askConsent = askConsent;
             this.notSentFolder = notSentFolder;
             this.mailer = mailer;
         }
@@ -60,33 +56,47 @@ public abstract class MAttachmentWatcher {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
-        public final MAttachmentWatcher startServer() throws IOException {
-            serverSocket = new ServerSocket(11111);
-            executor.submit(() -> {
-                System.out.println("AttachmentWatcher listening on port 11111...");
-                while (!serverSocket.isClosed()) {
-                    try (Socket client = serverSocket.accept();
-                         BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()))) {
+    public final MAttachmentWatcher startServer() throws IOException {
+        serverSocket = new ServerSocket(11111);
+        executor.submit(() -> {
+            System.out.println("AttachmentWatcher listening on port 11111...");
+            while (!serverSocket.isClosed()) {
+                Socket client = null;
+                BufferedReader reader = null;
+                try {
+                    client = serverSocket.accept();
+                  if(!busy) {
+                      busy = true;
+                      reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
-                        List<String> incomingPaths = new ArrayList<>();
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            incomingPaths.add(line.trim());
-                        }
+                      List<String> incomingPaths = new ArrayList<>();
+                      String line;
+                      while ((line = reader.readLine()) != null) {
+                          incomingPaths.add(line.trim());
+                      }
 
-                        if (!incomingPaths.isEmpty()) {
-                            onNewAttachmentList(incomingPaths);
-                        }
-
-                    } catch (IOException e) {
-                        if (!serverSocket.isClosed()) {
-                            System.err.println("Error in server loop: " + e.getMessage());
-                        }
+                      if (!incomingPaths.isEmpty()) {
+                          onNewAttachmentList(incomingPaths);
+                      }
+                  } else System.out.println("Server buisy");
+                } catch (IOException e) {
+                    if (!serverSocket.isClosed()) {
+                        System.err.println("Error in server loop: " + e.getMessage());
+                    }
+                } finally {
+                    try {
+                        if (reader != null) reader.close();
+                        if (client != null && !client.isClosed()) client.close();
+                    } catch (IOException closeExc) {
+                        System.err.println("Error closing client resources: " + closeExc.getMessage());
                     }
                 }
-            });
-            return this;
-        }
+                busy = false;
+            }
+        });
+        return this;
+    }
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -95,7 +105,6 @@ public abstract class MAttachmentWatcher {
         private void onNewAttachmentList(List<String> list) {
             fileLinkList.clear();
             fileLinkList.addAll(list);
-
             String sendDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress)
                     .setSubject(clientAndPathUUID + ", sendTime " + sendDateTime);
@@ -109,18 +118,13 @@ public abstract class MAttachmentWatcher {
                     mail.appendMessageText(clientAndPathUUID + "\\" + file.getName());
                 }
 
-                try {
-                    MConsentQuestionResult r = askForConsent(mail); // modal
-                    if (r.getValue()) {
-                        mailer.send(mail);
-                        moveAllToFolder(sentFolder);
-                    } else {
-                        moveAllToFolder(notSentFolder);
-                    }
-                } catch (Exception sendFail) {
-                    System.err.println("Mail send failed: " + sendFail.getMessage());
+                MConsentQuestionResult r = askForConsent(mail); // modal
+                if (r.getValue()) {
+                    mailer.send(mail);
+                    moveAllToFolder(sentFolder);
+                } else {
+                    moveAllToFolder(notSentFolder);
                 }
-
                 System.out.println("Mail processed with " + attachedFilesCnt + " attachments.");
             } catch (Exception sendExc) {
                 System.err.println("Error during send: " + sendExc.getMessage());

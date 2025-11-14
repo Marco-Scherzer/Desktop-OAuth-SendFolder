@@ -19,18 +19,16 @@ public final class MSimpleGoogleMailerService {
 
     private static final String userDir = System.getProperty("user.dir");
     private static final String basePath = userDir+"\\mail";
-    private static MFileNameWatcher outgoingDesktopLinkWatcher;
-    private static MFileNameWatcher sentDesktopLinkWatcher;
     private static boolean askConsent = true;
     private static Path notSentFolder;
     private static Path sentFolder;
-    private static Path outFolder;
     private static String clientAndPathUUID;
     private static MAttachmentWatcher watcher;
     private static String fromAddress;
     private static String toAddress;
     private static MSimpleGoogleMailer mailer;
     private static MFileNameWatcher notSentDesktopLinkWatcher;
+    private static MFileNameWatcher sentDesktopLinkWatcher;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -65,7 +63,7 @@ public final class MSimpleGoogleMailerService {
             fromAddress = store.get("fromAddress");
             toAddress = store.get("toAddress");
 
-            MAttachmentWatcher m = watcher = new MAttachmentWatcher(outFolder, sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID, askConsent) {
+            MAttachmentWatcher m = watcher = new MAttachmentWatcher(sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
                 @Override
                 public final MConsentQuestionResult askForConsent(MOutgoingMail mail) {
                     return () -> true;
@@ -126,8 +124,8 @@ public final class MSimpleGoogleMailerService {
         try {
             if(mailer.isInDoNotPersistOAuthTokenMode()) mailer.revokeOAuthTokenFromServer();
             if (watcher != null) watcher.shutdown();
-            if(outgoingDesktopLinkWatcher != null ) outgoingDesktopLinkWatcher.shutdown();
             if(sentDesktopLinkWatcher != null ) sentDesktopLinkWatcher.shutdown();
+            if(notSentDesktopLinkWatcher != null ) notSentDesktopLinkWatcher.shutdown();
         } catch (Exception exc) {
             exc.printStackTrace();
         }
