@@ -12,17 +12,11 @@ import java.util.Scanner;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- * Da die komplexität mit Einführung einer consent gui(sicherheitsgründe) overhead hat
- * ist eigentlich auch der zusatzspeicherverbrauch durch einkopieren in die Windows folder
- * nun nicht mehr hinnehmbar. Dies war für einfache ein-attachment-pro mail dinge sinnvoll,
- * da der code einfach blieb und backuper oder batch files einfach in die folder schreiben konnten.
- * Neben dem Speicherverbauchsnachteil hat
- * die Komplexität des Folderwatchings im Kontext der Gui nun aber mehr Aufwand als eine kleine Client-Server
- * Architektur einzuführen und den Speichernachteil von Anfang an vermeidet.
- * Dieses File beginnt vor Entwicklungbeginn durchdachten Plan B: Client-Server Architektur mit einem Client
- * der in einem BatchFile eine FileListe per Pipe annehmen und per
+   Client-Server Architektur mit einem Client
+ * der in einem BatchFile eine FileListe per Pipe annehmen oder per
  * file drag and drop auf sein folder symbol oder seinen (Desktop) Link die FileList an den ServerTeil schicken kann.
  */
+
 public class MFileLinkCollectorFolderClient {
 
     private static Socket socket;

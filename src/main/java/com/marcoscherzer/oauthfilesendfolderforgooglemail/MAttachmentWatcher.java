@@ -119,7 +119,7 @@ public abstract class MAttachmentWatcher {
                 }
 
                 MConsentQuestionResult r = askForConsent(mail); // modal
-                if (r.getValue()) {
+                if (r.getResult()) {
                     mailer.send(mail);
                     moveAllToFolder(sentFolder);
                 } else {
@@ -174,7 +174,7 @@ public abstract class MAttachmentWatcher {
      * unready
      */
         public interface MConsentQuestionResult {
-            boolean getValue();
+            boolean getResult();
         }
 
     }

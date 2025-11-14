@@ -9,11 +9,11 @@ import java.awt.*;
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  * MiniGui unready
  */
-public abstract class MMiniGui {
+public final class MMiniGui implements MAttachmentWatcher.MConsentQuestionResult {
     private JFrame consentFrame;
     private JLabel counterLabel;
 
-    protected void MMiniGui(MOutgoingMail mail) {
+    public MMiniGui(MOutgoingMail mail) {
         SwingUtilities.invokeLater(() -> {
             consentFrame = new JFrame("OAuthFileSendFolder for GoogleMail (Prototype, preAlpha 0.1) - Send Mail");
             consentFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -49,12 +49,10 @@ public abstract class MMiniGui {
 
             sendButton.addActionListener(e -> {
                 mail.appendMessageText(messageArea.getText());
-                onSendPermitted(mail);   // abstrakte Methode
                 consentFrame.dispose();
             });
 
             cancelButton.addActionListener(e -> {
-                onSendCanceled();        // abstrakte Methode
                 consentFrame.dispose();
             });
 
@@ -72,7 +70,8 @@ public abstract class MMiniGui {
         });
     }
 
-    protected abstract void onSendPermitted(MOutgoingMail mail);
-
-    protected abstract void onSendCanceled();
+    @Override
+    public boolean getResult() {
+        return false;
+    }
 }
