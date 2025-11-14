@@ -70,7 +70,15 @@ public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher {
                 mail.appendMessageText(clientAndPathUUID + "\\" + file.getName());
             }
             try {
-                showSendGui(mail, this.send(), this::moveAllToFolder(notSentFolder));
+                MSendGui g = showSendGui(mail); //modal
+                if(g.getValue()==true) {
+                    mailer.send(mail);
+                    moveAllToFolder(sentFolder);
+                }
+                else {
+                    moveAllToFolder(notSentFolder);
+                }
+
             } catch (Exception sendFail) {
                 System.err.println("Mail send failed: " + sendFail.getMessage());
             }
@@ -99,8 +107,15 @@ public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    abstract void showSendGui();
+    abstract MSendGui showSendGui(MOutgoingMail mail);
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public static interface MSendGui{
+        public boolean getValue();
+
+    }
 }
 
 
