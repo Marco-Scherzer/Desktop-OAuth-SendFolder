@@ -43,7 +43,7 @@ public final class MMiniGui implements MAttachmentWatcher.MConsentQuestioner {
             innerPanel.add(Box.createVerticalStrut(10));
 
             // 3. Zeile: Counter + Buttons
-            counterLabel = new JLabel("Attachments: 0", SwingConstants.CENTER);
+            counterLabel = new JLabel("Attachments: "+mail.getAttachments().length, SwingConstants.CENTER);
             JButton sendButton = new JButton("Senden");
             JButton cancelButton = new JButton("Abbrechen");
 
