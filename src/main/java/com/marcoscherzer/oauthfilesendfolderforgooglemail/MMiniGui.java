@@ -9,7 +9,7 @@ import java.awt.*;
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  * MiniGui unready
  */
-public final class MMiniGui implements MAttachmentWatcher.MConsentQuestionResult {
+public final class MMiniGui implements MAttachmentWatcher.MConsentQuestioner {
     private JFrame consentFrame;
     private JLabel counterLabel;
 

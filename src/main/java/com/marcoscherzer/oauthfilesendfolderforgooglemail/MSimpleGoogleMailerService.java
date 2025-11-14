@@ -65,9 +65,9 @@ public final class MSimpleGoogleMailerService {
 
             watcher = new MAttachmentWatcher(sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
                 @Override
-                public final MConsentQuestionResult askForConsent(MOutgoingMail mail) {
-                    //new MMiniGui(mail);
-                    return () -> true;
+                public final MConsentQuestioner askForConsent(MOutgoingMail mail) {
+                    return new MMiniGui(mail);
+                    //return () -> true;
                 }
             }.startServer();
 

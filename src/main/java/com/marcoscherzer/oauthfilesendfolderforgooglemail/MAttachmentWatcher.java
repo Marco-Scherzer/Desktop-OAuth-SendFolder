@@ -121,7 +121,7 @@ public abstract class MAttachmentWatcher {
                     mail.appendMessageText(clientAndPathUUID + "\\" + file.getName());
                 }
 
-                MConsentQuestionResult r = askForConsent(mail); // modal
+                MConsentQuestioner r = askForConsent(mail); // modal
                 if (r.getResult()) {
                     mailer.send(mail);
                     moveAllToFolder(sentFolder);
@@ -171,12 +171,12 @@ public abstract class MAttachmentWatcher {
      * unready
      */
         // Abstrakte Methode für Consent
-        public abstract MConsentQuestionResult askForConsent(MOutgoingMail mail);
+        public abstract MConsentQuestioner askForConsent(MOutgoingMail mail);
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
-        public interface MConsentQuestionResult {
+        public interface MConsentQuestioner {
             boolean getResult();
         }
 
