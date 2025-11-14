@@ -1,5 +1,6 @@
 package com.marcoscherzer.oauthfilesendfolderforgooglemail;
 
+import com.marcoscherzer.msimplegooglemailer.MOutgoingMail;
 import com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailer;
 import com.marcoscherzer.msimplegooglemailer.MSimpleKeystore;
 
@@ -65,7 +66,12 @@ public final class MSimpleGoogleMailerService {
             toAddress = store.get("toAddress");
 
             //server singlethreadexec als attribut und runloop der auf clientnachrichten mit pfadlisten lauscht und diese
-            MAttachmentWatcher m = new MAttachmentWatcher();
+            MAttachmentWatcher m = new MAttachmentWatcher() {
+                @Override
+                MSendGui showSendGui(MOutgoingMail mail) {
+
+                }
+            };
 
 
             sentDesktopLinkWatcher     = createAndWatchFolderDesktopLink(sentFolder.toString(), "Sent Things", "Sent");
