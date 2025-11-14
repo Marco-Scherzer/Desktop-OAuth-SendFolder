@@ -1,15 +1,10 @@
 package com.marcoscherzer.oauthfilesendfolderforgooglemail;
 
-import com.marcoscherzer.msimplegooglemailer.MOutgoingMail;
 import com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailer;
 import com.marcoscherzer.msimplegooglemailer.MSimpleKeystore;
 
-import javax.swing.*;
-import java.awt.*;
-import java.io.File;
 import java.nio.file.*;
 import java.util.*;
-import java.util.function.Consumer;
 
 import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createFolderDesktopLink;
 import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createPathIfNotExists;
@@ -30,10 +25,11 @@ public final class MSimpleGoogleMailerService {
     private static Path sentFolder;
     private static Path outFolder;
     private static String clientAndPathUUID;
-    private static MConsentOutgoingMailWatcher watcher;
+    private static MAttachmentWatcher watcher;
     private static String fromAddress;
     private static String toAddress;
     private static MSimpleGoogleMailer mailer;
+    private static MFileNameWatcher notSent;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -68,21 +64,12 @@ public final class MSimpleGoogleMailerService {
             fromAddress = store.get("fromAddress");
             toAddress = store.get("toAddress");
 
-
-            // Startup-Scan: verarbeite liegengebliebene Dateien
-            File[] files = outFolder.toFile().listFiles();
-            if (files != null) {
-                for (File f : files) {
-                    if (f.isFile()) {
-                        watcher.onFileChangedAndUnlocked(f.toPath());
-                    }
-                }
-            }
             //server singlethreadexec als attribut und runloop der auf clientnachrichten mit pfadlisten lauscht und diese
+            MAttachmentWatcher m = new MAttachmentWatcher();
 
 
             sentDesktopLinkWatcher     = createAndWatchFolderDesktopLink(sentFolder.toString(), "Sent Things", "Sent");
-            MFileNameWatcher notSent   = createAndWatchFolderDesktopLink(notSentFolder.toString(), "NotSent Things", "NotSent");
+            notSent   = createAndWatchFolderDesktopLink(notSentFolder.toString(), "NotSent Things", "NotSent");
 
             printConfiguration(fromAddress, toAddress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
 

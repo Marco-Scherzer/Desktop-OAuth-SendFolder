@@ -9,14 +9,13 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createFolderDesktopLink;
 import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createFolderLink;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  * unready
  */
-public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher {
+public abstract class MAttachmentWatcher {
 
     private final String fromAddress;
     private final String toAddress;
@@ -32,12 +31,11 @@ public abstract class MConsentOutgoingMailWatcher extends MFolderWatcher {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MConsentOutgoingMailWatcher(Path outFolder, Path sentFolder, Path notSentFolder, MSimpleGoogleMailer mailer,
-                                       String fromAddress,
-                                       String toAddress,
-                                       String clientAndPathUUID,
-                                       boolean askConsent) {
-        super(outFolder);
+    public MAttachmentWatcher(Path outFolder, Path sentFolder, Path notSentFolder, MSimpleGoogleMailer mailer,
+                              String fromAddress,
+                              String toAddress,
+                              String clientAndPathUUID,
+                              boolean askConsent) {
         this.sentFolder = sentFolder;
         this.fromAddress = fromAddress;
         this.toAddress = toAddress;
