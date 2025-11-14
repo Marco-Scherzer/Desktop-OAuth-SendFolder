@@ -30,14 +30,15 @@ public class MFileLinkCollectorFolderClient {
             System.out.println("ShutdownHook triggered – cleaning up resources...");
             exit(0);
         }));
+
         try {
-            List<File> collectedFiles = new ArrayList<>();
+            List<File> collectedFileLinks = new ArrayList<>();
             for (String path : args) {
                 try {
                     Paths.get(path); // Syntaxprüfung
                     File f = new File(path);
                     if (f.exists()) {
-                        collectedFiles.add(f);
+                        collectedFileLinks.add(f);
                         System.out.println("collected paths: " + f.getAbsolutePath());
                     } else {
                         System.err.println("Paths not found: " + path);
@@ -47,17 +48,24 @@ public class MFileLinkCollectorFolderClient {
                     exit(1);
                 }
             }
-            System.out.println("\nAll collected paths: " + collectedFiles.size());
-            socket = new Socket("localhost", 11111);
-            out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
-            for (File f : collectedFiles) out.println(f.getAbsolutePath());
-            System.out.println("All Paths sent to Server");
+            if(!collectedFileLinks.isEmpty()) {
+                System.out.println("\nAll collected paths: " + collectedFileLinks.size());
+                socket = new Socket("localhost", 11111);
+                out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
+                for (File f : collectedFileLinks) out.println(f.getAbsolutePath());
+                out.flush();
+                //Sending EOF to Server
+                socket.shutdownOutput();
+                System.out.println("All Paths sent to Server");
+            } else System.out.println("No paths to send to the Server. Nothing to do");
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
+            exit(1);
         }
         new Scanner(System.in).nextLine(); // dbg
         exit(0);
     }
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */

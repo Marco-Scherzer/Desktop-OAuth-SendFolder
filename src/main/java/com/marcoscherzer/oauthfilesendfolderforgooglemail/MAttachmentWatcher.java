@@ -71,7 +71,6 @@ public abstract class MAttachmentWatcher {
                       System.out.println("Not busy.");
                       busy = true;
                       reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
-
                       List<String> incomingPaths = new ArrayList<>();
                       String line;
                       while ((line = reader.readLine()) != null) {
@@ -87,14 +86,14 @@ public abstract class MAttachmentWatcher {
                   } else System.out.println("Server busy");
                 } catch (IOException e) {
                     System.err.println("Error in server loop: " + e.getMessage());
-                } finally {
-                    try {
-                        if (reader != null) reader.close();
-                        if (client != null && !client.isClosed()) client.close();
-                    } catch (IOException closeExc) {
-                        System.err.println("Error closing client resources: " + closeExc.getMessage());
-                    }
                 }
+                try {
+                    if (reader != null) reader.close();
+                    if (client != null && !client.isClosed()) client.close();
+                } catch (IOException closeExc) {
+                    System.err.println("Error closing client resources: " + closeExc.getMessage());
+                }
+
                 busy = false;
             }
         });
