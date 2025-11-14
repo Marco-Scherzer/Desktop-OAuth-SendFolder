@@ -45,6 +45,10 @@ public abstract class MAttachmentWatcher {
         this.mailer = mailer;
     }
 
+    private void onNewAttachmentList_(MOutgoingMail mail){
+
+    }
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -60,8 +64,8 @@ public abstract class MAttachmentWatcher {
                 mail.appendMessageText(clientAndPathUUID + "\\" + file.getName());
             }
             try {
-                MSendGui g = showSendGui(mail); //modal
-                if(g.getValue()==true) {
+                MConsentQuestionResult r = askForConsent(mail); //modal
+                if(r.getValue()==true) {
                     mailer.send(mail);
                     moveAllToFolder(sentFolder);
                 }
@@ -97,12 +101,12 @@ public abstract class MAttachmentWatcher {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    abstract MSendGui showSendGui(MOutgoingMail mail);
+    abstract MConsentQuestionResult askForConsent(MOutgoingMail mail);
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static interface MSendGui{
+    public static interface MConsentQuestionResult {
         public boolean getValue();
 
     }

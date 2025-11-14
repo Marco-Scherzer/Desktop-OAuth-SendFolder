@@ -68,7 +68,7 @@ public final class MSimpleGoogleMailerService {
             //server singlethreadexec als attribut und runloop der auf clientnachrichten mit pfadlisten lauscht und diese
             MAttachmentWatcher m = new MAttachmentWatcher() {
                 @Override
-                MSendGui showSendGui(MOutgoingMail mail) {
+                MConsentQuestionResult askForConsent(MOutgoingMail mail) {
 
                 }
             };
