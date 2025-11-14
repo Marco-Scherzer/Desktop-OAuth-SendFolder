@@ -45,17 +45,15 @@ public abstract class MAttachmentWatcher {
         this.mailer = mailer;
     }
 
-    private void onNewAttachmentList_(MOutgoingMail mail){
-
-    }
+//server singlethreadexec als attribut und runloop der auf clientnachrichten mit pfadlisten lauscht und diese
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private void onNewAttachmentList_(MOutgoingMail mail) {
+    private void onNewAttachmentList() {
         String sendDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        mail.setSubject(clientAndPathUUID + ", sendTime " + sendDateTime);
-
+        MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress)
+         .setSubject(clientAndPathUUID + ", sendTime " + sendDateTime);
         try {
             for (String path : fileLinkList) {
                 File file = new File(path);
@@ -97,6 +95,8 @@ public abstract class MAttachmentWatcher {
             }
     }
     }
+
+    //shutdown()
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
