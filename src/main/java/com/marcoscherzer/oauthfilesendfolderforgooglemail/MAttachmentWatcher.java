@@ -50,7 +50,7 @@ public abstract class MAttachmentWatcher {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private void onNewAttachmentList() {
+    private void onNewAttachmentList(List<String> list) {
         String sendDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         MOutgoingMail mail = new MOutgoingMail(fromAddress, toAddress)
          .setSubject(clientAndPathUUID + ", sendTime " + sendDateTime);
