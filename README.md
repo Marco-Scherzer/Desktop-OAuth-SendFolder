@@ -57,7 +57,7 @@ Contact: fahrservice.1@gmail.com
     Introduced for security reasons, the dialog requests user consent before sending. 
     Additional advantages: The user can also change the subject line or write a simple text message.
 
-### - One Time setup of Default Sender and Default Receiver Address
+### - One time setup of default sender address
 
 ### - usable inside of scripts (timed backups,...) but a secure way
 
