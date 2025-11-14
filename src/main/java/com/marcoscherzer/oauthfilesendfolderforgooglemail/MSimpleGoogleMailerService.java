@@ -44,8 +44,8 @@ public final class MSimpleGoogleMailerService {
             pw = "testTesttest-123";
             System.out.println();
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);
-            mailer = new MSimpleGoogleMailer("BackupMailer", pw, false); //dbg
-            //mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);//false because of dbg
+            //mailer = new MSimpleGoogleMailer("BackupMailer", pw, false); //dbg
+            mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);//false because of dbg
             MSimpleKeystore store = mailer.getKeystore();
 
             if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {

@@ -39,7 +39,7 @@ Contact: fahrservice.1@gmail.com
 
 ### A simple, secure OAuth GoogleMail client for sending mails with attachments that is Attachment Desktop Folder triggerd. 
 ### Creates a special outgoing mail folder linked on the desktop. 
-### After contents are added to the folder, an email-send dialog appears to ask the user for consent and to change the recipient or mail text.
+### After contents are added to the folder by drag and drop or script, an email-send dialog appears to ask the user for consent and to change the recipient or mail text.
 ### If the user agrees the mail is sent from the configured sender email address to the configured receiver email address.
 
  ## Features
@@ -51,8 +51,10 @@ Contact: fahrservice.1@gmail.com
 ### - Application startup access password protection
 
 ### - Attachments Desktop Folder triggerd email window appearance:
-    If attachments are added to the outgoing mail folder link on the Desktop, an Email Send dialog appears.
-    Purpose: Introduced for security reasons. The dialog requests user consent before sending. 
+    If attachments are added by drag and drop or script to the special outgoing mail folder linked on the Desktop, 
+    this part of the Application sends the links via TCP to the main part of the Application 
+    and an email send-dialog appears to send a mail. 
+    Introduced for security reasons, the dialog requests user consent before sending. 
     Additional advantages: The user can also change the subject line or write a simple text message.
 
 ### - Sender email address is stored in secure encrypted PKCS#12 database
