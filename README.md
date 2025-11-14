@@ -38,9 +38,9 @@ Contact: fahrservice.1@gmail.com
 <br>
 
 ### A simple, secure OAuth GoogleMail client for sending mails with attachments that is Attachment Desktop Folder triggerd. 
-### Creates a special outgoing mail folder linked on the desktop. 
-### After contents are added to the folder by drag and drop or script, an email-send dialog appears to ask the user for consent and to change the recipient or mail text.
-### If the user agrees the mail is sent from the configured sender email address to the configured receiver email address.
+### Creates a special outgoing mail folder linked on the desktop to send Mail. 
+### After contents are added to the folder by drag and drop or script, an email-send dialog appears to ask the user for consent and to change the recipient, subject or mail text.
+### If the user agrees the mail is sent from the configured sender email address to the receiver email address via GMail.
 
  ## Features
 
@@ -57,19 +57,22 @@ Contact: fahrservice.1@gmail.com
     Introduced for security reasons, the dialog requests user consent before sending. 
     Additional advantages: The user can also change the subject line or write a simple text message.
 
+### - One Time setup of Default Sender and Default Receiver Address
+
+### - usable inside of scripts (timed backups,...) but a secure way
+
 ### - Sender email address is stored in secure encrypted PKCS#12 database
 
 ### - Recipient email address is stored in secure encrypted PKCS#12 database
 
-### - One Time setup of Sender and Receiver Address
+### - Generates at setup time internal Mail Folder Names using UUIDs.
 
-### - Files added to the local "Outgoing Things" Desktop link folder are sent after user consent to a predefined recipient via Gmail.
+### - Uses the generated UUID in both the internal client name and default email metadata for additional verifiability
 
-### - Generates at setup time internal Mail Folder Names using UUIDs for additional abuse prevention (application decides the real folder name).
+### - Writes links of sent files to a "Sent Things" Desktop link folder and stores them with a timestamp name.
 
-### - Uses the generated UUID in both the client name and email metadata for additional verifiability
+### - Writes links of not sent files to a "Not Sent Things" Desktop link folder and stores them with a timestamp name.
 
-### - Moves sent files to a "Sent Things" Desktop link folder for archiving.
 
 
 
