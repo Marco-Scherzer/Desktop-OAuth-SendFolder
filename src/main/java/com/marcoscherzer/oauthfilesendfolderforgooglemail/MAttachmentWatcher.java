@@ -61,28 +61,32 @@ public abstract class MAttachmentWatcher {
         executor.submit(() -> {
             System.out.println("AttachmentWatcher listening on port 11111...");
             while (!serverSocket.isClosed()) {
+                System.out.println("1");
                 Socket client = null;
                 BufferedReader reader = null;
                 try {
                     client = serverSocket.accept();
+                    System.out.println("New incoming attachment list");
                   if(!busy) {
+                      System.out.println("Not busy.");
                       busy = true;
                       reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
                       List<String> incomingPaths = new ArrayList<>();
                       String line;
                       while ((line = reader.readLine()) != null) {
-                          incomingPaths.add(line.trim());
+                          String path = line.trim();
+                          System.out.println("adding path \""+path+"\"");
+                          incomingPaths.add(path);
                       }
-
+                      System.out.println("incomingPaths.isEmpty() = "+incomingPaths.isEmpty());//dbg
                       if (!incomingPaths.isEmpty()) {
+                          System.out.println("working off attachment list...");
                           onNewAttachmentList(incomingPaths);
-                      }
-                  } else System.out.println("Server buisy");
+                      } else System.out.println("Incoming path list ist empty. nothing to do ");
+                  } else System.out.println("Server busy");
                 } catch (IOException e) {
-                    if (!serverSocket.isClosed()) {
-                        System.err.println("Error in server loop: " + e.getMessage());
-                    }
+                    System.err.println("Error in server loop: " + e.getMessage());
                 } finally {
                     try {
                         if (reader != null) reader.close();

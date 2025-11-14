@@ -44,8 +44,8 @@ public final class MSimpleGoogleMailerService {
             pw = "testTesttest-123";
             System.out.println();
             MSimpleGoogleMailer.setClientKeystoreDir(userDir);
-            //MSimpleGoogleMailer mailer = new MSimpleGoogleMailer("BackupMailer", pw, false); //dbg
-            mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);//false because of dbg
+            mailer = new MSimpleGoogleMailer("BackupMailer", pw, false); //dbg
+            //mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);//false because of dbg
             MSimpleKeystore store = mailer.getKeystore();
 
             if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
@@ -63,7 +63,7 @@ public final class MSimpleGoogleMailerService {
             fromAddress = store.get("fromAddress");
             toAddress = store.get("toAddress");
 
-            MAttachmentWatcher m = watcher = new MAttachmentWatcher(sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
+            watcher = new MAttachmentWatcher(sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
                 @Override
                 public final MConsentQuestionResult askForConsent(MOutgoingMail mail) {
                     //new MMiniGui(mail);
