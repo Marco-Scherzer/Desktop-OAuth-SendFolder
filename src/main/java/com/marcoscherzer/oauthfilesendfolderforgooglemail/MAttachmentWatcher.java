@@ -35,7 +35,8 @@ public abstract class MAttachmentWatcher {
         private int attachedFilesCnt;
 
         // Server-Attribute
-        private final ExecutorService executor = Executors.newSingleThreadExecutor();
+        private final ExecutorService serverMainLoop = Executors.newSingleThreadExecutor();
+        private final ExecutorService pool = Executors.newCachedThreadPool();
         private ServerSocket serverSocket;
         private boolean busy;
 
@@ -56,50 +57,83 @@ public abstract class MAttachmentWatcher {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
+        private static abstract class MJob1A<T> implements Runnable{
+            protected T attribute1;
+            public MJob1A(T attribute1){
+             this.attribute1=attribute1;
+            }
+        }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
     public final MAttachmentWatcher startServer() throws IOException {
         serverSocket = new ServerSocket(11111);
-        executor.submit(() -> {
+        serverMainLoop.submit(() -> {
             System.out.println("AttachmentWatcher listening on port 11111...");
             while (!serverSocket.isClosed()) {
-                System.out.println("1");
-                Socket client = null;
-                BufferedReader reader = null;
                 try {
-                    client = serverSocket.accept();
+                    Socket client = serverSocket.accept();
                     System.out.println("New incoming attachment list");
-                  if(!busy) {
-                      System.out.println("Not busy.");
-                      busy = true;
-                      reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
-                      List<String> incomingPaths = new ArrayList<>();
-                      String line;
-                      while ((line = reader.readLine()) != null) {
-                          String path = line.trim();
-                          System.out.println("adding path \""+path+"\"");
-                          incomingPaths.add(path);
-                      }
-                      System.out.println("incomingPaths.isEmpty() = "+incomingPaths.isEmpty());//dbg
-                      if (!incomingPaths.isEmpty()) {
-                          System.out.println("working off attachment list...");
-                          onNewAttachmentList(incomingPaths);
-                      } else System.out.println("Incoming path list ist empty. nothing to do ");
-                  } else System.out.println("Server busy");
-                } catch (IOException e) {
-                    System.err.println("Error in server loop: " + e.getMessage());
+                    pool.submit(new MJob1A<Socket>(client) {
+                        @Override
+                        public void run() {
+                            Socket client = attribute1;
+                            BufferedReader reader = null;
+                            try {
+                                reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
+                                List<String> incomingPaths = new ArrayList<>();
+                                String line;
+                                while ((line = reader.readLine()) != null) {
+                                    String path = line.trim();
+                                    System.out.println("adding path \"" + path + "\"");
+                                    incomingPaths.add(path);
+                                }
+                                try {
+                                    if (reader != null) reader.close();
+                                    if (client != null && !client.isClosed()) client.close();
+                                } catch (IOException closeExc) {
+                                    System.err.println("Error closing client resources: " + closeExc.getMessage());
+                                }
+                                System.out.println("client.isClosed() = " + client.isClosed());
+                                System.out.println("incomingPaths.isEmpty() = " + incomingPaths.isEmpty());//dbg
+                                System.out.println("creating Mail...");
+                                onNewAttachmentList(incomingPaths);
+                            } catch (IOException e) {
+                                System.err.println("Error in MailJob: " + e.getMessage());
+                                try {
+                                    if (reader != null) reader.close();
+                                    if (client != null && !client.isClosed()) client.close();
+                                } catch (IOException closeExc) {
+                                    System.err.println("Error closing client resources after exception: " + closeExc.getMessage());
+                                }
+                            }
+                        }
+                    });
+                } catch (IOException exc) {
+                    System.err.println("Error in server loop: " + exc.getMessage());
                 }
-                try {
-                    if (reader != null) reader.close();
-                    if (client != null && !client.isClosed()) client.close();
-                } catch (IOException closeExc) {
-                    System.err.println("Error closing client resources: " + closeExc.getMessage());
-                }
-
-                busy = false;
             }
         });
         return this;
     }
-
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
+    public final void shutdown() {
+        try {
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                serverSocket.close();
+            }
+        } catch (IOException e) {
+            System.err.println("Error closing server socket: " + e.getMessage());
+        }
+        pool.shutdownNow();
+        serverMainLoop.shutdownNow();
+        System.out.println("AttachmentWatcher shutdown complete.");
+    }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -122,17 +156,27 @@ public abstract class MAttachmentWatcher {
                 }
 
                 MConsentQuestioner r = askForConsent(mail); // modal
+                while(r.getResult()==null){
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException exc) {
+                        System.err.println("Error: "+ exc.getMessage());
+                    }
+                }
+
                 if (r.getResult()) {
                     mailer.send(mail);
                     moveAllToFolder(sentFolder);
                 } else {
                     moveAllToFolder(notSentFolder);
                 }
+
                 System.out.println("Mail processed with " + attachedFilesCnt + " attachments.");
             } catch (Exception sendExc) {
                 System.err.println("Error during send: " + sendExc.getMessage());
             }
         }
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
@@ -154,22 +198,6 @@ public abstract class MAttachmentWatcher {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
-        public final void shutdown() {
-            try {
-                if (serverSocket != null && !serverSocket.isClosed()) {
-                    serverSocket.close();
-                }
-            } catch (IOException e) {
-                System.err.println("Error closing server socket: " + e.getMessage());
-            }
-            executor.shutdownNow();
-            System.out.println("AttachmentWatcher shutdown complete.");
-        }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
-     */
         // Abstrakte Methode für Consent
         public abstract MConsentQuestioner askForConsent(MOutgoingMail mail);
     /**
@@ -177,7 +205,7 @@ public abstract class MAttachmentWatcher {
      * unready
      */
         public interface MConsentQuestioner {
-            boolean getResult();
+            Boolean getResult();
         }
 
     }

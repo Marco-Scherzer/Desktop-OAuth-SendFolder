@@ -17,6 +17,7 @@ public final class MMiniGui implements MAttachmentWatcher.MConsentQuestioner {
     private JFrame consentFrame;
     private JLabel counterLabel;
     private boolean showingPrefs = false;
+    private Boolean result;
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
@@ -29,7 +30,6 @@ public final class MMiniGui implements MAttachmentWatcher.MConsentQuestioner {
      * unready
      */
     public MMiniGui(MOutgoingMail mail, int windowWidth, int windowHeight, int fontSize) {
-
         SwingUtilities.invokeLater(() -> {
 
                /*
@@ -122,9 +122,10 @@ public final class MMiniGui implements MAttachmentWatcher.MConsentQuestioner {
                 mail.setSubject(subjectField.getText());
                 mail.appendMessageText(messageArea.getText());
                 consentFrame.dispose();
+                result=true;
             });
 
-            cancelButton.addActionListener(e -> consentFrame.dispose());
+            cancelButton.addActionListener(e -> {consentFrame.dispose();result=false;});
 
             JPanel bottomRow = new JPanel(new GridLayout(1, 3, 10, 0));
             bottomRow.add(counterLabel);
@@ -173,15 +174,18 @@ public final class MMiniGui implements MAttachmentWatcher.MConsentQuestioner {
 
             consentFrame.setVisible(true);
         });
+
     }
+
+    static int dbg;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
     @Override
-    public boolean getResult() {
-        return false;
+    public Boolean getResult() {
+        return result;
     }
 }
 
