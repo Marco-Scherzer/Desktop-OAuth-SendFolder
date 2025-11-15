@@ -38,9 +38,10 @@ Contact: fahrservice.1@gmail.com
 <br>
 
 ### A simple, secure OAuth GoogleMail client for sending mails with attachments that is Attachment Desktop Folder triggerd. 
-### Creates a special outgoing mail folder linked on the desktop to send Mail. 
-### After contents are added to the folder by drag and drop or script, an email-send dialog appears to ask the user for consent and to change the recipient, subject or mail text.
+### Creates a special outgoing mail folder icon linked on the desktop to send mail. 
+### After the folder-icon is clicked or contents are added to the folder by drag and drop or script, an email-send dialog appears to ask the user for consent and to change the recipient, subject or mail text.
 ### If the user agrees the mail is sent from the configured sender email address to the receiver email address via GMail.
+### Multiple send windows can be opened by using the same simple click or drag-and-drop gesture.
 
  ## Features
 
@@ -51,11 +52,12 @@ Contact: fahrservice.1@gmail.com
 ### - Application startup access password protection
 
 ### - Attachments Desktop Folder triggerd email window appearance:
-    If attachments are added by drag and drop or script to the special outgoing mail folder linked on the Desktop, 
+    If attachments are added by drag and drop or script to the special outgoing mail folder icon linked on the Desktop, 
     this part of the Application sends the links via TCP to the main part of the Application 
-    and an email send-dialog appears to send a mail. 
-    Introduced for security reasons, the dialog requests user consent before sending. 
-    Additional advantages: The user can also change the subject line or write a simple text message.
+    and an email send-dialog appears to send a mail.
+    Introduced for security reasons, the dialog requests user consent before sending.
+    Additional advantages: The user can also change the the recipient, the subject line or write a simple text message.
+    Multiple send windows can be opened by using the same simple click or drag-and-drop gesture.
 
 ### - One time setup of default sender address
 

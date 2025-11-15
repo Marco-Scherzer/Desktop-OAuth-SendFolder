@@ -1,77 +1,200 @@
 package com.marcoscherzer.oauthfilesendfolderforgooglemail;
 
+import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.intellijthemes.*;
 import com.marcoscherzer.msimplegooglemailer.MOutgoingMail;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- * MiniGui unready
+ * unready
  */
 public final class MMiniGui implements MAttachmentWatcher.MConsentQuestioner {
     private JFrame consentFrame;
     private JLabel counterLabel;
-
+    private boolean showingPrefs = false;
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
     public MMiniGui(MOutgoingMail mail) {
+        this(mail, 900, 600, 16); // Defaultwerte: Breite 900, Höhe 600, Schriftgröße 16
+    }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
+    public MMiniGui(MOutgoingMail mail, int windowWidth, int windowHeight, int fontSize) {
+
         SwingUtilities.invokeLater(() -> {
-            consentFrame = new JFrame("OAuthFileSendFolder for GoogleMail (Prototype, preAlpha 0.1) - Send Mail");
+
+               /*
+                FlatLightLaf.setup(), FlatDarkLaf.setup(), FlatIntelliJLaf.setup(), FlatDarculaLaf.setup(),
+                FlatArcDarkIJTheme.setup(), FlatArcIJTheme.setup(), FlatArcOrangeIJTheme.setup(),
+                FlatArcDarkOrangeIJTheme.setup(), FlatCarbonIJTheme.setup(), FlatCyanLightIJTheme.setup(),
+                FlatGrayIJTheme.setup(), FlatGrayDarkIJTheme.setup(), FlatHiberbeeDarkIJTheme.setup(),
+                FlatHighContrastIJTheme.setup(), FlatMonokaiProIJTheme.setup(), FlatSolarizedLightIJTheme.setup(),
+                FlatSolarizedDarkIJTheme.setup(), FlatDraculaIJTheme.setup()
+           */
+
+            try {
+                FlatCarbonIJTheme.setup();
+            } catch (Exception exc) {
+                System.out.println("UI theme not supported");
+            }
+
+            // Schriftgröße global setzen
+            UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, fontSize));
+
+            consentFrame = new JFrame("OAuthFileSendFolder for Gmail (Prototype, preAlpha 0.1) - Send Mail");
             consentFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             consentFrame.setAlwaysOnTop(true);
-            consentFrame.setLocationRelativeTo(null);
+            consentFrame.setResizable(false);
 
-            // Innerer Container mit Padding
+            CardLayout cardLayout = new CardLayout();
+            JPanel basePanel = new JPanel(cardLayout);
+
+            // ---------------- Hauptansicht ----------------
             JPanel innerPanel = new JPanel();
             innerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.Y_AXIS));
 
-            // 1. Zeile: Betreff
-            JTextField subjectField = new JTextField("Betreff: " + mail.getSubject());
-            subjectField.setEditable(true);
-            subjectField.setMaximumSize(new Dimension(Integer.MAX_VALUE, subjectField.getPreferredSize().height));
-            innerPanel.add(subjectField);
+            JPanel fieldsPanel = new JPanel(new GridBagLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets(5, 5, 5, 5);
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+
+            JLabel senderLabel = new JLabel("Sender:");
+            gbc.gridx = 0; gbc.gridy = 0;
+            fieldsPanel.add(senderLabel, gbc);
+
+            JTextField senderField = new JTextField(mail.getFrom());
+            senderField.setEditable(false);
+            gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1;
+            fieldsPanel.add(senderField, gbc);
+
+            JLabel receiverLabel = new JLabel("Recipient:");
+            gbc.gridx = 0; gbc.gridy = 1;
+            fieldsPanel.add(receiverLabel, gbc);
+
+            JTextField receiverField = new JTextField(mail.getTo());
+            gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1;
+            fieldsPanel.add(receiverField, gbc);
+
+            JLabel subjectLabel = new JLabel("Subject:");
+            gbc.gridx = 0; gbc.gridy = 2;
+            fieldsPanel.add(subjectLabel, gbc);
+
+            JTextField subjectField = new JTextField(mail.getSubject());
+            gbc.gridx = 1; gbc.gridy = 2; gbc.weightx = 1;
+            fieldsPanel.add(subjectField, gbc);
+
+            innerPanel.add(fieldsPanel);
             innerPanel.add(Box.createVerticalStrut(10));
 
-            // 2. Zeile: TextArea für Mailtext
-            JTextArea messageArea = new JTextArea();
+            // TextArea für Mail Body
+            StringBuilder initialText = new StringBuilder("\n\n\n\n\nAttachments:\n");
+            for (String attachment : mail.getAttachments()) {
+                String fileName = new java.io.File(attachment).getName();
+                initialText.append("- ").append(fileName).append("\n");
+            }
+
+            JTextArea messageArea = new JTextArea(initialText.toString());
             messageArea.setLineWrap(true);
             messageArea.setWrapStyleWord(true);
+
             JScrollPane scrollPane = new JScrollPane(messageArea);
-            scrollPane.setPreferredSize(new Dimension(580, 200));
-            scrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+            scrollPane.setPreferredSize(new Dimension(800, 400));
             innerPanel.add(scrollPane);
             innerPanel.add(Box.createVerticalStrut(10));
 
-            // 3. Zeile: Counter + Buttons
-            counterLabel = new JLabel("Attachments: "+mail.getAttachments().length, SwingConstants.CENTER);
-            JButton sendButton = new JButton("Senden");
-            JButton cancelButton = new JButton("Abbrechen");
+            // Counter + Buttons
+            counterLabel = new JLabel("Attachments: " + mail.getAttachments().length, SwingConstants.CENTER);
+            JButton sendButton = new JButton("Send");
+            JButton cancelButton = new JButton("Cancel");
 
             sendButton.addActionListener(e -> {
+                mail.setTo(receiverField.getText());
+                mail.setSubject(subjectField.getText());
                 mail.appendMessageText(messageArea.getText());
                 consentFrame.dispose();
             });
 
-            cancelButton.addActionListener(e -> {
-                consentFrame.dispose();
-            });
+            cancelButton.addActionListener(e -> consentFrame.dispose());
 
             JPanel bottomRow = new JPanel(new GridLayout(1, 3, 10, 0));
-            bottomRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
             bottomRow.add(counterLabel);
             bottomRow.add(sendButton);
             bottomRow.add(cancelButton);
-
             innerPanel.add(bottomRow);
 
-            consentFrame.add(innerPanel);
-            consentFrame.setSize(600, 400);
+            // ---------------- Preferences Ansicht ----------------
+            JPanel prefsPanel = new JPanel();
+            prefsPanel.setLayout(new BoxLayout(prefsPanel, BoxLayout.Y_AXIS));
+            prefsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            prefsPanel.add(new JLabel("Preferences / Einstellungen hier"));
+
+            basePanel.add(innerPanel, "MAIN");
+            basePanel.add(prefsPanel, "PREFS");
+
+            // Menüleiste mit Zahnrad-Icon
+            JMenuBar menuBar = new JMenuBar();
+            JMenu preferencesMenu = new JMenu();
+            preferencesMenu.setToolTipText("Preferences");
+            preferencesMenu.setIcon(new FlatSVGIcon("gear.svg"));
+
+            preferencesMenu.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    if (showingPrefs) {
+                        cardLayout.show(basePanel, "MAIN");
+                        showingPrefs = false;
+                    } else {
+                        cardLayout.show(basePanel, "PREFS");
+                        showingPrefs = true;
+                    }
+                }
+            });
+
+            menuBar.add(preferencesMenu);
+            consentFrame.setJMenuBar(menuBar);
+
+            consentFrame.add(basePanel);
+
+            // Fenstergröße aus Parametern
+            consentFrame.setSize(windowWidth, windowHeight);
+
+            // Fenster mittig auf dem Bildschirm platzieren
+            consentFrame.setLocationRelativeTo(null);
+
             consentFrame.setVisible(true);
         });
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
     @Override
     public boolean getResult() {
         return false;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

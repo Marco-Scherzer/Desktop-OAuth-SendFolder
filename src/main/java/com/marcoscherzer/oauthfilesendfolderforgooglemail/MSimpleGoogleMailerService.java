@@ -4,6 +4,9 @@ import com.marcoscherzer.msimplegooglemailer.MOutgoingMail;
 import com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailer;
 import com.marcoscherzer.msimplegooglemailer.MSimpleKeystore;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.nio.file.*;
 import java.util.*;
 
@@ -77,8 +80,32 @@ public final class MSimpleGoogleMailerService {
 
             printConfiguration(fromAddress, toAddress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
 
+
+            PopupMenu traymenu = new PopupMenu();
+            MenuItem exitItem = new MenuItem("Close Program");
+            exitItem.addActionListener((ActionEvent e) -> {
+                System.out.println("Program closed via Tray-Icon");
+                System.exit(0);
+            });
+
+            traymenu.add(exitItem);
+            if (!SystemTray.isSupported()) {
+                System.out.println("SystemTray is not supported!");
+                return;
+            }
+            SystemTray tray = SystemTray.getSystemTray();
+            Image image = ImageIO.read(MSimpleGoogleMailerService.class.getResourceAsStream("/5.png"));
+            TrayIcon trayIcon = new TrayIcon(image, "OAuth Desktop FileSend Folder for GoogleMail", traymenu);
+            trayIcon.setImageAutoSize(true);
+            tray.add(trayIcon);
+            trayIcon.displayMessage("OAuth Desktop FileSend Folder for GoogleMail",
+                    "OAuth Desktop FileSend Folder for GoogleMail started in your system tray." +
+                    "To send mail drag files onto it's dolphin icon " +
+                            "on the desktop or click it.", TrayIcon.MessageType.INFO);
             System.out.println("To end the Program please press a key");
+
             new Scanner(System.in).nextLine();
+
             exit(0);
         } catch (Exception exc) {
             exc.printStackTrace();

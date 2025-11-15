@@ -40,11 +40,11 @@ public class MUtil {
      * returns the absolute path of the created link if desktop path exists. null otherwise.
      * Author: Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static Path createFolderLink(String targetFolderPath, Path linkPath_, String linkName) throws Exception {
+    public static Path createFolderLink(String folderPath, Path linkPath_, String linkName) throws Exception {
         Path linkPath;
         try {
 
-            Path targetPath = Paths.get(targetFolderPath);
+            Path targetPath = Paths.get(folderPath);
             if (!Files.isDirectory(targetPath)) {
                 throw new IllegalArgumentException("Target is not a directory. Junction Links only work with folders");
             }

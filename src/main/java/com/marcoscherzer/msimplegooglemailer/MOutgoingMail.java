@@ -26,6 +26,22 @@ public final class MOutgoingMail {
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
+    public final MOutgoingMail setTo(String to){
+        this.to = to;
+        return this;
+    }
+
+    /**
+     * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final MOutgoingMail setFrom(String from){
+        this.from = from;
+        return this;
+    }
+
+    /**
+     * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public final MOutgoingMail setSubject(String subject){
         this.subject = subject;
         return this;

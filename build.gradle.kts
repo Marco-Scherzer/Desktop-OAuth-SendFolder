@@ -31,6 +31,12 @@ dependencies {
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
     implementation("org.apache.httpcomponents:httpcore:4.4.15")
 
+
+    implementation("com.formdev:flatlaf:3.4")
+    implementation("com.formdev:flatlaf-extras:3.4")
+    implementation("com.formdev:flatlaf-intellij-themes:3.4")
+    implementation("com.formdev:flatlaf-swingx:3.4")
+
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -43,4 +49,5 @@ application {
 tasks.test {
     useJUnitPlatform()
 }
+
 
