@@ -1,10 +1,7 @@
 package com.marcoscherzer.msimplegoauthmailerclientapplication;
 
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
-import com.marcoscherzer.msimplegoauthmailer.MClientSecretException;
-import com.marcoscherzer.msimplegoauthmailer.MOutgoingMail;
-import com.marcoscherzer.msimplegoauthmailer.MSimpleMailer;
-import com.marcoscherzer.msimplegoauthmailer.MSimpleKeystore;
+import com.marcoscherzer.msimplegoauthmailer.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -68,13 +65,17 @@ public final class MMain {
                 }
                 UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
 
-
+                setupLogging();
                 Path keystorePath = Paths.get(userDir, "mystore.p12");
                 boolean keystoreFileExists = Files.exists(keystorePath);
                 String pw;
-                if (!keystoreFileExists) { pw = showSetupDialog(true)[0]; } else { pw = showPasswordDialog();}
+                if (!keystoreFileExists) {
+                    pw = showSetupDialog(true)[2];
+                }
+                else {
+                    pw = showPasswordDialog();
+                }
                 MSimpleMailer.setClientKeystoreDir(userDir);
-
                 mailer = new MSimpleMailer("BackupMailer", pw, false);
                 MSimpleKeystore store = mailer.getKeystore();
 
@@ -86,8 +87,6 @@ public final class MMain {
                     store.add("toAddress", to);
                 }
 
-                setupLogging();
-                openMainWindow();
                 clientAndPathUUID = store.get("clientId");
                 sentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-sent"), "Sent folder");
                 notSentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-notSent"), "NotSent folder");
@@ -110,21 +109,28 @@ public final class MMain {
                 setupTrayIcon();
 
             } catch (MClientSecretException exc) {
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Client Secret Error:\n" + exc.getMessage()+" Setup will be restarted next time.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-            exit(1);
+                JOptionPane.showMessageDialog(
+                        null,
+                        "Client Secret Error:\n" + exc.getMessage()+" Setup will be restarted on next launch.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                exit(1);
+            } catch (MPasswordIntegrityException exc) {
+                JOptionPane.showMessageDialog(
+                        null,
+                        "Client Integrity Error:\n" + exc.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                exit(1);
             } catch (Exception exc) {
                 //exc.printStackTrace();
                 exit(1);
             }
+
         });
     }
-
-
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
@@ -135,8 +141,9 @@ public final class MMain {
         logFrame = new JFrame("OAuth FileSendFolder Log");
         logFrame.add(new JScrollPane(logArea));
         logFrame.pack();
-        logFrame.setVisible(false);
-
+        logFrame.setVisible(false); // unsichtbar beim Start
+        logFrame.setSize(1350, 800);
+        logFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         PrintStream ps = new PrintStream(new OutputStream() {
             @Override
             public void write(int b) {
@@ -151,10 +158,54 @@ public final class MMain {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
+    private static void setupTrayIcon() throws Exception {
+        PopupMenu traymenu = new PopupMenu();
+
+        MenuItem showLogItem = new MenuItem("Show Log");
+        showLogItem.addActionListener((ActionEvent e) -> {
+            if (!logFrame.isVisible()) {
+                logFrame.setVisible(true);
+                logFrame.setState(JFrame.NORMAL);
+                logFrame.toFront();
+            } else {
+                logFrame.setVisible(false);
+            }
+        });
+        traymenu.add(showLogItem);
+
+        MenuItem exitItem = new MenuItem("Close Program");
+        exitItem.addActionListener((ActionEvent e) -> {
+            System.out.println("Program closed via Tray-Icon");
+            System.exit(0);
+        });
+        traymenu.add(exitItem);
+
+        if (!SystemTray.isSupported()) {
+            System.out.println("SystemTray is not supported!");
+            return;
+        }
+
+        SystemTray tray = SystemTray.getSystemTray();
+        Image image = ImageIO.read(MMain.class.getResourceAsStream("/5.png"));
+        TrayIcon trayIcon = new TrayIcon(image, "OAuth Desktop FileSend Folder", traymenu);
+        trayIcon.setImageAutoSize(true);
+        tray.add(trayIcon);
+
+        trayIcon.displayMessage("OAuth Desktop FileSend Folder",
+                "OAuth Desktop FileSend Folder started in your system tray.\n" +
+                        "To send mail drag files onto its dolphin icon on the desktop or click it.",
+                TrayIcon.MessageType.INFO);
+    }
+
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
     private static String[] showSetupDialog(boolean setPw) {
-        JTextField fromField = new JTextField();
-        JTextField toField = new JTextField();
-        JPasswordField pwField = new JPasswordField();
+        JTextField fromField = new JTextField(); fromField.setText("m.scherzer@hotmail.com");
+        JTextField toField = new JTextField(); toField.setText("m.scherzer@hotmail.com");
+        JPasswordField pwField = new JPasswordField(); pwField.setText("testTesttest-123)");
 
         JLabel heading = new JLabel("OAuth FileSendFolder Setup");
         JLabel infoLabel = new JLabel("(Requires an email account (tested with Gmail) and a clientSecret.json file provided by Google)\n\n");
@@ -329,42 +380,7 @@ public final class MMain {
             return null;
         }
     }
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
-     */
-    private static void setupTrayIcon() throws Exception {
-        PopupMenu traymenu = new PopupMenu();
-        MenuItem exitItem = new MenuItem("Close Program");
-        exitItem.addActionListener((ActionEvent e) -> {
-            System.out.println("Program closed via Tray-Icon");
-            System.exit(0);
-        });
-        traymenu.add(exitItem);
 
-        if (!SystemTray.isSupported()) {
-            System.out.println("SystemTray is not supported!");
-            return;
-        }
-        SystemTray tray = SystemTray.getSystemTray();
-        Image image = ImageIO.read(MMain.class.getResourceAsStream("/5.png"));
-        TrayIcon trayIcon = new TrayIcon(image, "OAuth Desktop FileSend Folder for GoogleMail", traymenu);
-        trayIcon.setImageAutoSize(true);
-        tray.add(trayIcon);
-        trayIcon.displayMessage("OAuth Desktop FileSend Folder for GoogleMail",
-                "OAuth Desktop FileSend Folder for GoogleMail started in your system tray.\n" +
-                        "To send mail drag files onto its dolphin icon on the desktop or click it.",
-                TrayIcon.MessageType.INFO);
-    }
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
-     */
-    private static void openMainWindow() {
-        logFrame.setSize(600, 400);
-        logFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        logFrame.setVisible(true); // erst jetzt sichtbar machen
-    }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready

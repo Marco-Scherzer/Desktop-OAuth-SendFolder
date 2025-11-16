@@ -42,11 +42,11 @@ public final class MSimpleKeystore {
             try { fis = new FileInputStream(ksFile);} catch (Exception exc) { throw new Exception("Error in context with keystore while opening keystore file", exc); }
             try { keyStore.load(fis, keystorePassword.toCharArray()); } catch (IOException exc) {
                 Throwable cause = exc.getCause();
-                if (cause instanceof UnrecoverableKeyException || cause instanceof UnrecoverableEntryException || cause instanceof BadPaddingException) {
-                    throw new Exception("Password seems to not work (possible wrong password or corruption)\n"+cause.getMessage(), exc);
+                if (cause instanceof InvalidKeyException || cause instanceof UnrecoverableKeyException || cause instanceof UnrecoverableEntryException || cause instanceof BadPaddingException) {
+                    throw new MPasswordIntegrityException("Password seems to not work (possible wrong password or corruption)\n"+cause.getMessage(), exc);
                 }
                 if (cause instanceof IllegalBlockSizeException) {
-                    throw new Exception("Error in context with keystore while decrypting block (possible password or corruption)\n"+cause.getMessage(), exc);
+                    throw new MPasswordIntegrityException("Error in context with keystore while decrypting block (possible wrong password or corruption)\n"+cause.getMessage(), exc);
                 }
                 if (cause instanceof EOFException) {
                     throw new Exception("Error in context with keystore while reading file (unexpected end of file)\n"+cause.getMessage(), exc);
