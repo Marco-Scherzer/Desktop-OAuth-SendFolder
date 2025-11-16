@@ -8,13 +8,19 @@ import com.marcoscherzer.msimplegoauthmailer.MSimpleKeystore;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.file.*;
 import java.util.*;
+import java.util.List;
 
+import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkPasswordComplexity;
 import static com.marcoscherzer.msimplegoauthmailerclientapplication.MUtil.createFolderDesktopLink;
 import static com.marcoscherzer.msimplegoauthmailerclientapplication.MUtil.createPathIfNotExists;
 import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkMailAddress;
@@ -117,6 +123,8 @@ public final class MMain {
             }
         });
     }
+
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
@@ -127,7 +135,7 @@ public final class MMain {
         logFrame = new JFrame("OAuth FileSendFolder Log");
         logFrame.add(new JScrollPane(logArea));
         logFrame.pack();
-        logFrame.setVisible(false); // Anfangs unsichtbar
+        logFrame.setVisible(false);
 
         PrintStream ps = new PrintStream(new OutputStream() {
             @Override
@@ -164,6 +172,51 @@ public final class MMain {
         label2.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
         label3.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
 
+
+        fromField.getDocument().addDocumentListener(new DocumentListener() {
+            private void validate() {
+                try {
+                    checkMailAddress(fromField.getText().trim());
+                    fromField.setBorder(UIManager.getBorder("TextField.border"));
+                } catch (IllegalArgumentException ex) {
+                    fromField.setBorder(BorderFactory.createLineBorder(Color.MAGENTA));
+                }
+            }
+            public void insertUpdate(DocumentEvent e) { validate(); }
+            public void removeUpdate(DocumentEvent e) { validate(); }
+            public void changedUpdate(DocumentEvent e) { validate(); }
+        });
+
+        toField.getDocument().addDocumentListener(new DocumentListener() {
+            private void validate() {
+                try {
+                    checkMailAddress(toField.getText().trim());
+                    toField.setBorder(UIManager.getBorder("TextField.border"));
+                } catch (IllegalArgumentException ex) {
+                    toField.setBorder(BorderFactory.createLineBorder(Color.MAGENTA));
+                }
+            }
+            public void insertUpdate(DocumentEvent e) { validate(); }
+            public void removeUpdate(DocumentEvent e) { validate(); }
+            public void changedUpdate(DocumentEvent e) { validate(); }
+        });
+
+        if (setPw) {
+            pwField.getDocument().addDocumentListener(new DocumentListener() {
+                private void validate() {
+                    try {
+                        checkPasswordComplexity(new String(pwField.getPassword()), 15, true, true, true);
+                        pwField.setBorder(UIManager.getBorder("TextField.border"));
+                    } catch (IllegalArgumentException ex) {
+                        pwField.setBorder(BorderFactory.createLineBorder(Color.MAGENTA));
+                    }
+                }
+                public void insertUpdate(DocumentEvent e) { validate(); }
+                public void removeUpdate(DocumentEvent e) { validate(); }
+                public void changedUpdate(DocumentEvent e) { validate(); }
+            });
+        }
+
         Object[] message = {
                 heading, null,
                 infoLabel, null,
@@ -191,19 +244,53 @@ public final class MMain {
         );
 
         if (option == JOptionPane.OK_OPTION) {
-            // Werte einsammeln
             String from = fromField.getText().trim();
-            String to = toField.getText().trim();
-            String pw = setPw ? new String(pwField.getPassword()) : null;
+            String to   = toField.getText().trim();
+            String pw   = setPw ? new String(pwField.getPassword()) : null;
 
-            // Rückgabe als String[]
+            // finale Sicherung beim Submit
+            List<String> errors = new ArrayList<>();
+
+            try {
+                checkMailAddress(from);
+            } catch (IllegalArgumentException e) {
+                errors.add("Sender email invalid: " + e.getMessage());
+            }
+
+            try {
+                checkMailAddress(to);
+            } catch (IllegalArgumentException e) {
+                errors.add("Recipient email invalid: " + e.getMessage());
+            }
+
+            if (setPw) {
+                try {
+                    checkPasswordComplexity(pw, 15, true, true, true);
+                } catch (IllegalArgumentException e) {
+                    errors.add("Password invalid: " + e.getMessage());
+                }
+            }
+
+            if (!errors.isEmpty()) {
+                StringBuilder sb = new StringBuilder("Invalid format(s):\n");
+                for (String err : errors) {
+                    sb.append("* ").append(err).append("\n");
+                }
+                JOptionPane.showMessageDialog(
+                        null,
+                        sb.toString(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return showSetupDialog(setPw); // Dialog erneut öffnen
+            }
+
             return setPw ? new String[]{from, to, pw} : new String[]{from, to};
         } else {
             System.exit(0);
             return null;
         }
     }
-
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -325,30 +412,6 @@ public final class MMain {
         System.out.println("Program terminated. Exit code: " + code);
         System.exit(code);
     }
-
-
-    /**
-     *@author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public static final String readMailAddressInput(String addressDescription)  {
-        Scanner scanner = new Scanner(System.in);
-        String out = null;
-        while (out == null) {
-            System.out.print("Enter "+ addressDescription +" email address (or type 'exit' to cancel): ");
-            String input = scanner.nextLine().trim();
-            if (input.equalsIgnoreCase("exit")) {
-                System.out.println("Aborted by user.");
-                exit(0);
-            }
-            try {
-                out = checkMailAddress(input);
-            } catch (IllegalArgumentException e) {
-                System.out.println("Please try again.");
-            }
-        }
-        return out;
-    }
-
 
 
     /**
