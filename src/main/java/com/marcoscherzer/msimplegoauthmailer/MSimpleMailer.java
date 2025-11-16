@@ -81,7 +81,6 @@ public final class MSimpleMailer {
         public interface InitExceptionHandler {
             void handle(Exception e);
         }
-
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
