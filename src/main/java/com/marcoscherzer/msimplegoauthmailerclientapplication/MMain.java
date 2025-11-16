@@ -149,7 +149,7 @@ public final class MMain {
         JPasswordField pwField = new JPasswordField();
 
         JLabel heading = new JLabel("OAuth FileSendFolder Setup");
-        JLabel infoLabel = new JLabel("(This Program requires a Gmail address and a clientSecret.json file)\n\n");
+        JLabel infoLabel = new JLabel("(Requires an email account (tested with Gmail) and a clientSecret.json file provided by Google)\n\n");
         JLabel label0 = new JLabel("\n");
         JLabel label1 = new JLabel("Email address:");
         JLabel label2 = new JLabel("Default recipient address:");
