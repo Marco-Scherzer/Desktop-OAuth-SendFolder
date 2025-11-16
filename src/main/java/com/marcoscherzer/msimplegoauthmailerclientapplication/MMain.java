@@ -51,9 +51,9 @@ public final class MMain {
      * unready
      */
     public static void main(String[] args) {
-        arg=new String[]{"-debug"};
+       // arg=new String[]{"-debug"};
         SwingUtilities.invokeLater(() -> {
-            try {
+
        /*
                 FlatLightLaf.setup(), FlatDarkLaf.setup(), FlatIntelliJLaf.setup(), FlatDarculaLaf.setup(),
                 FlatArcDarkIJTheme.setup(), FlatArcIJTheme.setup(), FlatArcOrangeIJTheme.setup(),
@@ -72,8 +72,9 @@ public final class MMain {
 
                 //originalOut = System.out;
                 //originalErr = System.err;
-                setupLogging();
-                if(arg[0]!=null && arg[0].equals("-debug")) logFrame.setVisible(true);//dbg
+                //setupLogging();
+                if(arg!=null && arg[0]!=null && arg[0].equals("-debug")) logFrame.setVisible(true);//dbg
+
 
                 Path keystorePath = Paths.get(userDir, "mystore.p12");
                 boolean keystoreFileExists = Files.exists(keystorePath);
@@ -89,75 +90,81 @@ public final class MMain {
 
                 MSimpleMailer.setClientKeystoreDir(userDir);
                 mailer = new MSimpleMailer("BackupMailer", pw, false){
+                    @Override
+                    protected void onInitializingSucceeded() {
+
+                    try{
+                        MSimpleKeystore store = mailer.getKeystore();
+
+                        if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
+                            String[] setupedValues = showSetupDialog(false);
+                            String from = setupedValues[0];
+                            String to = setupedValues[1];
+                            store.add("fromAddress", from);
+                            store.add("toAddress", to);
+                        }
+
+                        clientAndPathUUID = store.get("clientId");
+                        sentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-sent"), "Sent folder");
+                        notSentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-notSent"), "NotSent folder");
+
+                        fromAddress = store.get("fromAddress");
+                        toAddress = store.get("toAddress");
+
+                        watcher = new MAttachmentWatcher(sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
+                            @Override
+                            public final MConsentQuestioner askForConsent(MOutgoingMail mail) {
+                                return new MMiniGui(mail,900, 600, 16);
+                            }
+                        }.startServer();
+
+                        sentDesktopLinkWatcher = createAndWatchFolderDesktopLink(sentFolder.toString(), "Sent Things", "Sent");
+                        notSentDesktopLinkWatcher = createAndWatchFolderDesktopLink(notSentFolder.toString(), "NotSent Things", "NotSent");
+
+                        printConfiguration(fromAddress, toAddress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
+
+                        setupTrayIcon();
+
+                    } catch (MClientSecretException exc) {
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "Client Secret Error:\n" + exc.getMessage()+" Setup will be restarted on next launch.",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                        dbg(exc);
+                        exit(1);
+                    } catch (MPasswordIntegrityException exc) {
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "Client Integrity Error:\n" + exc.getMessage(),
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                        dbg(exc);
+                        exit(1);
+                    } catch (Exception exc) {
+                        System.err.println(exc.getMessage());
+                        dbg(exc);
+                        exit(1);
+                    }
+                    }
+
                     public void onInitializeException(Throwable exc){
                         System.err.println(exc.getMessage());
                         dbg(exc);
                         exit(1);
                     }
                 };
-                MSimpleKeystore store = mailer.getKeystore();
 
-                if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
-                    String[] setupedValues = showSetupDialog(false);
-                    String from = setupedValues[0];
-                    String to = setupedValues[1];
-                    store.add("fromAddress", from);
-                    store.add("toAddress", to);
-                }
 
-                clientAndPathUUID = store.get("clientId");
-                sentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-sent"), "Sent folder");
-                notSentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-notSent"), "NotSent folder");
-
-                fromAddress = store.get("fromAddress");
-                toAddress = store.get("toAddress");
-
-                watcher = new MAttachmentWatcher(sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
-                    @Override
-                    public final MConsentQuestioner askForConsent(MOutgoingMail mail) {
-                        return new MMiniGui(mail,900, 600, 16);
-                    }
-                }.startServer();
-
-                sentDesktopLinkWatcher = createAndWatchFolderDesktopLink(sentFolder.toString(), "Sent Things", "Sent");
-                notSentDesktopLinkWatcher = createAndWatchFolderDesktopLink(notSentFolder.toString(), "NotSent Things", "NotSent");
-
-                printConfiguration(fromAddress, toAddress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
-
-                setupTrayIcon();
-
-            } catch (MClientSecretException exc) {
-                JOptionPane.showMessageDialog(
-                        null,
-                        "Client Secret Error:\n" + exc.getMessage()+" Setup will be restarted on next launch.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
-                dbg(exc);
-                exit(1);
-            } catch (MPasswordIntegrityException exc) {
-                JOptionPane.showMessageDialog(
-                        null,
-                        "Client Integrity Error:\n" + exc.getMessage(),
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
-                dbg(exc);
-                exit(1);
-            } catch (Exception exc) {
-                System.err.println(exc.getMessage());
-                dbg(exc);
-                exit(1);
-            }
-
-        });
     }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
     private static void dbg(Throwable exc){
-        if(arg[0]!=null && arg[0].equals("-debug")) {exc.printStackTrace();}
+        if(arg != null && arg[0]!=null && arg[0].equals("-debug")) {exc.printStackTrace();}
     }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

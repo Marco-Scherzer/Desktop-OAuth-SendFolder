@@ -68,6 +68,7 @@ public abstract class MSimpleMailer {
                 } catch (Exception exc) {
                     onInitializeException(exc);
                 }
+                onInitializingSucceeded();
             }, "MSimpleMailer-Init");
 
             initThread.setUncaughtExceptionHandler((t, exc) -> {
@@ -76,6 +77,10 @@ public abstract class MSimpleMailer {
             initThread.start();
         }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    protected abstract void onInitializingSucceeded();
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
