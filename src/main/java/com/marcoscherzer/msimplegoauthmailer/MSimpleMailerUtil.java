@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegooglemailer;
+package com.marcoscherzer.msimplegoauthmailer;
 
 import java.util.regex.Pattern;
 
@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MSimpleGMailerUtil {
+public final class MSimpleMailerUtil {
 
 
     /**

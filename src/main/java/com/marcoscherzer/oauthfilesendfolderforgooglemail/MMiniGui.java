@@ -1,9 +1,6 @@
 package com.marcoscherzer.oauthfilesendfolderforgooglemail;
 
-import com.formdev.flatlaf.FlatLightLaf;
-import com.formdev.flatlaf.intellijthemes.*;
-import com.marcoscherzer.msimplegooglemailer.MOutgoingMail;
-import com.formdev.flatlaf.FlatDarkLaf;
+import com.marcoscherzer.msimplegoauthmailer.MOutgoingMail;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import javax.swing.*;

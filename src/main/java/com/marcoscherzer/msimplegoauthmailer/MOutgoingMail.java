@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegooglemailer;
+package com.marcoscherzer.msimplegoauthmailer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,8 +16,8 @@ public final class MOutgoingMail {
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public MOutgoingMail(String from, String to) {
-        MSimpleGoogleMailerUtil.checkMailAddress(from);
-        MSimpleGoogleMailerUtil.checkMailAddress(to);
+        MSimpleMailerUtil.checkMailAddress(from);
+        MSimpleMailerUtil.checkMailAddress(to);
         this.from = from;
         this.to = to;
         this.messageText = new StringBuilder();

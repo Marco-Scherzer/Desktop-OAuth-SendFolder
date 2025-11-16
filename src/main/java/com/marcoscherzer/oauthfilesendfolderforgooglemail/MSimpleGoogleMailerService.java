@@ -1,10 +1,10 @@
 package com.marcoscherzer.oauthfilesendfolderforgooglemail;
 
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
-import com.marcoscherzer.msimplegooglemailer.MClientSecretException;
-import com.marcoscherzer.msimplegooglemailer.MOutgoingMail;
-import com.marcoscherzer.msimplegooglemailer.MSimpleGMailer;
-import com.marcoscherzer.msimplegooglemailer.MSimpleKeystore;
+import com.marcoscherzer.msimplegoauthmailer.MClientSecretException;
+import com.marcoscherzer.msimplegoauthmailer.MOutgoingMail;
+import com.marcoscherzer.msimplegoauthmailer.MSimpleMailer;
+import com.marcoscherzer.msimplegoauthmailer.MSimpleKeystore;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -17,7 +17,7 @@ import java.util.*;
 
 import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createFolderDesktopLink;
 import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createPathIfNotExists;
-import static com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailerUtil.checkMailAddress;
+import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkMailAddress;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -33,7 +33,7 @@ public final class MSimpleGoogleMailerService {
     private static MAttachmentWatcher watcher;
     private static String fromAddress;
     private static String toAddress;
-    private static MSimpleGMailer mailer;
+    private static MSimpleMailer mailer;
     private static MFileNameWatcher notSentDesktopLinkWatcher;
     private static MFileNameWatcher sentDesktopLinkWatcher;
 
@@ -67,9 +67,9 @@ public final class MSimpleGoogleMailerService {
                 boolean keystoreFileExists = Files.exists(keystorePath);
                 String pw;
                 if (!keystoreFileExists) { pw = showSetupDialog(true)[0]; } else { pw = showPasswordDialog();}
-                MSimpleGMailer.setClientKeystoreDir(userDir);
+                MSimpleMailer.setClientKeystoreDir(userDir);
 
-                mailer = new MSimpleGMailer("BackupMailer", pw, false);
+                mailer = new MSimpleMailer("BackupMailer", pw, false);
                 MSimpleKeystore store = mailer.getKeystore();
 
                 if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {

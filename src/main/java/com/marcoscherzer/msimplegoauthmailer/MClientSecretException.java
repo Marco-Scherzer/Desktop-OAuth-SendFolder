@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegooglemailer;
+package com.marcoscherzer.msimplegoauthmailer;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

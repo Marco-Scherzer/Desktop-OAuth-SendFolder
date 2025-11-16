@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegooglemailer;
+package com.marcoscherzer.msimplegoauthmailer;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -35,12 +35,12 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
-import static com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailerUtil.checkPasswordComplexity;
+import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkPasswordComplexity;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MSimpleGMailer {
+public final class MSimpleMailer {
 
     private static String clientSecretDir = System.getProperty("user.dir");
     private final List<String> scopes = Collections.singletonList(GmailScopes.GMAIL_SEND);
@@ -59,7 +59,7 @@ public final class MSimpleGMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleGMailer(String applicationName, String keystorePassword, boolean doNotPersistOAuthToken) throws Exception {
+    public MSimpleMailer(String applicationName, String keystorePassword, boolean doNotPersistOAuthToken) throws Exception {
         File keystoreFile = new File(clientSecretDir, "mystore.p12");
         File jsonFile = new File(clientSecretDir, "client_secret.json");
         this.doNotPersistOAuthToken = doNotPersistOAuthToken;
