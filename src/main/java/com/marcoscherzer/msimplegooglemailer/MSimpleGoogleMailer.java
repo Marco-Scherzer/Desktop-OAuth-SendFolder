@@ -90,11 +90,11 @@ public final class MSimpleGoogleMailer {
                             System.out.println("Tokens successfully saved");
                         } else {
                            // System.err.println();
-                            throw new Exception("client_secret.json does not contain valid credentials.");
+                            throw new MClientSecretException("client_secret.json does not contain valid credentials.");
                         }
                     } else {
                         //System.err.println();
-                        throw new Exception("client_secret.json must be placed in the directory \"" + clientSecretDir + "\" before first launch.");
+                        throw new MClientSecretException("client_secret.json must be placed in the directory \"" + clientSecretDir + "\" before first launch.");
                     }
 
                     UUID uuid = UUID.randomUUID();

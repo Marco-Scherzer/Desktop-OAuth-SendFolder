@@ -66,20 +66,18 @@ public final class MSimpleGoogleMailerService {
                 Path keystorePath = Paths.get(userDir, "mystore.p12");
                 boolean keystoreFileExists = Files.exists(keystorePath);
 
-                MSimpleGoogleMailer.setClientKeystoreDir(userDir);
-
                 String pw;
                 if (!keystoreFileExists) {
                     pw = showSetupDialog();
                 } else {
                     pw = showPasswordDialog();
                 }
+                MSimpleGoogleMailer.setClientKeystoreDir(userDir);
 
                 // Mailer initialisieren
                 mailer = new MSimpleGoogleMailer("BackupMailer", pw, false);
                 MSimpleKeystore store = mailer.getKeystore();
 
-                // Falls Adressen fehlen Setup-Dialog
                 if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
                     String from = JOptionPane.showInputDialog(null, "Sender address:");
                     String to = JOptionPane.showInputDialog(null, "Receiver address:");
@@ -112,7 +110,7 @@ public final class MSimpleGoogleMailerService {
                 openMainWindow();
 
             } catch (Exception exc) {
-                exc.printStackTrace();
+                //exc.printStackTrace();
                 exit(1);
             }
         });
