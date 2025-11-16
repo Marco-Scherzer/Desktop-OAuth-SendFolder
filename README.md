@@ -1,4 +1,4 @@
-#  OAuth Desktop FileSend Folder
+#  Desktop OAuth Send Folder
 ## A spontaneous mini project focused on simplicity and security.
 <br>
 <br>
