@@ -142,26 +142,79 @@ public final class MSimpleGoogleMailerService {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
     private static String showSetupDialog() {
         JTextField fromField = new JTextField();
         JTextField toField = new JTextField();
         JPasswordField pwField = new JPasswordField();
+        JLabel heading = new JLabel("OAuth FileSendFolder Setup");
+        JLabel infoLabel = new JLabel("(This Program requires a Gmail address and a clientSecret.json file)\n\n");
+        JLabel label0 = new JLabel("\n");
+        JLabel label1 = new JLabel("Email address:");
+        JLabel label2 = new JLabel("Default recipient address:");
+        JPanel label3 = createTwoPartLabel("Program startup password:", "(Do not use any account or email account password!)", 16, 11);
+        heading.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 23f));
+        heading.setHorizontalAlignment(SwingConstants.CENTER);
+        infoLabel.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
+        infoLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        label0.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
+        label1.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
+        label2.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
+        label3.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
+        //label1.setHorizontalAlignment(SwingConstants.CENTER);
+
+
         Object[] message = {
-                "This application requires a \n\"Gmail address\" and a \"clientSecret.json\" file.\n\n", null,
-                "\nEmail address:", fromField,
-                "Default recipient email address: ", toField,
-                "Program startup password\n(Do not use any account or email account password !): ", pwField,
+                heading, null,
+                infoLabel, null,
+                label0, null,
+                label1, fromField,
+                label2, toField,
+                label3, pwField,
                 "\n"
         };
-        int option = JOptionPane.showConfirmDialog(null, message, "Setup OAuth FileSendFolder", JOptionPane.OK_CANCEL_OPTION,JOptionPane.INFORMATION_MESSAGE);
+
+        int option = JOptionPane.showConfirmDialog(
+                null,
+                message,
+                "",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.INFORMATION_MESSAGE
+        );
+
         if (option == JOptionPane.OK_OPTION) {
-            String pw = new String(pwField.getPassword());
-            return pw;
+            return new String(pwField.getPassword());
         } else {
             System.exit(0);
             return null;
         }
     }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
+    private static JPanel createTwoPartLabel(String mainText, String hintText, float mainFontSize, float hintFontSize) {
+        JPanel labelPanel = new JPanel();
+        labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
+
+        JLabel labelMain = new JLabel(mainText);
+        labelMain.setFont(labelMain.getFont().deriveFont(Font.BOLD, mainFontSize));
+        labelMain.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel labelHint = new JLabel(hintText);
+        labelHint.setFont(labelHint.getFont().deriveFont(Font.PLAIN, hintFontSize));
+        labelHint.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        labelPanel.add(labelMain);
+        labelPanel.add(labelHint);
+
+        return labelPanel;
+    }
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
