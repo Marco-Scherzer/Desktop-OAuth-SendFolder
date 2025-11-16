@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MSimpleGoogleMailerUtil {
+public final class MSimpleGMailerUtil {
 
 
     /**
