@@ -1,7 +1,7 @@
 package com.marcoscherzer.oauthfilesendfolderforgooglemail;
 
 import com.marcoscherzer.msimplegooglemailer.MOutgoingMail;
-import com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailer;
+import com.marcoscherzer.msimplegooglemailer.MSimpleGMailer;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,7 +30,7 @@ public abstract class MAttachmentWatcher {
         private final String clientAndPathUUID;
         private final Path sentFolder;
         private final Path notSentFolder;
-        private final MSimpleGoogleMailer mailer;
+        private final MSimpleGMailer mailer;
         private final List<String> fileLinkList = new ArrayList<>();
         private int attachedFilesCnt;
 
@@ -44,7 +44,7 @@ public abstract class MAttachmentWatcher {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
-        public MAttachmentWatcher(Path sentFolder, Path notSentFolder, MSimpleGoogleMailer mailer, String fromAddress, String toAddress, String clientAndPathUUID) {
+        public MAttachmentWatcher(Path sentFolder, Path notSentFolder, MSimpleGMailer mailer, String fromAddress, String toAddress, String clientAndPathUUID) {
             this.sentFolder = sentFolder;
             this.fromAddress = fromAddress;
             this.toAddress = toAddress;

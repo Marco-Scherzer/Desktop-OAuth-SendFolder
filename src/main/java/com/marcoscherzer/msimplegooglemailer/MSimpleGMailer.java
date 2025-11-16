@@ -24,7 +24,6 @@ import jakarta.activation.DataSource;
 import jakarta.activation.FileDataSource;
 import org.apache.commons.codec.binary.Base64;
 
-import javax.swing.text.StringContent;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
@@ -41,7 +40,7 @@ import static com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailerUtil.chec
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MSimpleGoogleMailer {
+public final class MSimpleGMailer {
 
     private static String clientSecretDir = System.getProperty("user.dir");
     private final List<String> scopes = Collections.singletonList(GmailScopes.GMAIL_SEND);
@@ -60,7 +59,7 @@ public final class MSimpleGoogleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleGoogleMailer(String applicationName, String keystorePassword, boolean doNotPersistOAuthToken) throws Exception {
+    public MSimpleGMailer(String applicationName, String keystorePassword, boolean doNotPersistOAuthToken) throws Exception {
         File keystoreFile = new File(clientSecretDir, "mystore.p12");
         File jsonFile = new File(clientSecretDir, "client_secret.json");
         this.doNotPersistOAuthToken = doNotPersistOAuthToken;

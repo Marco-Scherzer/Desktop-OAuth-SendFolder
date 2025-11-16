@@ -3,7 +3,7 @@ package com.marcoscherzer.oauthfilesendfolderforgooglemail;
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.marcoscherzer.msimplegooglemailer.MClientSecretException;
 import com.marcoscherzer.msimplegooglemailer.MOutgoingMail;
-import com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailer;
+import com.marcoscherzer.msimplegooglemailer.MSimpleGMailer;
 import com.marcoscherzer.msimplegooglemailer.MSimpleKeystore;
 
 import javax.imageio.ImageIO;
@@ -33,7 +33,7 @@ public final class MSimpleGoogleMailerService {
     private static MAttachmentWatcher watcher;
     private static String fromAddress;
     private static String toAddress;
-    private static MSimpleGoogleMailer mailer;
+    private static MSimpleGMailer mailer;
     private static MFileNameWatcher notSentDesktopLinkWatcher;
     private static MFileNameWatcher sentDesktopLinkWatcher;
 
@@ -60,22 +60,22 @@ public final class MSimpleGoogleMailerService {
                 } catch (Exception exc) {
                     System.out.println("UI theme not supported");
                 }
-
-                // Schriftgröße global setzen
                 UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
+
+
                 Path keystorePath = Paths.get(userDir, "mystore.p12");
                 boolean keystoreFileExists = Files.exists(keystorePath);
                 String pw;
-                if (!keystoreFileExists) { pw = showSetupDialog(); } else { pw = showPasswordDialog();}
-                MSimpleGoogleMailer.setClientKeystoreDir(userDir);
+                if (!keystoreFileExists) { pw = showSetupDialog(true)[0]; } else { pw = showPasswordDialog();}
+                MSimpleGMailer.setClientKeystoreDir(userDir);
 
-                // Mailer initialisieren
-                mailer = new MSimpleGoogleMailer("BackupMailer", pw, false);
+                mailer = new MSimpleGMailer("BackupMailer", pw, false);
                 MSimpleKeystore store = mailer.getKeystore();
 
                 if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
-                    String from = JOptionPane.showInputDialog(null, "Please enter your registered GMail address:");
-                    String to = JOptionPane.showInputDialog(null, "Please enter a default-recipient address:");
+                    String[] setupedValues = showSetupDialog(false);
+                    String from = setupedValues[0];
+                    String to = setupedValues[1];
                     store.add("fromAddress", from);
                     store.add("toAddress", to);
                 }
@@ -106,7 +106,7 @@ public final class MSimpleGoogleMailerService {
             } catch (MClientSecretException exc) {
             JOptionPane.showMessageDialog(
                     null,
-                    "Client Secret Error:\n" + exc.getMessage(),
+                    "Client Secret Error:\n" + exc.getMessage()+" Setup will be restarted next time.",
                     "Error",
                     JOptionPane.ERROR_MESSAGE
             );
@@ -138,24 +138,23 @@ public final class MSimpleGoogleMailerService {
         System.setOut(ps);
         System.setErr(ps);
     }
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
-     */
-    private static String showSetupDialog() {
+    private static String[] showSetupDialog(boolean setPw) {
         JTextField fromField = new JTextField();
         JTextField toField = new JTextField();
         JPasswordField pwField = new JPasswordField();
+
         JLabel heading = new JLabel("OAuth FileSendFolder Setup");
         JLabel infoLabel = new JLabel("(This Program requires a Gmail address and a clientSecret.json file)\n\n");
         JLabel label0 = new JLabel("\n");
         JLabel label1 = new JLabel("Email address:");
         JLabel label2 = new JLabel("Default recipient address:");
         JPanel label3 = createTwoPartLabel("Program startup password:", "(Do not use any account or email account password!)", 16, 11);
+
         heading.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 23f));
         heading.setHorizontalAlignment(SwingConstants.CENTER);
         infoLabel.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
@@ -164,8 +163,6 @@ public final class MSimpleGoogleMailerService {
         label1.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
         label2.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
         label3.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
-        //label1.setHorizontalAlignment(SwingConstants.CENTER);
-
 
         Object[] message = {
                 heading, null,
@@ -176,22 +173,37 @@ public final class MSimpleGoogleMailerService {
                 label3, pwField,
                 "\n"
         };
+        Object[] message2 = {
+                heading, null,
+                infoLabel, null,
+                label0, null,
+                label1, fromField,
+                label2, toField,
+                "\n"
+        };
 
         int option = JOptionPane.showConfirmDialog(
                 null,
-                message,
+                setPw ? message : message2,
                 "",
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.INFORMATION_MESSAGE
         );
 
         if (option == JOptionPane.OK_OPTION) {
-            return new String(pwField.getPassword());
+            // Werte einsammeln
+            String from = fromField.getText().trim();
+            String to = toField.getText().trim();
+            String pw = setPw ? new String(pwField.getPassword()) : null;
+
+            // Rückgabe als String[]
+            return setPw ? new String[]{from, to, pw} : new String[]{from, to};
         } else {
             System.exit(0);
             return null;
         }
     }
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
