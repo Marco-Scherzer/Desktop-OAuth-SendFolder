@@ -37,7 +37,7 @@ Contact: fahrservice.1@gmail.com
 <br>
 <br>
 
-### A simple, secure OAuth mail client for sending emails with attachments, triggered by a desktop folder icon.
+### A simple, security focused OAuth mail client for sending emails with attachments, triggered by a desktop folder icon.
 ### Requires an email account (tested with Gmail) and a clientSecret.json file provided by Google.
 ### Redirects you to the OAuth login page hosted by Google.
 ### Creates a special outgoing mail folder icon linked on the desktop to send mail. 
