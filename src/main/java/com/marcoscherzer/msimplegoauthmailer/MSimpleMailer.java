@@ -44,38 +44,63 @@ public final class MSimpleMailer {
 
     private static String clientSecretDir = System.getProperty("user.dir");
     private final List<String> scopes = Collections.singletonList(GmailScopes.GMAIL_SEND);
-    private final Credential credential;
-    private final boolean doNotPersistOAuthToken;
+    private Credential credential;
+    private boolean doNotPersistOAuthToken;
     private Gmail service;
     private MSimpleKeystore keystore;
 
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public static final void setClientKeystoreDir(String clientSecretFileDir) {
-        clientSecretDir = clientSecretFileDir;
-    }
+        /**
+         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
+        public MSimpleMailer(String applicationName, String keystorePassword, boolean doNotPersistOAuthToken, InitExceptionHandler handler) {
+            this.doNotPersistOAuthToken = doNotPersistOAuthToken;
 
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public MSimpleMailer(String applicationName, String keystorePassword, boolean doNotPersistOAuthToken) throws Exception {
-        File keystoreFile = new File(clientSecretDir, "mystore.p12");
-        File jsonFile = new File(clientSecretDir, "client_secret.json");
-        this.doNotPersistOAuthToken = doNotPersistOAuthToken;
+            Thread initThread = new Thread(() -> {
+                try {
+                    init(applicationName, keystorePassword);
+                } catch (Exception e) {
+                    handler.handle(e); // Übergabe an den abstrakten Handler
+                }
+            }, "MSimpleMailer-Init");
+
+            initThread.setUncaughtExceptionHandler((t, e) -> {
+                Throwable cause = (e instanceof RuntimeException && e.getCause() != null) ? e.getCause() : e;
+                if (cause instanceof Exception) {
+                    handler.handle((Exception) cause);
+                } else {
+                    handler.handle(new Exception(cause));
+                }
+            });
+
+            initThread.start();
+        }
+
+        /**
+         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
+        public interface InitExceptionHandler {
+            void handle(Exception e);
+        }
+
+        /**
+         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
+        private void init(String applicationName, String keystorePassword) throws Exception {
+            File keystoreFile = new File(clientSecretDir, "mystore.p12");
+            File jsonFile = new File(clientSecretDir, "client_secret.json");
+
             if (!keystoreFile.exists()) checkParameters(applicationName, keystorePassword);
-            try {
 
+            try {
                 this.keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
                 keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
 
                 HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
                 JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+
                 String clientId;
                 String clientSecret;
 
-                //versucht die parameter immer neu einzulesen bis irgendwann mal ein json file ins verzeichnis gelegt wird
-                // danach wird der block nur neu betreten falls der keystore manuell gelöscht wird.
                 if (keystore.newCreated() || !keystore.containsAllNonNullKeys("clientId", "google-client-id", "google-client-secret")) {
                     System.out.println("Checking if file \"client_secret.json\" exists");
                     if (jsonFile.exists()) {
@@ -88,11 +113,9 @@ public final class MSimpleMailer {
                             keystore.add("google-client-id", clientId).add("google-client-secret", clientSecret);
                             System.out.println("Tokens successfully saved");
                         } else {
-                           // System.err.println();
                             throw new MClientSecretException("client_secret.json does not contain valid credentials.");
                         }
                     } else {
-                        //System.err.println();
                         throw new MClientSecretException("client_secret.json must be placed in the directory \"" + clientSecretDir + "\" before first launch.");
                     }
 
@@ -123,7 +146,6 @@ public final class MSimpleMailer {
                             .setApprovalPrompt("force")
                             .setCredentialDataStore(new MemoryDataStoreFactory().getDataStore("tempsession"))
                             .build();
-
                 } else {
                     flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
                             .setAccessType("offline")
@@ -143,30 +165,32 @@ public final class MSimpleMailer {
                         .setApplicationName(applicationName)
                         .build();
 
-        } catch (Exception exc) {
-                System.err.println("Error in initialization. "+ exc.getMessage());
-                    if (keystore.successfullyInitialized()) {
-                        System.out.println("clearing KeyStore");
-                        try {
-                         keystore.clear();
-                        } catch (Exception exc2) {
-                            System.err.println("Error while clearing keystore.\n" +(exc2.getMessage()==null ?exc2:exc2.getMessage()));
-                            System.err.println("Initialization failed and keystore could not be cleared. Please delete it manually");
-                            throw new Exception(exc2);
-                        }
+            } catch (Exception exc) {
+                System.err.println("Error in initialization. " + exc.getMessage());
+                if (keystore.successfullyInitialized()) {
+                    System.out.println("clearing KeyStore");
+                    try {
+                        keystore.clear();
+                    } catch (Exception exc2) {
+                        System.err.println("Error while clearing keystore.\n" + (exc2.getMessage() == null ? exc2 : exc2.getMessage()));
+                        System.err.println("Initialization failed and keystore could not be cleared. Please delete it manually");
+                        throw new Exception(exc2);
                     }
-                    throw exc;
-        }
+                }
+                throw exc;
+            }
 
-        if (jsonFile.exists()) {
-            boolean jsonFileDeleted = jsonFile.delete();
-            if (!jsonFileDeleted) {
-                System.out.println("File \"client_secret.json\" could not be deleted. Please delete it manually.");
-            } else {
-                System.out.println("client_secret.json successfully imported and deleted.");
+            if (jsonFile.exists()) {
+                boolean jsonFileDeleted = jsonFile.delete();
+                if (!jsonFileDeleted) {
+                    System.out.println("File \"client_secret.json\" could not be deleted. Please delete it manually.");
+                } else {
+                    System.out.println("client_secret.json successfully imported and deleted.");
+                }
             }
         }
     }
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */

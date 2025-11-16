@@ -56,6 +56,7 @@ public final class MSimpleKeystore {
             try { fis.close(); } catch (Exception exc) { throw new Exception("Error in context with keystore while closing keystore file", exc); }
             successfullyInitialized = true;
             newCreated = false;
+            System.out.println("keystore successfully loaded");
         } else {
             System.out.println("creating keystore " + ksFile);
             try { keyStore.load(null, keystorePassword.toCharArray()); } catch (Exception exc) { throw new Exception("Error in context with keystore while initializing new keystore", exc); }
@@ -66,6 +67,7 @@ public final class MSimpleKeystore {
             try { fos.close(); } catch (Exception exc) { throw new Exception("Error in context with keystore while closing fileoutputstream", exc); }
             successfullyInitialized = true;
             newCreated = true;
+            System.out.println("keystore successfully created");
         }
     }
     /**

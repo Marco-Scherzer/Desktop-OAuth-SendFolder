@@ -70,8 +70,8 @@ public final class MMain {
                 }
                 UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
 
-                originalOut = System.out;
-                originalErr = System.err;
+                //originalOut = System.out;
+                //originalErr = System.err;
                 setupLogging();
                 if(arg[0]!=null && arg[0].equals("-debug")) logFrame.setVisible(true);//dbg
 
@@ -79,9 +79,11 @@ public final class MMain {
                 boolean keystoreFileExists = Files.exists(keystorePath);
                 String pw;
                 if (!keystoreFileExists) {
+                    System.out.println("showing setup dialog");
                     pw = showSetupDialog(true)[2];
                 }
                 else {
+                    System.out.println("showing password dialog");
                     pw = showPasswordDialog();
                 }
                 MSimpleMailer.setClientKeystoreDir(userDir);
@@ -147,18 +149,28 @@ public final class MMain {
     private static void setupLogging() {
         logArea = new JTextArea(20, 80);
         logArea.setEditable(false);
-        logFrame = new JFrame("OAuth FileSendFolder Log");
+        logFrame = new JFrame("Log Output");
         logFrame.add(new JScrollPane(logArea));
         logFrame.pack();
-        logFrame.setVisible(false); // unsichtbar beim Start
-        logFrame.setSize(1350, 800);
-        logFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        PrintStream ps = new PrintStream(new OutputStream() {
+        logFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        OutputStream outStream = new OutputStream() {
+            @Override
+            public void write(byte[] b, int off, int len) {
+                final String text = new String(b, off, len);
+                SwingUtilities.invokeLater(() -> {
+                    logArea.append(text);
+                    logArea.setCaretPosition(logArea.getDocument().getLength());
+                });
+            }
+
             @Override
             public void write(int b) {
-                logArea.append(String.valueOf((char) b));
+                write(new byte[]{(byte)b}, 0, 1);
             }
-        });
+        };
+
+        PrintStream ps = new PrintStream(outStream, true);
         System.setOut(ps);
         System.setErr(ps);
     }
