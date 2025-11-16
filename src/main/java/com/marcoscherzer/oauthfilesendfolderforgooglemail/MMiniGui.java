@@ -31,24 +31,6 @@ public final class MMiniGui implements MAttachmentWatcher.MConsentQuestioner {
      */
     public MMiniGui(MOutgoingMail mail, int windowWidth, int windowHeight, int fontSize) {
         SwingUtilities.invokeLater(() -> {
-               /*
-                FlatLightLaf.setup(), FlatDarkLaf.setup(), FlatIntelliJLaf.setup(), FlatDarculaLaf.setup(),
-                FlatArcDarkIJTheme.setup(), FlatArcIJTheme.setup(), FlatArcOrangeIJTheme.setup(),
-                FlatArcDarkOrangeIJTheme.setup(), FlatCarbonIJTheme.setup(), FlatCyanLightIJTheme.setup(),
-                FlatGrayIJTheme.setup(), FlatGrayDarkIJTheme.setup(), FlatHiberbeeDarkIJTheme.setup(),
-                FlatHighContrastIJTheme.setup(), FlatMonokaiProIJTheme.setup(), FlatSolarizedLightIJTheme.setup(),
-                FlatSolarizedDarkIJTheme.setup(), FlatDraculaIJTheme.setup()
-           */
-
-            try {
-                FlatCarbonIJTheme.setup();
-            } catch (Exception exc) {
-                System.out.println("UI theme not supported");
-            }
-
-            // Schriftgröße global setzen
-            UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, fontSize));
-
             consentFrame = new JFrame("OAuthFileSendFolder for Gmail (Prototype, preAlpha 0.1) - Send Mail");
             consentFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             consentFrame.setAlwaysOnTop(true);

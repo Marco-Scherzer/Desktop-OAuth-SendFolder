@@ -1,5 +1,6 @@
 package com.marcoscherzer.oauthfilesendfolderforgooglemail;
 
+import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.marcoscherzer.msimplegooglemailer.MOutgoingMail;
 import com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailer;
 import com.marcoscherzer.msimplegooglemailer.MSimpleKeystore;
@@ -44,7 +45,23 @@ public final class MSimpleGoogleMailerService {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
+       /*
+                FlatLightLaf.setup(), FlatDarkLaf.setup(), FlatIntelliJLaf.setup(), FlatDarculaLaf.setup(),
+                FlatArcDarkIJTheme.setup(), FlatArcIJTheme.setup(), FlatArcOrangeIJTheme.setup(),
+                FlatArcDarkOrangeIJTheme.setup(), FlatCarbonIJTheme.setup(), FlatCyanLightIJTheme.setup(),
+                FlatGrayIJTheme.setup(), FlatGrayDarkIJTheme.setup(), FlatHiberbeeDarkIJTheme.setup(),
+                FlatHighContrastIJTheme.setup(), FlatMonokaiProIJTheme.setup(), FlatSolarizedLightIJTheme.setup(),
+                FlatSolarizedDarkIJTheme.setup(), FlatDraculaIJTheme.setup()
+           */
 
+                try {
+                    FlatCarbonIJTheme.setup();
+                } catch (Exception exc) {
+                    System.out.println("UI theme not supported");
+                }
+
+                // Schriftgröße global setzen
+                UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
 
                 Path keystorePath = Paths.get(userDir, "mystore.p12");
                 boolean keystoreFileExists = Files.exists(keystorePath);
@@ -81,7 +98,7 @@ public final class MSimpleGoogleMailerService {
                 watcher = new MAttachmentWatcher(sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
                     @Override
                     public final MConsentQuestioner askForConsent(MOutgoingMail mail) {
-                        return new MMiniGui(mail);
+                        return new MMiniGui(mail,900, 600, 16);
                     }
                 }.startServer();
 
