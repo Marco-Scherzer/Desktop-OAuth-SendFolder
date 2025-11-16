@@ -1,4 +1,4 @@
-package com.marcoscherzer.oauthfilesendfolderforgooglemail;
+package com.marcoscherzer.msimplegoauthmailerclientapplication;
 import java.io.File;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MFileLinkCollectorFolderClient {
+public final class MFileLinkCollector {
 
     private static Socket socket;
     private static PrintWriter out;

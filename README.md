@@ -1,4 +1,4 @@
-#  OAuth Desktop FileSend Folder for GMail
+#  OAuth Desktop FileSend Folder
 ## A spontaneous mini project focused on simplicity and security.
 <br>
 <br>
@@ -37,17 +37,19 @@ Contact: fahrservice.1@gmail.com
 <br>
 <br>
 
-### A simple, secure OAuth GoogleMail client for sending mails with attachments that is Attachment Desktop Folder triggerd. 
+### A simple, secure OAuth Mail client for sending mails with attachments that is attachment Desktop folder triggerd.
+### Requires an email account (tested with Gmail) and a clientSecret.json file provided by Google.
+### Redirects you to the OAuth login page hosted by Google.
 ### Creates a special outgoing mail folder icon linked on the desktop to send mail. 
 ### After the folder-icon is clicked or contents are added to the folder by drag and drop or script, an email-send dialog appears to ask the user for consent and to change the recipient, subject or mail text.
-### If the user agrees the mail is sent from the configured sender email address to the receiver email address via GMail.
+### If the user agrees the mail is sent from the configured sender email address to the receiver email address.
 ### Multiple send windows can be opened by using the same simple click or drag-and-drop gesture.
 
  ## Features
 
-### - Gmail OAuth 2.0 authentication without persisting OAuth tokens.
+### - OAuth 2.0 authentication without persisting OAuth tokens.
 
-### - Google client_secret.json file is stored in secure encrypted PKCS#12 database
+### - client_secret.json file is stored in secure encrypted PKCS#12 database
 
 ### - Application startup access password protection
 
@@ -92,7 +94,7 @@ Contact: fahrservice.1@gmail.com
 ###  https://accounts.google.com/o/oauth2/...
 
 ==========================================================================
-##              OAuth Desktop FileSend Folder for GoogleMail 
+##              OAuth Desktop FileSend Folder
 ## (A mini project focusing on simplicity and security)
 ## Author : Marco Scherzer Copyright: © Marco Scherzer. All rights reserved. 
 ==========================================================================

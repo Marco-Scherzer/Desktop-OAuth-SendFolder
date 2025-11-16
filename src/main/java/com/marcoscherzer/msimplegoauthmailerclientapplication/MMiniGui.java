@@ -1,4 +1,4 @@
-package com.marcoscherzer.oauthfilesendfolderforgooglemail;
+package com.marcoscherzer.msimplegoauthmailerclientapplication;
 
 import com.marcoscherzer.msimplegoauthmailer.MOutgoingMail;
 import com.formdev.flatlaf.extras.FlatSVGIcon;

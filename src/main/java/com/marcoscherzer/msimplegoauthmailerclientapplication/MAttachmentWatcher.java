@@ -1,4 +1,4 @@
-package com.marcoscherzer.oauthfilesendfolderforgooglemail;
+package com.marcoscherzer.msimplegoauthmailerclientapplication;
 
 import com.marcoscherzer.msimplegoauthmailer.MOutgoingMail;
 import com.marcoscherzer.msimplegoauthmailer.MSimpleMailer;
@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createFolderLink;
+import static com.marcoscherzer.msimplegoauthmailerclientapplication.MUtil.createFolderLink;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

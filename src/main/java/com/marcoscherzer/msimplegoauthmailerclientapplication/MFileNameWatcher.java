@@ -1,4 +1,4 @@
-package com.marcoscherzer.oauthfilesendfolderforgooglemail;
+package com.marcoscherzer.msimplegoauthmailerclientapplication;
 
 import java.io.IOException;
 import java.nio.file.*;

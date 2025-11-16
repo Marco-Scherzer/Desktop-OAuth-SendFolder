@@ -1,4 +1,4 @@
-package com.marcoscherzer.oauthfilesendfolderforgooglemail;
+package com.marcoscherzer.msimplegoauthmailerclientapplication;
 
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.marcoscherzer.msimplegoauthmailer.MClientSecretException;
@@ -15,15 +15,15 @@ import java.io.PrintStream;
 import java.nio.file.*;
 import java.util.*;
 
-import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createFolderDesktopLink;
-import static com.marcoscherzer.oauthfilesendfolderforgooglemail.MUtil.createPathIfNotExists;
+import static com.marcoscherzer.msimplegoauthmailerclientapplication.MUtil.createFolderDesktopLink;
+import static com.marcoscherzer.msimplegoauthmailerclientapplication.MUtil.createPathIfNotExists;
 import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkMailAddress;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  * unready
  */
-public final class MSimpleGoogleMailerService {
+public final class MMain {
 
     private static final String userDir = System.getProperty("user.dir");
     private static final String basePath = userDir + "\\mail";
@@ -260,7 +260,7 @@ public final class MSimpleGoogleMailerService {
             return;
         }
         SystemTray tray = SystemTray.getSystemTray();
-        Image image = ImageIO.read(MSimpleGoogleMailerService.class.getResourceAsStream("/5.png"));
+        Image image = ImageIO.read(MMain.class.getResourceAsStream("/5.png"));
         TrayIcon trayIcon = new TrayIcon(image, "OAuth Desktop FileSend Folder for GoogleMail", traymenu);
         trayIcon.setImageAutoSize(true);
         tray.add(trayIcon);
