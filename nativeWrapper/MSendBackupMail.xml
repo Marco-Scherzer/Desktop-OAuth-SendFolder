@@ -3,7 +3,7 @@
   <dontWrapJar>false</dontWrapJar>
   <headerType>console</headerType>
   <jar>Z:\MarcoScherzer-Projects\MSendBackupMail\out\artifacts\MSendBackupMail_jar\MSendBackupMail.jar</jar>
-  <outfile>Z:\MarcoScherzer-Projects\MSendBackupMail\nativeWrapper\OAuthFileSendFolder.exe</outfile>
+  <outfile>Z:\MarcoScherzer-Projects\MLinkCollectorFolderClient\nativeWrapper\OAuthFileSendFolder.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>

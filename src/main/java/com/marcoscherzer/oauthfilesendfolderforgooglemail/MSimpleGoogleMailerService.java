@@ -5,8 +5,11 @@ import com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailer;
 import com.marcoscherzer.msimplegooglemailer.MSimpleKeystore;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.file.*;
 import java.util.*;
 
@@ -21,8 +24,7 @@ import static com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailerUtil.chec
 public final class MSimpleGoogleMailerService {
 
     private static final String userDir = System.getProperty("user.dir");
-    private static final String basePath = userDir+"\\mail";
-    private static boolean askConsent = true;
+    private static final String basePath = userDir + "\\mail";
     private static Path notSentFolder;
     private static Path sentFolder;
     private static String clientAndPathUUID;
@@ -33,89 +35,168 @@ public final class MSimpleGoogleMailerService {
     private static MFileNameWatcher notSentDesktopLinkWatcher;
     private static MFileNameWatcher sentDesktopLinkWatcher;
 
+    private static JTextArea logArea;
+    private static JFrame logFrame;
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
-    public static final void main(String[] args) {
-        try {
-            System.setErr(System.out);
-            Path keystorePath = Paths.get(userDir, "mystore.p12");
-            boolean keystoreFileExists = Files.exists(keystorePath);
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            try {
 
-            String pw = MUtil.promptPassword(!keystoreFileExists ? "Please set a password: " : "Please enter your password: ");
-            pw = "testTesttest-123";
-            System.out.println();
-            MSimpleGoogleMailer.setClientKeystoreDir(userDir);
-            mailer = new MSimpleGoogleMailer("BackupMailer", pw, false); //dbg
-            //mailer = new MSimpleGoogleMailer("BackupMailer", pw, true);//false because of dbg
-            MSimpleKeystore store = mailer.getKeystore();
 
-            if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
-                String fromAddress = readMailAddressInput("sender");
-                String toAddress = readMailAddressInput("receiver");
-                store.add("fromAddress", fromAddress);
-                store.add("toAddress", toAddress);
-            }
+                Path keystorePath = Paths.get(userDir, "mystore.p12");
+                boolean keystoreFileExists = Files.exists(keystorePath);
 
-            clientAndPathUUID = store.get("clientId");
+                MSimpleGoogleMailer.setClientKeystoreDir(userDir);
 
-            sentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-sent"), "Sent folder");
-            notSentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-notSent"), "NotSent folder");
-
-            fromAddress = store.get("fromAddress");
-            toAddress = store.get("toAddress");
-
-            watcher = new MAttachmentWatcher(sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
-                @Override
-                public final MConsentQuestioner askForConsent(MOutgoingMail mail) {
-                    return new MMiniGui(mail);
-                    //return () -> true;
+                String pw;
+                if (!keystoreFileExists) {
+                    pw = showSetupDialog();
+                } else {
+                    pw = showPasswordDialog();
                 }
-            }.startServer();
 
+                // Mailer initialisieren
+                mailer = new MSimpleGoogleMailer("BackupMailer", pw, false);
+                MSimpleKeystore store = mailer.getKeystore();
 
-            sentDesktopLinkWatcher     = createAndWatchFolderDesktopLink(sentFolder.toString(), "Sent Things", "Sent");
-            notSentDesktopLinkWatcher = createAndWatchFolderDesktopLink(notSentFolder.toString(), "NotSent Things", "NotSent");
+                // Falls Adressen fehlen Setup-Dialog
+                if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
+                    String from = JOptionPane.showInputDialog(null, "Sender address:");
+                    String to = JOptionPane.showInputDialog(null, "Receiver address:");
+                    store.add("fromAddress", from);
+                    store.add("toAddress", to);
+                }
 
-            printConfiguration(fromAddress, toAddress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
+                setupLogging(); // Logging vorbereiten, aber Fenster noch nicht sichtbar
+                clientAndPathUUID = store.get("clientId");
+                sentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-sent"), "Sent folder");
+                notSentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-notSent"), "NotSent folder");
 
+                fromAddress = store.get("fromAddress");
+                toAddress = store.get("toAddress");
 
-            PopupMenu traymenu = new PopupMenu();
-            MenuItem exitItem = new MenuItem("Close Program");
-            exitItem.addActionListener((ActionEvent e) -> {
-                System.out.println("Program closed via Tray-Icon");
-                System.exit(0);
-            });
+                watcher = new MAttachmentWatcher(sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
+                    @Override
+                    public final MConsentQuestioner askForConsent(MOutgoingMail mail) {
+                        return new MMiniGui(mail);
+                    }
+                }.startServer();
 
-            traymenu.add(exitItem);
-            if (!SystemTray.isSupported()) {
-                System.out.println("SystemTray is not supported!");
-                return;
+                sentDesktopLinkWatcher = createAndWatchFolderDesktopLink(sentFolder.toString(), "Sent Things", "Sent");
+                notSentDesktopLinkWatcher = createAndWatchFolderDesktopLink(notSentFolder.toString(), "NotSent Things", "NotSent");
+
+                printConfiguration(fromAddress, toAddress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
+
+                setupTrayIcon();
+
+                openMainWindow();
+
+            } catch (Exception exc) {
+                exc.printStackTrace();
+                exit(1);
             }
-            SystemTray tray = SystemTray.getSystemTray();
-            Image image = ImageIO.read(MSimpleGoogleMailerService.class.getResourceAsStream("/5.png"));
-            TrayIcon trayIcon = new TrayIcon(image, "OAuth Desktop FileSend Folder for GoogleMail", traymenu);
-            trayIcon.setImageAutoSize(true);
-            tray.add(trayIcon);
-            trayIcon.displayMessage("OAuth Desktop FileSend Folder for GoogleMail",
-                    "OAuth Desktop FileSend Folder for GoogleMail started in your system tray." +
-                    "To send mail drag files onto it's dolphin icon " +
-                            "on the desktop or click it.", TrayIcon.MessageType.INFO);
-            System.out.println("To end the Program please press a key");
+        });
+    }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
+    private static void setupLogging() {
+        logArea = new JTextArea(20, 80);
+        logArea.setEditable(false);
+        logFrame = new JFrame("OAuth FileSendFolder Log");
+        logFrame.add(new JScrollPane(logArea));
+        logFrame.pack();
+        logFrame.setVisible(false); // Anfangs unsichtbar
 
-            new Scanner(System.in).nextLine();
-
-            exit(0);
-        } catch (Exception exc) {
-            exc.printStackTrace();
-            exit(1);
+        PrintStream ps = new PrintStream(new OutputStream() {
+            @Override
+            public void write(int b) {
+                logArea.append(String.valueOf((char) b));
+            }
+        });
+        System.setOut(ps);
+        System.setErr(ps);
+    }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
+    private static String showSetupDialog() {
+        JTextField fromField = new JTextField();
+        JTextField toField = new JTextField();
+        JPasswordField pwField = new JPasswordField();
+        Object[] message = {
+                "Sender:", fromField,
+                "Receiver:", toField,
+                "Password:", pwField
+        };
+        int option = JOptionPane.showConfirmDialog(null, message, "Setup Mailer", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.OK_OPTION) {
+            String pw = new String(pwField.getPassword());
+            return pw;
+        } else {
+            System.exit(0);
+            return null;
         }
     }
-
     /**
-     * @author Marco Scherzer
-     * Copyright © Marco Scherzer. All rights reserved.
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
+    private static String showPasswordDialog() {
+        JPasswordField pwField = new JPasswordField();
+        pwField.setText("testTesttest-123");
+        int option = JOptionPane.showConfirmDialog(null, pwField, "Enter Password", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.OK_OPTION) {
+            return new String(pwField.getPassword());
+        } else {
+            System.exit(0);
+            return null;
+        }
+    }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
+    private static void setupTrayIcon() throws Exception {
+        PopupMenu traymenu = new PopupMenu();
+        MenuItem exitItem = new MenuItem("Close Program");
+        exitItem.addActionListener((ActionEvent e) -> {
+            System.out.println("Program closed via Tray-Icon");
+            System.exit(0);
+        });
+        traymenu.add(exitItem);
+
+        if (!SystemTray.isSupported()) {
+            System.out.println("SystemTray is not supported!");
+            return;
+        }
+        SystemTray tray = SystemTray.getSystemTray();
+        Image image = ImageIO.read(MSimpleGoogleMailerService.class.getResourceAsStream("/5.png"));
+        TrayIcon trayIcon = new TrayIcon(image, "OAuth Desktop FileSend Folder for GoogleMail", traymenu);
+        trayIcon.setImageAutoSize(true);
+        tray.add(trayIcon);
+        trayIcon.displayMessage("OAuth Desktop FileSend Folder for GoogleMail",
+                "OAuth Desktop FileSend Folder for GoogleMail started in your system tray.\n" +
+                        "To send mail drag files onto its dolphin icon on the desktop or click it.",
+                TrayIcon.MessageType.INFO);
+    }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
+    private static void openMainWindow() {
+        logFrame.setSize(600, 400);
+        logFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        logFrame.setVisible(true); // erst jetzt sichtbar machen
+    }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
      */
     private static void printConfiguration(String fromAddress, String toAddress, String basePath, String outFolder, String sentFolder) {
         System.out.println(
@@ -142,8 +223,8 @@ public final class MSimpleGoogleMailerService {
                         "\n  After sending, they will be moved to the 'Sent Things' folder." +
                         "\n=========================================================================="
         );
-
     }
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

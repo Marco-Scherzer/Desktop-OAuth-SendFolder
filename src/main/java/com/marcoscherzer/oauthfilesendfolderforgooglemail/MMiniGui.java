@@ -31,7 +31,6 @@ public final class MMiniGui implements MAttachmentWatcher.MConsentQuestioner {
      */
     public MMiniGui(MOutgoingMail mail, int windowWidth, int windowHeight, int fontSize) {
         SwingUtilities.invokeLater(() -> {
-
                /*
                 FlatLightLaf.setup(), FlatDarkLaf.setup(), FlatIntelliJLaf.setup(), FlatDarculaLaf.setup(),
                 FlatArcDarkIJTheme.setup(), FlatArcIJTheme.setup(), FlatArcOrangeIJTheme.setup(),
@@ -177,7 +176,6 @@ public final class MMiniGui implements MAttachmentWatcher.MConsentQuestioner {
 
     }
 
-    static int dbg;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
