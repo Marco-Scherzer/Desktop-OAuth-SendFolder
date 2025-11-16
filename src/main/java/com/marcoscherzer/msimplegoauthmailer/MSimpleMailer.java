@@ -55,8 +55,10 @@ public abstract class MSimpleMailer {
         public MSimpleMailer(String applicationName, String keystorePassword, boolean doNotPersistOAuthToken) {
             this.doNotPersistOAuthToken = doNotPersistOAuthToken;
             Thread initThread = new Thread(() -> {
+                String applicationName_=applicationName;
+                String keystorePassword_=keystorePassword;
                 try {
-                    init(applicationName, keystorePassword);
+                    initialize(applicationName_, keystorePassword_);
                 } catch (Exception exc) {
                     onInitializeException(exc);
                 }
@@ -76,7 +78,7 @@ public abstract class MSimpleMailer {
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
-        private void init(String applicationName, String keystorePassword) throws Exception {
+        private void initialize(String applicationName, String keystorePassword) throws Exception {
             File keystoreFile = new File(clientSecretDir, "mystore.p12");
             File jsonFile = new File(clientSecretDir, "client_secret.json");
 
