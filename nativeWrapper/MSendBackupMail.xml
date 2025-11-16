@@ -15,7 +15,7 @@
   <manifest>Z:\MarcoScherzer-Projects\MSendBackupMail\nativeWrapper\MSendBackupMail.manifest</manifest>
   <icon>Z:\MarcoScherzer-Projects\MSendBackupMail\nativeWrapper\2.ico</icon>
   <jre>
-    <path>D:\User\Marco Scherzer\Desktop\dbgTest\jre</path>
+    <path>Z:\MarcoScherzer-Projects\MLinkCollectorFolderClient\nativeWrapper\jre</path>
     <requiresJdk>false</requiresJdk>
     <requires64Bit>true</requires64Bit>
     <minVersion>21</minVersion>

@@ -42,11 +42,16 @@ public final class MMain {
 
     private static JTextArea logArea;
     private static JFrame logFrame;
+    private static PrintStream originalOut;
+    private static PrintStream originalErr;
+    private static String[] arg;
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
     public static void main(String[] args) {
+        arg=new String[]{"-debug"};
         SwingUtilities.invokeLater(() -> {
             try {
        /*
@@ -65,7 +70,11 @@ public final class MMain {
                 }
                 UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
 
+                originalOut = System.out;
+                originalErr = System.err;
                 setupLogging();
+                if(arg[0]!=null && arg[0].equals("-debug")) logFrame.setVisible(true);//dbg
+
                 Path keystorePath = Paths.get(userDir, "mystore.p12");
                 boolean keystoreFileExists = Files.exists(keystorePath);
                 String pw;
@@ -125,7 +134,7 @@ public final class MMain {
                 );
                 exit(1);
             } catch (Exception exc) {
-                //exc.printStackTrace();
+                if(arg[0]!=null && arg[0].equals("-debug")) {exc.printStackTrace();}
                 exit(1);
             }
 
@@ -196,7 +205,6 @@ public final class MMain {
                         "To send mail drag files onto its dolphin icon on the desktop or click it.",
                 TrayIcon.MessageType.INFO);
     }
-
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

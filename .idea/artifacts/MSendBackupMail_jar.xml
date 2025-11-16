@@ -1,11 +1,16 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="MSendBackupMail:jar">
+  <artifact type="jar" build-on-make="true" name="MSendBackupMail:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/MSendBackupMail_jar</output-path>
     <root id="archive" name="MSendBackupMail.jar">
       <element id="directory" name="META-INF">
         <element id="file-copy" path="$PROJECT_DIR$/src/main/META-INF/MANIFEST.MF" />
       </element>
       <element id="module-output" name="MSendBackupMail.main" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.formdev/flatlaf-extras/3.4/87c7ef20a1387060c4403b7a319b8b35e323911f/flatlaf-extras-3.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.formdev/flatlaf-intellij-themes/3.4/5f34693a9971f41d0b6e1d007395b9435647af9e/flatlaf-intellij-themes-3.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.formdev/flatlaf-swingx/3.4/1ccd67714e8c4f3da9f0e89e1ce08e4a3336d210/flatlaf-swingx-3.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.formdev/flatlaf/3.4/af0071792ef88347127e2252e56aac80a8b819e2/flatlaf-3.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.weisj/jsvg/1.2.0/7a1dfd541dc48ca58e706c356d1604971f58db25/jsvg-1.2.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.api-client/google-api-client/2.7.2/495d58d6e31c2c5e24a707a50d6355ba92dd3d0c/google-api-client-2.7.2.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.apis/google-api-services-gmail/v1-rev20250630-2.0.0/d55a07eab48a656f836ef9dce95da8d5a31252a4/google-api-services-gmail-v1-rev20250630-2.0.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.auth/google-auth-library-credentials/1.30.0/30f48b5459b931c7d2692970fae23121b598dad7/google-auth-library-credentials-1.30.0.jar" path-in-jar="/" />
