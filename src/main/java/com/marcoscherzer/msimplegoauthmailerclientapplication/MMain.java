@@ -86,10 +86,13 @@ public final class MMain {
                     System.out.println("showing password dialog");
                     pw = showPasswordDialog();
                 }
-                //MSimpleMailer.setClientKeystoreDir(userDir);
-                mailer = new MSimpleMailer("BackupMailer", pw, false){
-                    public void onInitializeException(Throwable e){
 
+                MSimpleMailer.setClientKeystoreDir(userDir);
+                mailer = new MSimpleMailer("BackupMailer", pw, false){
+                    public void onInitializeException(Throwable exc){
+                        System.err.println(exc.getMessage());
+                        dbg(exc);
+                        exit(1);
                     }
                 };
                 MSimpleKeystore store = mailer.getKeystore();
@@ -130,6 +133,7 @@ public final class MMain {
                         "Error",
                         JOptionPane.ERROR_MESSAGE
                 );
+                dbg(exc);
                 exit(1);
             } catch (MPasswordIntegrityException exc) {
                 JOptionPane.showMessageDialog(
@@ -138,13 +142,22 @@ public final class MMain {
                         "Error",
                         JOptionPane.ERROR_MESSAGE
                 );
+                dbg(exc);
                 exit(1);
             } catch (Exception exc) {
-                if(arg[0]!=null && arg[0].equals("-debug")) {exc.printStackTrace();}
+                System.err.println(exc.getMessage());
+                dbg(exc);
                 exit(1);
             }
 
         });
+    }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
+    private static void dbg(Throwable exc){
+        if(arg[0]!=null && arg[0].equals("-debug")) {exc.printStackTrace();}
     }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

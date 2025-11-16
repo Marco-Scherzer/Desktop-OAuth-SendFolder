@@ -48,6 +48,12 @@ public abstract class MSimpleMailer {
     private boolean doNotPersistOAuthToken;
     private Gmail service;
     private MSimpleKeystore keystore;
+        /**
+         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
+        public static final void setClientKeystoreDir(String clientSecretFileDir) {
+            clientSecretDir = clientSecretFileDir;
+        }
 
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -73,7 +79,7 @@ public abstract class MSimpleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-        protected abstract void onInitializeException(Throwable e);
+        protected abstract void onInitializeException(Throwable exc);
 
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
