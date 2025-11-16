@@ -40,7 +40,7 @@ import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkPassw
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MSimpleMailer {
+public abstract class MSimpleMailer {
 
     private static String clientSecretDir = System.getProperty("user.dir");
     private final List<String> scopes = Collections.singletonList(GmailScopes.GMAIL_SEND);
@@ -52,35 +52,27 @@ public final class MSimpleMailer {
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
-        public MSimpleMailer(String applicationName, String keystorePassword, boolean doNotPersistOAuthToken, InitExceptionHandler handler) {
+        public MSimpleMailer(String applicationName, String keystorePassword, boolean doNotPersistOAuthToken) {
             this.doNotPersistOAuthToken = doNotPersistOAuthToken;
-
             Thread initThread = new Thread(() -> {
                 try {
                     init(applicationName, keystorePassword);
-                } catch (Exception e) {
-                    handler.handle(e); // Übergabe an den abstrakten Handler
+                } catch (Exception exc) {
+                    onInitializeException(exc);
                 }
             }, "MSimpleMailer-Init");
 
-            initThread.setUncaughtExceptionHandler((t, e) -> {
-                Throwable cause = (e instanceof RuntimeException && e.getCause() != null) ? e.getCause() : e;
-                if (cause instanceof Exception) {
-                    handler.handle((Exception) cause);
-                } else {
-                    handler.handle(new Exception(cause));
-                }
+            initThread.setUncaughtExceptionHandler((t, exc) -> {
+                onInitializeException(exc);
             });
-
             initThread.start();
         }
 
-        /**
-         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-         */
-        public interface InitExceptionHandler {
-            void handle(Exception e);
-        }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+        protected abstract void onInitializeException(Throwable e);
+
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
@@ -91,7 +83,7 @@ public final class MSimpleMailer {
             if (!keystoreFile.exists()) checkParameters(applicationName, keystorePassword);
 
             try {
-                this.keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
+                keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
                 keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
 
                 HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
@@ -188,7 +180,7 @@ public final class MSimpleMailer {
                 }
             }
         }
-    }
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

@@ -86,8 +86,12 @@ public final class MMain {
                     System.out.println("showing password dialog");
                     pw = showPasswordDialog();
                 }
-                MSimpleMailer.setClientKeystoreDir(userDir);
-                mailer = new MSimpleMailer("BackupMailer", pw, false);
+                //MSimpleMailer.setClientKeystoreDir(userDir);
+                mailer = new MSimpleMailer("BackupMailer", pw, false){
+                    public void onInitializeException(Throwable e){
+
+                    }
+                };
                 MSimpleKeystore store = mailer.getKeystore();
 
                 if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
