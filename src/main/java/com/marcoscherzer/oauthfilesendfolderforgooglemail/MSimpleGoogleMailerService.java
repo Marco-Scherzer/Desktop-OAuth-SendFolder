@@ -1,6 +1,7 @@
 package com.marcoscherzer.oauthfilesendfolderforgooglemail;
 
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
+import com.marcoscherzer.msimplegooglemailer.MClientSecretException;
 import com.marcoscherzer.msimplegooglemailer.MOutgoingMail;
 import com.marcoscherzer.msimplegooglemailer.MSimpleGoogleMailer;
 import com.marcoscherzer.msimplegooglemailer.MSimpleKeystore;
@@ -62,16 +63,10 @@ public final class MSimpleGoogleMailerService {
 
                 // Schriftgröße global setzen
                 UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
-
                 Path keystorePath = Paths.get(userDir, "mystore.p12");
                 boolean keystoreFileExists = Files.exists(keystorePath);
-
                 String pw;
-                if (!keystoreFileExists) {
-                    pw = showSetupDialog();
-                } else {
-                    pw = showPasswordDialog();
-                }
+                if (!keystoreFileExists) { pw = showSetupDialog(); } else { pw = showPasswordDialog();}
                 MSimpleGoogleMailer.setClientKeystoreDir(userDir);
 
                 // Mailer initialisieren
@@ -79,13 +74,14 @@ public final class MSimpleGoogleMailerService {
                 MSimpleKeystore store = mailer.getKeystore();
 
                 if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
-                    String from = JOptionPane.showInputDialog(null, "Sender address:");
-                    String to = JOptionPane.showInputDialog(null, "Receiver address:");
+                    String from = JOptionPane.showInputDialog(null, "Please enter your registered GMail address:");
+                    String to = JOptionPane.showInputDialog(null, "Please enter a default-recipient address:");
                     store.add("fromAddress", from);
                     store.add("toAddress", to);
                 }
 
-                setupLogging(); // Logging vorbereiten, aber Fenster noch nicht sichtbar
+                setupLogging();
+                openMainWindow();
                 clientAndPathUUID = store.get("clientId");
                 sentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-sent"), "Sent folder");
                 notSentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-notSent"), "NotSent folder");
@@ -107,8 +103,14 @@ public final class MSimpleGoogleMailerService {
 
                 setupTrayIcon();
 
-                openMainWindow();
-
+            } catch (MClientSecretException exc) {
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Client Secret Error:\n" + exc.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            exit(1);
             } catch (Exception exc) {
                 //exc.printStackTrace();
                 exit(1);
@@ -145,11 +147,13 @@ public final class MSimpleGoogleMailerService {
         JTextField toField = new JTextField();
         JPasswordField pwField = new JPasswordField();
         Object[] message = {
-                "Sender:", fromField,
-                "Receiver:", toField,
-                "Password:", pwField
+                "This application requires a \n\"Gmail address\" and a \"clientSecret.json\" file.\n\n", null,
+                "\nEmail address:", fromField,
+                "Default recipient email address: ", toField,
+                "Program startup password\n(Do not use any account or email account password !): ", pwField,
+                "\n"
         };
-        int option = JOptionPane.showConfirmDialog(null, message, "Setup Mailer", JOptionPane.OK_CANCEL_OPTION);
+        int option = JOptionPane.showConfirmDialog(null, message, "Setup OAuth FileSendFolder", JOptionPane.OK_CANCEL_OPTION,JOptionPane.INFORMATION_MESSAGE);
         if (option == JOptionPane.OK_OPTION) {
             String pw = new String(pwField.getPassword());
             return pw;
@@ -246,7 +250,7 @@ public final class MSimpleGoogleMailerService {
      */
     private static void exit(int code) {
         try {
-            if(mailer.isInDoNotPersistOAuthTokenMode()) mailer.revokeOAuthTokenFromServer();
+            if(mailer != null && mailer.isInDoNotPersistOAuthTokenMode()) mailer.revokeOAuthTokenFromServer();
             if (watcher != null) watcher.shutdown();
             if(sentDesktopLinkWatcher != null ) sentDesktopLinkWatcher.shutdown();
             if(notSentDesktopLinkWatcher != null ) notSentDesktopLinkWatcher.shutdown();

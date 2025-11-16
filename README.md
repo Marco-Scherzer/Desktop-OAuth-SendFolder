@@ -1,4 +1,4 @@
-#  OAuth Desktop FileSend Folder for GoogleMail
+#  OAuth Desktop FileSend Folder for GMail
 ## A spontaneous mini project focused on simplicity and security.
 <br>
 <br>
