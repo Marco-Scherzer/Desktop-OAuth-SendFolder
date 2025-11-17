@@ -15,7 +15,7 @@ public final class MAppPwDialog {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final String createAndShowDialog(boolean wait) throws InterruptedException, InvocationTargetException {
+    public final String createAndShowDialog() throws InterruptedException, InvocationTargetException {
         Runnable task = () -> {
             JPasswordField pwField = new JPasswordField();
             int option = JOptionPane.showConfirmDialog(
@@ -30,13 +30,7 @@ public final class MAppPwDialog {
                 result = null; // kein Exit, nur null zurück
             }
         };
-
-        if (wait) {
-            SwingUtilities.invokeAndWait(task);
-        } else {
-            SwingUtilities.invokeLater(task);
-        }
-
+        SwingUtilities.invokeAndWait(task);
         return result;
     }
 }

@@ -32,8 +32,6 @@ public final class MMain {
     private static MFileNameWatcher sentDesktopLinkWatcher;
 
     private static MAppLoggingArea logFrame;
-    private static PrintStream originalOut;
-    private static PrintStream originalErr;
     private static String[] arg;
 
     /**
@@ -57,17 +55,18 @@ public final class MMain {
             final String[] pw_ = new String[1];
             try {
                 logFrame = new MAppLoggingArea(true);
+
                 //if (isDbg()) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
 
                 Path keystorePath = Paths.get(userDir, "mystore.p12");
                 boolean keystoreFileExists = Files.exists(keystorePath);
                 if (!keystoreFileExists) {
                     System.out.println("showing setup dialog");
-                    pw_[0] = new MAppSetupDialog(true).createAndShowDialog(true)[2];
+                    pw_[0] = new MAppSetupDialog(true).createAndShowDialog()[2];
                     System.out.println("setup completed");
                 } else {
                     System.out.println("showing password dialog");
-                    pw_[0] = new MAppPwDialog().createAndShowDialog(true);
+                    pw_[0] = new MAppPwDialog().createAndShowDialog();
                     System.out.println("password valid");
                 }
 
@@ -81,7 +80,7 @@ public final class MMain {
                    try {
                        MSimpleKeystore store = mailer.getKeystore();
                        if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
-                           String[] setupedValues = new MAppSetupDialog(false).createAndShowDialog(true);
+                           String[] setupedValues = new MAppSetupDialog(false).createAndShowDialog();
                            String from = setupedValues[0];
                            String to = setupedValues[1];
                            store.add("fromAddress", from);
@@ -132,7 +131,7 @@ public final class MMain {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public static void createMessageDialogAndWait(String message, String title){
-        SwingUtilities.invokeLater(() -> { JOptionPane.showMessageDialog(null,message, title, JOptionPane.ERROR_MESSAGE);});
+         JOptionPane.showMessageDialog(null,message, title, JOptionPane.ERROR_MESSAGE);
     }
 
     /**

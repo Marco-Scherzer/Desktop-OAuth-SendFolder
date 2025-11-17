@@ -12,6 +12,7 @@ public final class MAppLoggingArea {
 
     private JTextArea logArea;
     private JFrame logFrame;
+    private static PrintStream originalOut=System.out;
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -24,7 +25,6 @@ public final class MAppLoggingArea {
             logFrame.add(new JScrollPane(logArea));
             logFrame.pack();
             logFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            logFrame.setVisible(true);
 
             OutputStream outStream = new OutputStream() {
                 @Override
@@ -32,6 +32,7 @@ public final class MAppLoggingArea {
                     final String text = new String(b, off, len);
                     SwingUtilities.invokeLater(() -> {
                         logArea.append(text);
+                        originalOut.append(text);
                         logArea.setCaretPosition(logArea.getDocument().getLength());
                     });
                 }

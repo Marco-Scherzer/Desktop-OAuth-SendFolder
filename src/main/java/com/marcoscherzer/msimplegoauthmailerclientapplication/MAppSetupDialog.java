@@ -30,7 +30,7 @@ public final class MAppSetupDialog {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final String[] createAndShowDialog(boolean wait) throws InterruptedException, InvocationTargetException, Exception {
+    public final String[] createAndShowDialog() throws InterruptedException, InvocationTargetException, Exception {
         Runnable task = () -> {
             try {
                 result = buildAndShowDialog();
@@ -38,17 +38,11 @@ public final class MAppSetupDialog {
                 capturedException = e; // Exception nur speichern
             }
         };
-
-        if (wait) {
             SwingUtilities.invokeAndWait(task);
             if (capturedException != null) {
                 throw capturedException; // außerhalb des EDT werfen
             }
             return result;
-        } else {
-            SwingUtilities.invokeLater(task);
-            return result; // Ergebnis wird später gesetzt
-        }
     }
 
     /**
