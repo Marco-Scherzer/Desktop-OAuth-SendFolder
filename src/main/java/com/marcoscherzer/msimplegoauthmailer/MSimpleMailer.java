@@ -212,6 +212,30 @@ public abstract class MSimpleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
+    public static String buildOAuthLink(String clientId, String accessType, int gglsLocalJettyPort, String scope, String responseType, String state, String prompt) {
+        String baseUrl = "https://accounts.google.com/o/oauth2/auth";
+        String redirectUri = "http://localhost:" + gglsLocalJettyPort + "/Callback";
+
+        StringBuilder link = new StringBuilder(baseUrl)
+                .append("?access_type=").append(accessType)
+                .append("&client_id=").append(clientId)
+                .append("&redirect_uri=").append(redirectUri)
+                .append("&response_type=").append(responseType)
+                .append("&scope=").append(scope);
+
+        if (state != null && !state.isEmpty()) {
+            link.append("&state=").append(state);
+        }
+        if (prompt != null && !prompt.isEmpty()) {
+            link.append("&prompt=").append(prompt);
+        }
+
+        return "Please open the following address in your browser:\n  " + link;
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
         private void clearKeystore() throws Exception {
             if (keystore.successfullyInitialized()) {
                 System.out.println("clearing KeyStore");
