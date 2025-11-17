@@ -193,7 +193,7 @@ public abstract class MSimpleMailer {
                     }
                 }
             } catch (Exception exc) {
-                System.err.println("Error in initialization. " + exc.getMessage());
+                //System.err.println("Error in initialization."+ exc.getMessage());
                 try { clearKeystore(); } catch (Exception exc2) { exc.addSuppressed(exc2);};
                 if (exc instanceof MClientSecretException){
                     onClientSecretInitalizationFailure((MClientSecretException)exc);}
@@ -211,10 +211,10 @@ public abstract class MSimpleMailer {
                 System.out.println("clearing KeyStore");
                 try {
                     keystore.clear();
-                } catch (Exception exc2) {
-                    System.err.println("Error while clearing keystore.\n" + (exc2.getMessage() == null ? exc2 : exc2.getMessage()));
+                } catch (Exception exc) {
+                    System.err.println("Error while clearing keystore.\n" + exc.getMessage());
                     System.err.println("Initialization failed and keystore could not be cleared. Please delete it manually");
-                    throw new Exception(exc2);
+                    throw new Exception(exc);
                 }
             }
         }
