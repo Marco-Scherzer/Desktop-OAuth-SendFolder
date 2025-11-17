@@ -5,20 +5,12 @@ import com.marcoscherzer.msimplegoauthmailer.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.*;
-import java.util.*;
-import java.util.List;
 
-import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkPasswordComplexity;
-import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkMailAddress;
 import static com.marcoscherzer.msimplegoauthmailerclientapplication.MUtil.*;
 
 /**
@@ -39,8 +31,7 @@ public final class MMain {
     private static MFileNameWatcher notSentDesktopLinkWatcher;
     private static MFileNameWatcher sentDesktopLinkWatcher;
 
-    private static JTextArea logArea;
-    private static JFrame logFrame;
+    private static MAppLoggingArea logFrame;
     private static PrintStream originalOut;
     private static PrintStream originalErr;
     private static String[] arg;
@@ -59,32 +50,24 @@ public final class MMain {
             FlatHighContrastIJTheme.setup(), FlatMonokaiProIJTheme.setup(), FlatSolarizedLightIJTheme.setup(),
             FlatSolarizedDarkIJTheme.setup(), FlatDraculaIJTheme.setup()
         */
-            try {
-                FlatCarbonIJTheme.setup();
-            } catch (Exception exc) {
-                System.out.println("UI theme not supported");
-            }
-            UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
 
-            setupLogging();
-            if (isDbg()) logFrame.setVisible(true);// sonst nur im tray sichtbar
+            FlatCarbonIJTheme.setup();
+            UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
 
             final String[] pw_ = new String[1];
             try {
+                logFrame = new MAppLoggingArea(true);
+                //if (isDbg()) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
+
                 Path keystorePath = Paths.get(userDir, "mystore.p12");
                 boolean keystoreFileExists = Files.exists(keystorePath);
-
                 if (!keystoreFileExists) {
                     System.out.println("showing setup dialog");
-                    SwingUtilities.invokeAndWait(() -> {
-                        pw_[0] = showSetupDialog(true)[2];
-                    });
+                    pw_[0] = new MAppSetupDialog(true).createAndShowDialog(true)[2];
                     System.out.println("setup completed");
                 } else {
                     System.out.println("showing password dialog");
-                    SwingUtilities.invokeAndWait(() -> {
-                        pw_[0] = showPasswordDialog();
-                    });
+                    pw_[0] = new MAppPwDialog().createAndShowDialog(true);
                     System.out.println("password valid");
                 }
 
@@ -92,14 +75,13 @@ public final class MMain {
             String pw = pw_[0];
 
             MSimpleMailer.setClientKeystoreDir(userDir);
-
             mailer = new MSimpleMailer("BackupMailer", pw, false) {
                 @Override
                 protected void onInitializeSucceeded() {
                    try {
                        MSimpleKeystore store = mailer.getKeystore();
                        if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
-                           String[] setupedValues = showSetupDialog(false);
+                           String[] setupedValues = new MAppSetupDialog(false).createAndShowDialog(true);
                            String from = setupedValues[0];
                            String to = setupedValues[1];
                            store.add("fromAddress", from);
@@ -129,31 +111,17 @@ public final class MMain {
                 }
 
                 @Override
-                protected void onInitializeFailed(Throwable exc) { exit(exc,1);}
+                protected final void onCommonInitializationFailure(Throwable exc) { exit(exc,1);}
 
                 @Override
-                protected void onClientSecretFailure(MClientSecretException exc) {
-                    SwingUtilities.invokeLater(() -> {
-                        JOptionPane.showMessageDialog(
-                                null,
-                                "Client Secret Error:\n" + exc.getMessage() + " Setup will be restarted on next launch.",
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE
-                        );
-                    });
+                protected final void onClientSecretInitalizationFailure(MClientSecretException exc) {
+                    createMessageDialogAndWait("Client Secret Error:\n" + exc.getMessage() + " Setup will be restarted on next launch.", "Error");
                     exit(exc,1);
                 }
 
                 @Override
-                protected void onPasswordIntegrityFailure(MPasswordIntegrityException exc) {
-                    SwingUtilities.invokeLater(() -> {
-                        JOptionPane.showMessageDialog(
-                                null,
-                                "Client Integrity Error:\n" + exc.getMessage(),
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE
-                        );
-                    });
+                protected final void onPasswordIntegrityFailure(MPasswordIntegrityException exc) {
+                    createMessageDialogAndWait("Client Integrity Error:\n" + exc.getMessage(), "Error");
                     exit(exc,1);
                 }
             };
@@ -162,17 +130,9 @@ public final class MMain {
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
      */
-    private static String showPasswordDialog() {
-        JPasswordField pwField = new JPasswordField();
-        int option = JOptionPane.showConfirmDialog(null, pwField, "Enter Password", JOptionPane.OK_CANCEL_OPTION);
-        if (option == JOptionPane.OK_OPTION) {
-            return new String(pwField.getPassword());
-        } else {
-            System.exit(0);
-            return null;
-        }
+    public static void createMessageDialogAndWait(String message, String title){
+        SwingUtilities.invokeLater(() -> { JOptionPane.showMessageDialog(null,message, title, JOptionPane.ERROR_MESSAGE);});
     }
 
     /**
@@ -201,38 +161,7 @@ public final class MMain {
     private static boolean isDbg(){
        return (arg != null && arg[0]!=null && arg[0].equals("-debug"));
     }
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
-     */
-    private static void setupLogging() {
-        logArea = new JTextArea(20, 80);
-        logArea.setEditable(false);
-        logFrame = new JFrame("Log Output");
-        logFrame.add(new JScrollPane(logArea));
-        logFrame.pack();
-        logFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        OutputStream outStream = new OutputStream() {
-            @Override
-            public void write(byte[] b, int off, int len) {
-                final String text = new String(b, off, len);
-                SwingUtilities.invokeLater(() -> {
-                    logArea.append(text);
-                    logArea.setCaretPosition(logArea.getDocument().getLength());
-                });
-            }
-
-            @Override
-            public void write(int b) {
-                write(new byte[]{(byte)b}, 0, 1);
-            }
-        };
-
-        PrintStream ps = new PrintStream(outStream, true);
-        System.setOut(ps);
-        System.setErr(ps);
-    }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -243,12 +172,12 @@ public final class MMain {
 
         MenuItem showLogItem = new MenuItem("Show Log");
         showLogItem.addActionListener((ActionEvent e) -> {
-            if (!logFrame.isVisible()) {
-                logFrame.setVisible(true);
-                logFrame.setState(JFrame.NORMAL);
-                logFrame.toFront();
+            if (!logFrame.getLogFrame().isVisible()) {
+                logFrame.getLogArea().setVisible(true);
+                logFrame.getLogFrame().setState(JFrame.NORMAL);
+                logFrame.getLogFrame().toFront();
             } else {
-                logFrame.setVisible(false);
+                logFrame.getLogFrame().setVisible(false);
             }
         });
         traymenu.add(showLogItem);
@@ -277,151 +206,6 @@ public final class MMain {
                 TrayIcon.MessageType.INFO);
     }
 
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
-     */
-    private static String[] showSetupDialog(boolean setPw) {
-
-        JTextField fromField = new JTextField(); fromField.setText("m.scherzer@hotmail.com");
-        JTextField toField = new JTextField(); toField.setText("m.scherzer@hotmail.com");
-        JPasswordField pwField = new JPasswordField(); pwField.setText("testTesttest-123)");
-
-        JLabel heading = new JLabel("OAuth FileSendFolder Setup");
-        JLabel infoLabel = new JLabel("(Requires an email account (tested with Gmail) and a clientSecret.json file provided by Google)\n\n");
-        JLabel label0 = new JLabel("\n");
-        JLabel label1 = new JLabel("Email address:");
-        JLabel label2 = new JLabel("Default recipient address:");
-        JPanel label3 = createTwoPartLabel("Program startup password:", "(Do not use any account or email account password!)", 16, 11);
-
-        heading.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 23f));
-        heading.setHorizontalAlignment(SwingConstants.CENTER);
-        infoLabel.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
-        infoLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        label0.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
-        label1.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
-        label2.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
-        label3.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
-
-
-        fromField.getDocument().addDocumentListener(new DocumentListener() {
-            private void validate() {
-                try {
-                    checkMailAddress(fromField.getText().trim());
-                    fromField.setBorder(UIManager.getBorder("TextField.border"));
-                } catch (IllegalArgumentException ex) {
-                    fromField.setBorder(BorderFactory.createLineBorder(Color.MAGENTA));
-                }
-            }
-            public void insertUpdate(DocumentEvent e) { validate(); }
-            public void removeUpdate(DocumentEvent e) { validate(); }
-            public void changedUpdate(DocumentEvent e) { validate(); }
-        });
-
-        toField.getDocument().addDocumentListener(new DocumentListener() {
-            private void validate() {
-                try {
-                    checkMailAddress(toField.getText().trim());
-                    toField.setBorder(UIManager.getBorder("TextField.border"));
-                } catch (IllegalArgumentException ex) {
-                    toField.setBorder(BorderFactory.createLineBorder(Color.MAGENTA));
-                }
-            }
-            public void insertUpdate(DocumentEvent e) { validate(); }
-            public void removeUpdate(DocumentEvent e) { validate(); }
-            public void changedUpdate(DocumentEvent e) { validate(); }
-        });
-
-        if (setPw) {
-            pwField.getDocument().addDocumentListener(new DocumentListener() {
-                private void validate() {
-                    try {
-                        checkPasswordComplexity(new String(pwField.getPassword()), 15, true, true, true);
-                        pwField.setBorder(UIManager.getBorder("TextField.border"));
-                    } catch (IllegalArgumentException ex) {
-                        pwField.setBorder(BorderFactory.createLineBorder(Color.MAGENTA));
-                    }
-                }
-                public void insertUpdate(DocumentEvent e) { validate(); }
-                public void removeUpdate(DocumentEvent e) { validate(); }
-                public void changedUpdate(DocumentEvent e) { validate(); }
-            });
-        }
-
-        Object[] message = {
-                heading, null,
-                infoLabel, null,
-                label0, null,
-                label1, fromField,
-                label2, toField,
-                label3, pwField,
-                "\n"
-        };
-        Object[] message2 = {
-                heading, null,
-                infoLabel, null,
-                label0, null,
-                label1, fromField,
-                label2, toField,
-                "\n"
-        };
-
-        int option = JOptionPane.showConfirmDialog(
-                null,
-                setPw ? message : message2,
-                "",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.INFORMATION_MESSAGE
-        );
-
-        if (option == JOptionPane.OK_OPTION) {
-            String from = fromField.getText().trim();
-            String to   = toField.getText().trim();
-            String pw   = setPw ? new String(pwField.getPassword()) : null;
-
-            // finale Sicherung beim Submit
-            List<String> errors = new ArrayList<>();
-
-            try {
-                checkMailAddress(from);
-            } catch (IllegalArgumentException e) {
-                errors.add("Sender email invalid: " + e.getMessage());
-            }
-
-            try {
-                checkMailAddress(to);
-            } catch (IllegalArgumentException e) {
-                errors.add("Recipient email invalid: " + e.getMessage());
-            }
-
-            if (setPw) {
-                try {
-                    checkPasswordComplexity(pw, 15, true, true, true);
-                } catch (IllegalArgumentException e) {
-                    errors.add("Password invalid: " + e.getMessage());
-                }
-            }
-
-            if (!errors.isEmpty()) {
-                StringBuilder sb = new StringBuilder("Invalid format(s):\n");
-                for (String err : errors) {
-                    sb.append("* ").append(err).append("\n");
-                }
-                JOptionPane.showMessageDialog(
-                        null,
-                        sb.toString(),
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
-                return showSetupDialog(setPw); // Dialog erneut öffnen
-            }
-
-            return setPw ? new String[]{from, to, pw} : new String[]{from, to};
-        } else {
-            exit(null,0);
-            return null;
-        }
-    }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -453,7 +237,6 @@ public final class MMain {
                         "\n=========================================================================="
         );
     }
-
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

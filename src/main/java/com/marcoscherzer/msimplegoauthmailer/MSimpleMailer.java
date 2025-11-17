@@ -64,11 +64,7 @@ public abstract class MSimpleMailer {
             initThread = new Thread(() -> {
                 String applicationName_=applicationName;
                 String keystorePassword_=keystorePassword;
-                try {
-                    initialize(applicationName_, keystorePassword_);
-                } catch (Exception exc) {
-                    onInitializeFailed(exc);
-                }
+                initialize(applicationName_, keystorePassword_);
                 onInitializeSucceeded();
             }, "MSimpleMailer-Init");
         }
@@ -87,12 +83,12 @@ public abstract class MSimpleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    protected abstract void onInitializeFailed(Throwable exc);
+    protected abstract void onCommonInitializationFailure(Throwable exc);
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    protected abstract void onClientSecretFailure(MClientSecretException exc);
+    protected abstract void onClientSecretInitalizationFailure(MClientSecretException exc);
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -102,7 +98,7 @@ public abstract class MSimpleMailer {
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
-        private void initialize(String applicationName, String keystorePassword) throws Exception {
+        private void initialize(String applicationName, String keystorePassword) {
             File keystoreFile = new File(clientSecretDir, "mystore.p12");
             File jsonFile = new File(clientSecretDir, "client_secret.json");
 
@@ -192,11 +188,12 @@ public abstract class MSimpleMailer {
                 }
             } catch (Exception exc) {
                 System.err.println("Error in initialization. " + exc.getMessage());
-                clearKeystore();
-                if (exc instanceof MClientSecretException){onClientSecretFailure((MClientSecretException)exc);}
+                try { clearKeystore(); } catch (Exception exc2) { exc.addSuppressed(exc2);};
+                if (exc instanceof MClientSecretException){
+                    onClientSecretInitalizationFailure((MClientSecretException)exc);}
                 else
                 if (exc instanceof MPasswordIntegrityException){onPasswordIntegrityFailure((MPasswordIntegrityException)exc);}
-                else throw exc;
+                else onCommonInitializationFailure(exc);
             }
         }
 
@@ -258,7 +255,7 @@ public abstract class MSimpleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public void revokeOAuthTokenFromServer() throws GeneralSecurityException, IOException {
+    public final void revokeOAuthTokenFromServer() throws GeneralSecurityException, IOException {
         try {
             if (credential == null) {
                 System.out.println("No credential available to revoke.");
@@ -297,9 +294,6 @@ public abstract class MSimpleMailer {
             throw exc;
         }
     }
-
-
-
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

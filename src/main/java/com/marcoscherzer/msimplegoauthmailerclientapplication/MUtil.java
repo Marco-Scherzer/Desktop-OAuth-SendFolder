@@ -15,7 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
 
-public class MUtil {
+public final class MUtil {
 
     /**
      * Creates a junction on the desktop pointing to a target folder.
@@ -23,7 +23,7 @@ public class MUtil {
      * returns the absolute path of the created link if desktop path exists. null otherwise.
      * Author: Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static Path createFolderDesktopLink(String targetFolderPath, String linkName) throws Exception {
+    public static final Path createFolderDesktopLink(String targetFolderPath, String linkName) throws Exception {
 
      Path desktopPath = getDesktopPath();
             System.out.println("Creating Desktop link for \"" + targetFolderPath + "\" in Desktop folder \"" + desktopPath + "\"");
@@ -42,7 +42,7 @@ public class MUtil {
      * returns the absolute path of the created link if desktop path exists. null otherwise.
      * Author: Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static Path createFolderLink(String folderPath, Path linkPath_, String linkName) throws Exception {
+    public static final Path createFolderLink(String folderPath, Path linkPath_, String linkName) throws Exception {
         Path linkPath;
         try {
 
@@ -75,7 +75,7 @@ public class MUtil {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static Path getDesktopPath() {
+    public static final Path getDesktopPath() {
         String rawPath = Advapi32Util.registryGetStringValue(
                 WinReg.HKEY_CURRENT_USER,
                 "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders",
@@ -132,30 +132,6 @@ public class MUtil {
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS").format(new Date());
             return originalName + "_" + timestamp + extension;
     }
-
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
-     */
-    public static JPanel createTwoPartLabel(String mainText, String hintText, float mainFontSize, float hintFontSize) {
-        JPanel labelPanel = new JPanel();
-        labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
-
-        JLabel labelMain = new JLabel(mainText);
-        labelMain.setFont(labelMain.getFont().deriveFont(Font.BOLD, mainFontSize));
-        labelMain.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JLabel labelHint = new JLabel(hintText);
-        labelHint.setFont(labelHint.getFont().deriveFont(Font.PLAIN, hintFontSize));
-        labelHint.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        labelPanel.add(labelMain);
-        labelPanel.add(labelHint);
-
-        return labelPanel;
-    }
-
 
 
 }

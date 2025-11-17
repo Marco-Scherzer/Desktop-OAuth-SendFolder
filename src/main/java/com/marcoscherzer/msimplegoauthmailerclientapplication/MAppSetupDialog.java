@@ -6,51 +6,65 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkMailAddress;
 import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkPasswordComplexity;
-import static com.marcoscherzer.msimplegoauthmailerclientapplication.MUtil.createTwoPartLabel;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MMailAppSetupDialog {
+public final class MAppSetupDialog {
 
     private final boolean setPw;
     private String[] result;
+    private Exception capturedException;
 
-    public MMailAppSetupDialog(boolean setPw) {
-        this.setPw = setPw;
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public MAppSetupDialog(boolean setPasswordDialogMode) {
+        this.setPw = setPasswordDialogMode;
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public String[] showDialog() throws InterruptedException, InvocationTargetException {
-        try {
-            SwingUtilities.invokeAndWait(() -> {
+    public final String[] createAndShowDialog(boolean wait) throws InterruptedException, InvocationTargetException, Exception {
+        Runnable task = () -> {
+            try {
                 result = buildAndShowDialog();
-            });
-        } catch (Exception exc) {
-            throw exc;
+            } catch (Exception e) {
+                capturedException = e; // Exception nur speichern
+            }
+        };
+
+        if (wait) {
+            SwingUtilities.invokeAndWait(task);
+            if (capturedException != null) {
+                throw capturedException; // außerhalb des EDT werfen
+            }
+            return result;
+        } else {
+            SwingUtilities.invokeLater(task);
+            return result; // Ergebnis wird später gesetzt
         }
-        return result;
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private String[] buildAndShowDialog() throws InterruptedException, InvocationTargetException {
+    private String[] buildAndShowDialog() {
         JTextField fromField = new JTextField("m.scherzer@hotmail.com");
-        JTextField toField   = new JTextField("m.scherzer@hotmail.com");
+        JTextField toField = new JTextField("m.scherzer@hotmail.com");
         JPasswordField pwField = new JPasswordField("testTesttest-123)");
 
-        JLabel heading   = new JLabel("OAuth FileSendFolder Setup");
+        JLabel heading = new JLabel("OAuth FileSendFolder Setup");
         JLabel infoLabel = new JLabel("(Requires an email account (tested with Gmail) and a clientSecret.json file provided by Google)\n\n");
-        JLabel label0    = new JLabel("\n");
-        JLabel label1    = new JLabel("Email address:");
-        JLabel label2    = new JLabel("Default recipient address:");
-        JPanel label3    = createTwoPartLabel("Program startup password:",
+        JLabel label0 = new JLabel("\n");
+        JLabel label1 = new JLabel("Email address:");
+        JLabel label2 = new JLabel("Default recipient address:");
+        JPanel label3 = createTwoPartLabel("Program startup password:",
                 "(Do not use any account or email account password!)",
                 16, 11);
 
@@ -59,7 +73,6 @@ public final class MMailAppSetupDialog {
         infoLabel.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
         infoLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        // Validierung für Felder
         addMailValidation(fromField);
         addMailValidation(toField);
         if (setPw) addPasswordValidation(pwField);
@@ -92,23 +105,35 @@ public final class MMailAppSetupDialog {
 
         if (option == JOptionPane.OK_OPTION) {
             String from = fromField.getText().trim();
-            String to   = toField.getText().trim();
-            String pw   = setPw ? new String(pwField.getPassword()) : null;
+            String to = toField.getText().trim();
+            String pw = setPw ? new String(pwField.getPassword()) : null;
 
             List<String> errors = new ArrayList<>();
-            try { checkMailAddress(from); } catch (IllegalArgumentException e) { errors.add("Sender email invalid: " + e.getMessage()); }
-            try { checkMailAddress(to);   } catch (IllegalArgumentException e) { errors.add("Recipient email invalid: " + e.getMessage()); }
+            try {
+                checkMailAddress(from);
+            } catch (IllegalArgumentException e) {
+                errors.add("Sender email invalid: " + e.getMessage());
+            }
+            try {
+                checkMailAddress(to);
+            } catch (IllegalArgumentException e) {
+                errors.add("Recipient email invalid: " + e.getMessage());
+            }
             if (setPw) {
-                try { checkPasswordComplexity(pw, 15, true, true, true); }
-                catch (IllegalArgumentException e) { errors.add("Password invalid: " + e.getMessage()); }
+                try {
+                    checkPasswordComplexity(pw, 15, true, true, true);
+                } catch (IllegalArgumentException e) {
+                    errors.add("Password invalid: " + e.getMessage());
+                }
             }
 
             if (!errors.isEmpty()) {
                 StringBuilder sb = new StringBuilder("Invalid format(s):\n");
                 for (String err : errors) sb.append("* ").append(err).append("\n");
                 JOptionPane.showMessageDialog(null, sb.toString(), "Error", JOptionPane.ERROR_MESSAGE);
-                return new MMailAppSetupDialog(setPw).showDialog(); // Dialog erneut öffnen
+                return new MAppSetupDialog(setPw).buildAndShowDialog();
             }
+
             return setPw ? new String[]{from, to, pw} : new String[]{from, to};
         } else {
             return null;
@@ -128,9 +153,18 @@ public final class MMailAppSetupDialog {
                     field.setBorder(BorderFactory.createLineBorder(Color.MAGENTA));
                 }
             }
-            public void insertUpdate(DocumentEvent e) { validate(); }
-            public void removeUpdate(DocumentEvent e) { validate(); }
-            public void changedUpdate(DocumentEvent e) { validate(); }
+
+            public void insertUpdate(DocumentEvent e) {
+                validate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                validate();
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                validate();
+            }
         });
     }
 
@@ -147,10 +181,43 @@ public final class MMailAppSetupDialog {
                     field.setBorder(BorderFactory.createLineBorder(Color.MAGENTA));
                 }
             }
-            public void insertUpdate(DocumentEvent e) { validate(); }
-            public void removeUpdate(DocumentEvent e) { validate(); }
-            public void changedUpdate(DocumentEvent e) { validate(); }
+
+            public void insertUpdate(DocumentEvent e) {
+                validate();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                validate();
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                validate();
+            }
         });
     }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
+    public static JPanel createTwoPartLabel(String mainText, String hintText, float mainFontSize, float hintFontSize) {
+        JPanel labelPanel = new JPanel();
+        labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
+
+        JLabel labelMain = new JLabel(mainText);
+        labelMain.setFont(labelMain.getFont().deriveFont(Font.BOLD, mainFontSize));
+        labelMain.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel labelHint = new JLabel(hintText);
+        labelHint.setFont(labelHint.getFont().deriveFont(Font.PLAIN, hintFontSize));
+        labelHint.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        labelPanel.add(labelMain);
+        labelPanel.add(labelHint);
+
+        return labelPanel;
+    }
+
 }
+
 
