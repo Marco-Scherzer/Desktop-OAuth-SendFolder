@@ -212,7 +212,7 @@ public abstract class MSimpleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static String buildOAuthLink(String clientId, String accessType, int gglsLocalJettyPort, String scope, String responseType, String state, String prompt) {
+    private static String createOAuthLink(String clientId, String accessType, int gglsLocalJettyPort, String scope, String responseType, String state, String prompt) {
         String baseUrl = "https://accounts.google.com/o/oauth2/auth";
         String redirectUri = "http://localhost:" + gglsLocalJettyPort + "/Callback";
 
@@ -229,8 +229,7 @@ public abstract class MSimpleMailer {
         if (prompt != null && !prompt.isEmpty()) {
             link.append("&prompt=").append(prompt);
         }
-
-        return "Please open the following address in your browser:\n  " + link;
+        return link.toString();
     }
 
     /**
