@@ -183,6 +183,7 @@ public abstract class MSimpleMailer {
 
             GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
             GoogleAuthorizationCodeFlow flow;
+            int gglsLocalJettyPort = 8888;
 
             if (doNotPersistOAuthToken) {
                 if (keystore.contains("OAuth")) {
@@ -194,14 +195,17 @@ public abstract class MSimpleMailer {
                         .setApprovalPrompt("force")
                         .setCredentialDataStore(new MemoryDataStoreFactory().getDataStore("tempsession"))
                         .build();
+                createOAuthLink(flow,clientSecrets,gglsLocalJettyPort);
             } else {
                 flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
                         .setAccessType("offline")
                         .setCredentialDataStore(new MSimpleKeystoreDataStoreFactory(keystore).getDataStore("OAuth"))
                         .build();
+                createOAuthLink(flow,clientSecrets, gglsLocalJettyPort);
             }
 
-            LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+
+            LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(gglsLocalJettyPort).build();
             credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("OAuth");
             if (credential == null) {
                 throw new IllegalStateException("No stored OAuth credential found.");
@@ -210,7 +214,7 @@ public abstract class MSimpleMailer {
             applicationName += " [" + keystore.get("clientId") + "]";
 
 
-            onStartOAuth(createOAuthLink(String clientId, String accessType, int gglsLocalJettyPort, String scope, String responseType, String state, String prompt));
+            onStartOAuth();
             this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
                     .setApplicationName(applicationName)
                     .build();
@@ -220,25 +224,31 @@ public abstract class MSimpleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private static String createOAuthLink(String clientId, String accessType, int gglsLocalJettyPort, String scope, String responseType, String state, String prompt) {
-        String baseUrl = "https://accounts.google.com/o/oauth2/auth";
-        String redirectUri = "http://localhost:" + gglsLocalJettyPort + "/Callback";
 
-        StringBuilder link = new StringBuilder(baseUrl)
-                .append("?access_type=").append(accessType)
-                .append("&client_id=").append(clientId)
-                .append("&redirect_uri=").append(redirectUri)
-                .append("&response_type=").append(responseType)
-                .append("&scope=").append(scope);
+        public static String createOAuthLink(GoogleAuthorizationCodeFlow flow,GoogleClientSecrets clientSecrets, int gglsLocalJettyPort) {
+            String baseUrl = "https://accounts.google.com/o/oauth2/auth";
+            String redirectUri = "http://localhost:" + gglsLocalJettyPort + "/Callback";
 
-        if (state != null && !state.isEmpty()) {
-            link.append("&state=").append(state);
+            String clientId = clientSecrets.getDetails().getClientId();
+            String accessType = flow.getAccessType();
+            String prompt = flow.getApprovalPrompt();
+            String responseType = "code"; // Standard für Authorization Code Flow
+            String scope = String.join(" ", flow.getScopes());
+
+            StringBuilder link = new StringBuilder(baseUrl)
+                    .append("?access_type=").append(accessType)
+                    .append("&client_id=").append(clientId)
+                    .append("&redirect_uri=").append(redirectUri)
+                    .append("&response_type=").append(responseType)
+                    .append("&scope=").append(scope);
+
+            if (prompt != null && !prompt.isEmpty()) {
+                link.append("&prompt=").append(prompt);
+            }
+
+            return link.toString();
         }
-        if (prompt != null && !prompt.isEmpty()) {
-            link.append("&prompt=").append(prompt);
-        }
-        return link.toString();
-    }
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
