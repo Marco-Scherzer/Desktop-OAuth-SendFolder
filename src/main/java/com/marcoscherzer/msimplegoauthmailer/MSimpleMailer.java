@@ -44,6 +44,7 @@ public abstract class MSimpleMailer {
 
     private static String clientSecretDir = System.getProperty("user.dir");
     private final List<String> scopes = Collections.singletonList(GmailScopes.GMAIL_SEND);
+    private final Thread initThread;
     private Credential credential;
     private boolean doNotPersistOAuthToken;
     private Gmail service;
@@ -60,31 +61,33 @@ public abstract class MSimpleMailer {
          */
         public MSimpleMailer(String applicationName, String keystorePassword, boolean doNotPersistOAuthToken) {
             this.doNotPersistOAuthToken = doNotPersistOAuthToken;
-            Thread initThread = new Thread(() -> {
+            initThread = new Thread(() -> {
                 String applicationName_=applicationName;
                 String keystorePassword_=keystorePassword;
                 try {
                     initialize(applicationName_, keystorePassword_);
                 } catch (Exception exc) {
-                    onInitializeException(exc);
+                    onInitializeFailed(exc);
                 }
-                onInitializingSucceeded();
+                onInitializeSucceeded();
             }, "MSimpleMailer-Init");
+        }
 
-            initThread.setUncaughtExceptionHandler((t, exc) -> {
-                onInitializeException(exc);
-            });
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+        public final void startInitialization() {
             initThread.start();
         }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    protected abstract void onInitializingSucceeded();
+    protected abstract void onInitializeSucceeded();
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-        protected abstract void onInitializeException(Throwable exc);
+        protected abstract void onInitializeFailed(Throwable exc);
 
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

@@ -51,114 +51,136 @@ public final class MMain {
      * unready
      */
     public static void main(String[] args) {
-       // arg=new String[]{"-debug"};
-        SwingUtilities.invokeLater(() -> {
-
-       /*
-                FlatLightLaf.setup(), FlatDarkLaf.setup(), FlatIntelliJLaf.setup(), FlatDarculaLaf.setup(),
-                FlatArcDarkIJTheme.setup(), FlatArcIJTheme.setup(), FlatArcOrangeIJTheme.setup(),
-                FlatArcDarkOrangeIJTheme.setup(), FlatCarbonIJTheme.setup(), FlatCyanLightIJTheme.setup(),
-                FlatGrayIJTheme.setup(), FlatGrayDarkIJTheme.setup(), FlatHiberbeeDarkIJTheme.setup(),
-                FlatHighContrastIJTheme.setup(), FlatMonokaiProIJTheme.setup(), FlatSolarizedLightIJTheme.setup(),
-                FlatSolarizedDarkIJTheme.setup(), FlatDraculaIJTheme.setup()
-           */
-
-                try {
-                    FlatCarbonIJTheme.setup();
-                } catch (Exception exc) {
-                    System.out.println("UI theme not supported");
-                }
-                UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
-
-                //originalOut = System.out;
-                //originalErr = System.err;
-                //setupLogging();
-                if(arg!=null && arg[0]!=null && arg[0].equals("-debug")) logFrame.setVisible(true);//dbg
+        // arg = new String[]{"-debug"};
 
 
+        /*
+            FlatLightLaf.setup(), FlatDarkLaf.setup(), FlatIntelliJLaf.setup(), FlatDarculaLaf.setup(),
+            FlatArcDarkIJTheme.setup(), FlatArcIJTheme.setup(), FlatArcOrangeIJTheme.setup(),
+            FlatArcDarkOrangeIJTheme.setup(), FlatCarbonIJTheme.setup(), FlatCyanLightIJTheme.setup(),
+            FlatGrayIJTheme.setup(), FlatGrayDarkIJTheme.setup(), FlatHiberbeeDarkIJTheme.setup(),
+            FlatHighContrastIJTheme.setup(), FlatMonokaiProIJTheme.setup(), FlatSolarizedLightIJTheme.setup(),
+            FlatSolarizedDarkIJTheme.setup(), FlatDraculaIJTheme.setup()
+        */
+
+            try {
+                FlatCarbonIJTheme.setup();
+            } catch (Exception exc) {
+                System.out.println("UI theme not supported");
+            }
+            UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
+
+            // originalOut = System.out;
+            // originalErr = System.err;
+             setupLogging();logFrame.setVisible(true);
+            if (arg != null && arg[0] != null && arg[0].equals("-debug")) {
+                logFrame.setVisible(true); // dbg
+            }
+
+            final String[] pw_ = new String[1];
+            try {
                 Path keystorePath = Paths.get(userDir, "mystore.p12");
                 boolean keystoreFileExists = Files.exists(keystorePath);
-                String pw;
+
                 if (!keystoreFileExists) {
                     System.out.println("showing setup dialog");
-                    pw = showSetupDialog(true)[2];
-                }
-                else {
+                    SwingUtilities.invokeAndWait(() -> {
+                        pw_[0] = showSetupDialog(true)[2];
+                    });
+                    System.out.println("setup completed");
+                } else {
                     System.out.println("showing password dialog");
-                    pw = showPasswordDialog();
+                    SwingUtilities.invokeAndWait(() -> {
+                        pw_[0] = showPasswordDialog();
+                    });
+                    System.out.println("password valid");
                 }
 
-                MSimpleMailer.setClientKeystoreDir(userDir);
-                mailer = new MSimpleMailer("BackupMailer", pw, false){
-                    @Override
-                    protected void onInitializingSucceeded() {
+            } catch (Exception exc){ handleException(exc); }
+            String pw = pw_[0];
 
-                    try{
-                        MSimpleKeystore store = mailer.getKeystore();
+            MSimpleMailer.setClientKeystoreDir(userDir);
 
-                        if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
-                            String[] setupedValues = showSetupDialog(false);
-                            String from = setupedValues[0];
-                            String to = setupedValues[1];
-                            store.add("fromAddress", from);
-                            store.add("toAddress", to);
-                        }
+            mailer = new MSimpleMailer("BackupMailer", pw, false) {
+                @Override
+                protected void onInitializeSucceeded() {
+                   try {
+                       MSimpleKeystore store = mailer.getKeystore();
+                       if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
+                           String[] setupedValues = showSetupDialog(false);
+                           String from = setupedValues[0];
+                           String to = setupedValues[1];
+                           store.add("fromAddress", from);
+                           store.add("toAddress", to);
+                       }
+                       clientAndPathUUID = store.get("clientId");
+                       sentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-sent"), "Sent folder");
+                       notSentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-notSent"), "NotSent folder");
 
-                        clientAndPathUUID = store.get("clientId");
-                        sentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-sent"), "Sent folder");
-                        notSentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-notSent"), "NotSent folder");
+                       fromAddress = store.get("fromAddress");
+                       toAddress = store.get("toAddress");
 
-                        fromAddress = store.get("fromAddress");
-                        toAddress = store.get("toAddress");
+                       watcher = new MAttachmentWatcher(sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
+                           @Override
+                           public final MConsentQuestioner askForConsent(MOutgoingMail mail) {
+                               return new MMiniGui(mail, 900, 600, 16);
+                           }
+                       }.startServer();
 
-                        watcher = new MAttachmentWatcher(sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
-                            @Override
-                            public final MConsentQuestioner askForConsent(MOutgoingMail mail) {
-                                return new MMiniGui(mail,900, 600, 16);
-                            }
-                        }.startServer();
+                       sentDesktopLinkWatcher = createAndWatchFolderDesktopLink(sentFolder.toString(), "Sent Things", "Sent");
+                       notSentDesktopLinkWatcher = createAndWatchFolderDesktopLink(notSentFolder.toString(), "NotSent Things", "NotSent");
 
-                        sentDesktopLinkWatcher = createAndWatchFolderDesktopLink(sentFolder.toString(), "Sent Things", "Sent");
-                        notSentDesktopLinkWatcher = createAndWatchFolderDesktopLink(notSentFolder.toString(), "NotSent Things", "NotSent");
+                       printConfiguration(fromAddress, toAddress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
 
-                        printConfiguration(fromAddress, toAddress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
+                       setupTrayIcon();
+                   } catch (Throwable exc){ handleException(exc);}
+                }
 
-                        setupTrayIcon();
-
-                    } catch (MClientSecretException exc) {
-                        JOptionPane.showMessageDialog(
-                                null,
-                                "Client Secret Error:\n" + exc.getMessage()+" Setup will be restarted on next launch.",
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE
-                        );
-                        dbg(exc);
-                        exit(1);
-                    } catch (MPasswordIntegrityException exc) {
-                        JOptionPane.showMessageDialog(
-                                null,
-                                "Client Integrity Error:\n" + exc.getMessage(),
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE
-                        );
-                        dbg(exc);
-                        exit(1);
-                    } catch (Exception exc) {
-                        System.err.println(exc.getMessage());
-                        dbg(exc);
-                        exit(1);
-                    }
-                    }
-
-                    public void onInitializeException(Throwable exc){
-                        System.err.println(exc.getMessage());
-                        dbg(exc);
-                        exit(1);
-                    }
-                };
-
-
+                @Override
+                protected void onInitializeFailed(Throwable exc) {
+                    handleException(exc);
+                }
+            };
+            mailer.startInitialization();
     }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
+    private static void handleException(Throwable exception) {
+        try {
+            throw new Throwable(exception);
+        } catch (MClientSecretException exc) {
+            SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(
+                        null,
+                        "Client Secret Error:\n" + exc.getMessage() + " Setup will be restarted on next launch.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            });
+            dbg(exc);
+            exit(1);
+        } catch (MPasswordIntegrityException exc) {
+            SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(
+                        null,
+                        "Client Integrity Error:\n" + exc.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            });
+            dbg(exc);
+            exit(1);
+        } catch (Throwable exc) {
+            System.err.println(exc.getMessage());
+            dbg(exc);
+            exit(1);
+        }
+    }
+
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
@@ -247,6 +269,7 @@ public final class MMain {
      * unready
      */
     private static String[] showSetupDialog(boolean setPw) {
+
         JTextField fromField = new JTextField(); fromField.setText("m.scherzer@hotmail.com");
         JTextField toField = new JTextField(); toField.setText("m.scherzer@hotmail.com");
         JPasswordField pwField = new JPasswordField(); pwField.setText("testTesttest-123)");
