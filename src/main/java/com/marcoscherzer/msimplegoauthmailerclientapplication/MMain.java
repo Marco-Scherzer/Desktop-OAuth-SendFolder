@@ -136,6 +136,13 @@ public final class MMain {
                     System.out.println("Access-level 1 granted: Application");
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
                 }
+
+                @Override
+                protected void onStartOAuth(String oAuthLink) {
+                    System.out.println("Additional authentification needed "+oAuthLink);
+                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Additional authentification needed\n", TrayIcon.MessageType.INFO);
+
+                }
             };
             mailer.startInitialization();
     }
