@@ -33,6 +33,7 @@ public final class MMain {
 
     private static MAppLoggingArea logFrame;
     private static String[] arg;
+    private static TrayIcon trayIcon;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -55,19 +56,23 @@ public final class MMain {
             final String[] pw_ = new String[1];
             try {
                 logFrame = new MAppLoggingArea(true);
-
-                //if (isDbg()) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
-
+                setupTrayIcon();
+                if (isDbg()) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
                 Path keystorePath = Paths.get(userDir, "mystore.p12");
                 boolean keystoreFileExists = Files.exists(keystorePath);
+
                 if (!keystoreFileExists) {
                     System.out.println("showing setup dialog");
+                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup started. \nInfo: Use the SystemTray Icon to view log Information", TrayIcon.MessageType.INFO);
                     pw_[0] = new MAppSetupDialog(true).createAndShowDialog()[2];
+                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup completed.", TrayIcon.MessageType.INFO);
                     System.out.println("setup completed");
                 } else {
                     System.out.println("showing password dialog");
+                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Password required.\n", TrayIcon.MessageType.INFO);
                     pw_[0] = new MAppPwDialog().createAndShowDialog();
                     System.out.println("password valid");
+                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access granted\n", TrayIcon.MessageType.INFO);
                 }
 
             } catch (Exception exc){ exit(exc,1); }
@@ -104,8 +109,7 @@ public final class MMain {
                        notSentDesktopLinkWatcher = createAndWatchFolderDesktopLink(notSentFolder.toString(), "NotSent Things", "NotSent");
 
                        printConfiguration(fromAddress, toAddress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
-
-                       setupTrayIcon();
+                       trayIcon.displayMessage("OAuth Desktop FileSend Folder", "To send mail drag files onto its dolphin icon on the desktop or click it.", TrayIcon.MessageType.INFO);
                    } catch (Throwable exc){ exit(exc,1);}
                 }
 
@@ -125,6 +129,44 @@ public final class MMain {
                 }
             };
             mailer.startInitialization();
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
+    private static void setupTrayIcon() throws Exception {
+        PopupMenu traymenu = new PopupMenu();
+
+        MenuItem showLogItem = new MenuItem("Show Log");
+        showLogItem.addActionListener((ActionEvent e) -> {
+            if (!logFrame.getLogFrame().isVisible()) {
+                logFrame.getLogArea().setVisible(true);
+                logFrame.getLogFrame().setState(JFrame.NORMAL);
+                logFrame.getLogFrame().toFront();
+            } else {
+                logFrame.getLogFrame().setVisible(false);
+            }
+        });
+        traymenu.add(showLogItem);
+
+        MenuItem exitItem = new MenuItem("Close Program");
+        exitItem.addActionListener((ActionEvent e) -> {
+            System.out.println("Program closed via Tray-Icon");
+            exit(null,0);
+        });
+        traymenu.add(exitItem);
+
+        if (!SystemTray.isSupported()) {
+            System.out.println("SystemTray is not supported!");
+            return;
+        }
+
+        SystemTray tray = SystemTray.getSystemTray();
+        Image image = ImageIO.read(MMain.class.getResourceAsStream("/5.png"));
+        trayIcon = new TrayIcon(image, "OAuth Desktop FileSend Folder", traymenu);
+        trayIcon.setImageAutoSize(true);
+        tray.add(trayIcon);
     }
 
     /**
@@ -162,48 +204,7 @@ public final class MMain {
     }
 
 
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
-     */
-    private static void setupTrayIcon() throws Exception {
-        PopupMenu traymenu = new PopupMenu();
 
-        MenuItem showLogItem = new MenuItem("Show Log");
-        showLogItem.addActionListener((ActionEvent e) -> {
-            if (!logFrame.getLogFrame().isVisible()) {
-                logFrame.getLogArea().setVisible(true);
-                logFrame.getLogFrame().setState(JFrame.NORMAL);
-                logFrame.getLogFrame().toFront();
-            } else {
-                logFrame.getLogFrame().setVisible(false);
-            }
-        });
-        traymenu.add(showLogItem);
-
-        MenuItem exitItem = new MenuItem("Close Program");
-        exitItem.addActionListener((ActionEvent e) -> {
-            System.out.println("Program closed via Tray-Icon");
-            exit(null,0);
-        });
-        traymenu.add(exitItem);
-
-        if (!SystemTray.isSupported()) {
-            System.out.println("SystemTray is not supported!");
-            return;
-        }
-
-        SystemTray tray = SystemTray.getSystemTray();
-        Image image = ImageIO.read(MMain.class.getResourceAsStream("/5.png"));
-        TrayIcon trayIcon = new TrayIcon(image, "OAuth Desktop FileSend Folder", traymenu);
-        trayIcon.setImageAutoSize(true);
-        tray.add(trayIcon);
-
-        trayIcon.displayMessage("OAuth Desktop FileSend Folder",
-                "OAuth Desktop FileSend Folder started in your system tray.\n" +
-                        "To send mail drag files onto its dolphin icon on the desktop or click it.",
-                TrayIcon.MessageType.INFO);
-    }
 
 
     /**
