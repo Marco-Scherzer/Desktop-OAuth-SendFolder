@@ -18,9 +18,8 @@ import java.util.*;
 import java.util.List;
 
 import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkPasswordComplexity;
-import static com.marcoscherzer.msimplegoauthmailerclientapplication.MUtil.createFolderDesktopLink;
-import static com.marcoscherzer.msimplegoauthmailerclientapplication.MUtil.createPathIfNotExists;
 import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkMailAddress;
+import static com.marcoscherzer.msimplegoauthmailerclientapplication.MUtil.*;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -51,9 +50,7 @@ public final class MMain {
      * unready
      */
     public static void main(String[] args) {
-        // arg = new String[]{"-debug"};
-
-
+         arg = new String[]{"-debug"};
         /*
             FlatLightLaf.setup(), FlatDarkLaf.setup(), FlatIntelliJLaf.setup(), FlatDarculaLaf.setup(),
             FlatArcDarkIJTheme.setup(), FlatArcIJTheme.setup(), FlatArcOrangeIJTheme.setup(),
@@ -62,7 +59,6 @@ public final class MMain {
             FlatHighContrastIJTheme.setup(), FlatMonokaiProIJTheme.setup(), FlatSolarizedLightIJTheme.setup(),
             FlatSolarizedDarkIJTheme.setup(), FlatDraculaIJTheme.setup()
         */
-
             try {
                 FlatCarbonIJTheme.setup();
             } catch (Exception exc) {
@@ -70,12 +66,8 @@ public final class MMain {
             }
             UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
 
-            // originalOut = System.out;
-            // originalErr = System.err;
-             setupLogging();logFrame.setVisible(true);
-            if (arg != null && arg[0] != null && arg[0].equals("-debug")) {
-                logFrame.setVisible(true); // dbg
-            }
+            setupLogging();
+            if (isDbg()) logFrame.setVisible(true);// sonst nur im tray sichtbar
 
             final String[] pw_ = new String[1];
             try {
@@ -96,7 +88,7 @@ public final class MMain {
                     System.out.println("password valid");
                 }
 
-            } catch (Exception exc){ handleException(exc); }
+            } catch (Exception exc){ exit(exc,1); }
             String pw = pw_[0];
 
             MSimpleMailer.setClientKeystoreDir(userDir);
@@ -133,12 +125,36 @@ public final class MMain {
                        printConfiguration(fromAddress, toAddress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
 
                        setupTrayIcon();
-                   } catch (Throwable exc){ handleException(exc);}
+                   } catch (Throwable exc){ exit(exc,1);}
                 }
 
                 @Override
-                protected void onInitializeFailed(Throwable exc) {
-                    handleException(exc);
+                protected void onInitializeFailed(Throwable exc) { exit(exc,1);}
+
+                @Override
+                protected void onClientSecretFailure(MClientSecretException exc) {
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "Client Secret Error:\n" + exc.getMessage() + " Setup will be restarted on next launch.",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                    });
+                    exit(exc,1);
+                }
+
+                @Override
+                protected void onPasswordIntegrityFailure(MPasswordIntegrityException exc) {
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "Client Integrity Error:\n" + exc.getMessage(),
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                    });
+                    exit(exc,1);
                 }
             };
             mailer.startInitialization();
@@ -148,36 +164,33 @@ public final class MMain {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
-    private static void handleException(Throwable exception) {
-        try {
-            throw new Throwable(exception);
-        } catch (MClientSecretException exc) {
-            SwingUtilities.invokeLater(() -> {
-                JOptionPane.showMessageDialog(
-                        null,
-                        "Client Secret Error:\n" + exc.getMessage() + " Setup will be restarted on next launch.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
-            });
-            dbg(exc);
-            exit(1);
-        } catch (MPasswordIntegrityException exc) {
-            SwingUtilities.invokeLater(() -> {
-                JOptionPane.showMessageDialog(
-                        null,
-                        "Client Integrity Error:\n" + exc.getMessage(),
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
-            });
-            dbg(exc);
-            exit(1);
-        } catch (Throwable exc) {
-            System.err.println(exc.getMessage());
-            dbg(exc);
-            exit(1);
+    private static String showPasswordDialog() {
+        JPasswordField pwField = new JPasswordField();
+        int option = JOptionPane.showConfirmDialog(null, pwField, "Enter Password", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.OK_OPTION) {
+            return new String(pwField.getPassword());
+        } else {
+            System.exit(0);
+            return null;
         }
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private static void exit(Throwable exception,int code) {
+        System.err.println(exception.getMessage());
+        if(isDbg() && exception!=null){exception.printStackTrace();}
+        try {
+            if(mailer != null && mailer.isInDoNotPersistOAuthTokenMode()) mailer.revokeOAuthTokenFromServer();
+            if (watcher != null) watcher.shutdown();
+            if(sentDesktopLinkWatcher != null ) sentDesktopLinkWatcher.shutdown();
+            if(notSentDesktopLinkWatcher != null ) notSentDesktopLinkWatcher.shutdown();
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        }
+        System.out.println("Program terminated. Exit code: " + code);
+        System.exit(code);
     }
 
 
@@ -185,8 +198,8 @@ public final class MMain {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
-    private static void dbg(Throwable exc){
-        if(arg != null && arg[0]!=null && arg[0].equals("-debug")) {exc.printStackTrace();}
+    private static boolean isDbg(){
+       return (arg != null && arg[0]!=null && arg[0].equals("-debug"));
     }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -243,7 +256,7 @@ public final class MMain {
         MenuItem exitItem = new MenuItem("Close Program");
         exitItem.addActionListener((ActionEvent e) -> {
             System.out.println("Program closed via Tray-Icon");
-            System.exit(0);
+            exit(null,0);
         });
         traymenu.add(exitItem);
 
@@ -405,45 +418,7 @@ public final class MMain {
 
             return setPw ? new String[]{from, to, pw} : new String[]{from, to};
         } else {
-            System.exit(0);
-            return null;
-        }
-    }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
-     */
-    private static JPanel createTwoPartLabel(String mainText, String hintText, float mainFontSize, float hintFontSize) {
-        JPanel labelPanel = new JPanel();
-        labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
-
-        JLabel labelMain = new JLabel(mainText);
-        labelMain.setFont(labelMain.getFont().deriveFont(Font.BOLD, mainFontSize));
-        labelMain.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JLabel labelHint = new JLabel(hintText);
-        labelHint.setFont(labelHint.getFont().deriveFont(Font.PLAIN, hintFontSize));
-        labelHint.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        labelPanel.add(labelMain);
-        labelPanel.add(labelHint);
-
-        return labelPanel;
-    }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
-     */
-    private static String showPasswordDialog() {
-        JPasswordField pwField = new JPasswordField();
-        pwField.setText("testTesttest-123");
-        int option = JOptionPane.showConfirmDialog(null, pwField, "Enter Password", JOptionPane.OK_CANCEL_OPTION);
-        if (option == JOptionPane.OK_OPTION) {
-            return new String(pwField.getPassword());
-        } else {
-            System.exit(0);
+            exit(null,0);
             return null;
         }
     }
@@ -483,23 +458,6 @@ public final class MMain {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private static void exit(int code) {
-        try {
-            if(mailer != null && mailer.isInDoNotPersistOAuthTokenMode()) mailer.revokeOAuthTokenFromServer();
-            if (watcher != null) watcher.shutdown();
-            if(sentDesktopLinkWatcher != null ) sentDesktopLinkWatcher.shutdown();
-            if(notSentDesktopLinkWatcher != null ) notSentDesktopLinkWatcher.shutdown();
-        } catch (Exception exc) {
-            exc.printStackTrace();
-        }
-        System.out.println("Program terminated. Exit code: " + code);
-        System.exit(code);
-    }
-
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
     private static MFileNameWatcher createAndWatchFolderDesktopLink(String folderPath, String linkName, String label) throws Exception {
         Path linkPath = createFolderDesktopLink(folderPath, linkName);
         if (linkPath == null) {
@@ -512,7 +470,7 @@ public final class MMain {
             protected void onFileNameChanged(WatchEvent.Kind<?> kind, Path fileName) {
                 System.out.println("Security integrity violated. Desktop Folder Link \""
                         + linkPath + "\" (" + label + ") changed. Shutting down.");
-                exit(0);
+                exit(null,0);
             }
         };
 

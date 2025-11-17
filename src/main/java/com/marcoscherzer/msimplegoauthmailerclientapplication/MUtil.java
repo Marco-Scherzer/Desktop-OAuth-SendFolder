@@ -3,6 +3,8 @@ package com.marcoscherzer.msimplegoauthmailerclientapplication;
 import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.WinReg;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.Console;
 import java.io.File;
 import java.io.IOException;
@@ -130,5 +132,30 @@ public class MUtil {
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS").format(new Date());
             return originalName + "_" + timestamp + extension;
     }
+
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
+    public static JPanel createTwoPartLabel(String mainText, String hintText, float mainFontSize, float hintFontSize) {
+        JPanel labelPanel = new JPanel();
+        labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
+
+        JLabel labelMain = new JLabel(mainText);
+        labelMain.setFont(labelMain.getFont().deriveFont(Font.BOLD, mainFontSize));
+        labelMain.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel labelHint = new JLabel(hintText);
+        labelHint.setFont(labelHint.getFont().deriveFont(Font.PLAIN, hintFontSize));
+        labelHint.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        labelPanel.add(labelMain);
+        labelPanel.add(labelHint);
+
+        return labelPanel;
+    }
+
+
 
 }

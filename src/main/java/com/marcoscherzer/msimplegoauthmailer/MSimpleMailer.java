@@ -87,7 +87,17 @@ public abstract class MSimpleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-        protected abstract void onInitializeFailed(Throwable exc);
+    protected abstract void onInitializeFailed(Throwable exc);
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    protected abstract void onClientSecretFailure(MClientSecretException exc);
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    protected abstract void onPasswordIntegrityFailure(MPasswordIntegrityException exc);
 
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -172,32 +182,39 @@ public abstract class MSimpleMailer {
                         .setApplicationName(applicationName)
                         .build();
 
-            } catch (Exception exc) {
-                System.err.println("Error in initialization. " + exc.getMessage());
-                if (keystore.successfullyInitialized()) {
-                    System.out.println("clearing KeyStore");
-                    try {
-                        keystore.clear();
-                    } catch (Exception exc2) {
-                        System.err.println("Error while clearing keystore.\n" + (exc2.getMessage() == null ? exc2 : exc2.getMessage()));
-                        System.err.println("Initialization failed and keystore could not be cleared. Please delete it manually");
-                        throw new Exception(exc2);
+                if (jsonFile.exists()) {
+                    boolean jsonFileDeleted = jsonFile.delete();
+                    if (!jsonFileDeleted) {
+                        System.out.println("File \"client_secret.json\" could not be deleted. Please delete it manually.");
+                    } else {
+                        System.out.println("client_secret.json successfully imported and deleted.");
                     }
                 }
-                throw exc;
-            }
-
-            if (jsonFile.exists()) {
-                boolean jsonFileDeleted = jsonFile.delete();
-                if (!jsonFileDeleted) {
-                    System.out.println("File \"client_secret.json\" could not be deleted. Please delete it manually.");
-                } else {
-                    System.out.println("client_secret.json successfully imported and deleted.");
-                }
+            } catch (Exception exc) {
+                System.err.println("Error in initialization. " + exc.getMessage());
+                clearKeystore();
+                if (exc instanceof MClientSecretException){onClientSecretFailure((MClientSecretException)exc);}
+                else
+                if (exc instanceof MPasswordIntegrityException){onPasswordIntegrityFailure((MPasswordIntegrityException)exc);}
+                else throw exc;
             }
         }
 
-
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+        private void clearKeystore() throws Exception {
+            if (keystore.successfullyInitialized()) {
+                System.out.println("clearing KeyStore");
+                try {
+                    keystore.clear();
+                } catch (Exception exc2) {
+                    System.err.println("Error while clearing keystore.\n" + (exc2.getMessage() == null ? exc2 : exc2.getMessage()));
+                    System.err.println("Initialization failed and keystore could not be cleared. Please delete it manually");
+                    throw new Exception(exc2);
+                }
+            }
+        }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
