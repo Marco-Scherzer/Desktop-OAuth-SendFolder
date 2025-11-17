@@ -95,6 +95,11 @@ public abstract class MSimpleMailer {
      */
     protected abstract void onPasswordIntegrityFailure(MPasswordIntegrityException exc);
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    protected abstract void onPasswordIntegritySuccess();
+
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
@@ -113,7 +118,8 @@ public abstract class MSimpleMailer {
 
                 String clientId;
                 String clientSecret;
-
+                if(!keystore.newCreated()) onPasswordIntegritySuccess();
+                else
                 if (keystore.newCreated() || !keystore.containsAllNonNullKeys("clientId", "google-client-id", "google-client-secret")) {
                     System.out.println("Checking if file \"client_secret.json\" exists");
                     if (jsonFile.exists()) {

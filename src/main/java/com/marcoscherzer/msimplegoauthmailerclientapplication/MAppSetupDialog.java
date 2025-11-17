@@ -35,12 +35,12 @@ public final class MAppSetupDialog {
             try {
                 result = buildAndShowDialog();
             } catch (Exception e) {
-                capturedException = e; // Exception nur speichern
+                capturedException = e;
             }
         };
             SwingUtilities.invokeAndWait(task);
             if (capturedException != null) {
-                throw capturedException; // außerhalb des EDT werfen
+                throw capturedException;
             }
             return result;
     }

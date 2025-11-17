@@ -53,7 +53,7 @@ public final class MMain {
             FlatCarbonIJTheme.setup();
             UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
 
-            final String[] pw_ = new String[1];
+            String pw=null;
             try {
                 logFrame = new MAppLoggingArea(true);
                 setupTrayIcon();
@@ -64,19 +64,17 @@ public final class MMain {
                 if (!keystoreFileExists) {
                     System.out.println("showing setup dialog");
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup started. \nInfo: Use the SystemTray Icon to view log Information", TrayIcon.MessageType.INFO);
-                    pw_[0] = new MAppSetupDialog(true).createAndShowDialog()[2];
+                    pw = new MAppSetupDialog(true).createAndShowDialog()[2];
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup completed.", TrayIcon.MessageType.INFO);
                     System.out.println("setup completed");
                 } else {
                     System.out.println("showing password dialog");
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Password required.\n", TrayIcon.MessageType.INFO);
-                    pw_[0] = new MAppPwDialog().createAndShowDialog();
-                    System.out.println("password valid");
-                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access granted\n", TrayIcon.MessageType.INFO);
+                    pw = new MAppPwDialog().createAndShowDialog();
+                    if(pw != null) System.out.println("checking password");
+                    else { exit(null,0); }
                 }
-
             } catch (Exception exc){ exit(exc,1); }
-            String pw = pw_[0];
 
             MSimpleMailer.setClientKeystoreDir(userDir);
             mailer = new MSimpleMailer("BackupMailer", pw, false) {
@@ -124,8 +122,14 @@ public final class MMain {
 
                 @Override
                 protected final void onPasswordIntegrityFailure(MPasswordIntegrityException exc) {
-                    createMessageDialogAndWait("Client Integrity Error:\n" + exc.getMessage(), "Error");
+                    createMessageDialogAndWait("Password Integrity Error:\n" + exc.getMessage(), "Error");
                     exit(exc,1);
+                }
+
+                @Override
+                protected void onPasswordIntegritySuccess() {
+                    System.out.println("Access-level 1 granted: Application");
+                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
                 }
             };
             mailer.startInitialization();
@@ -188,9 +192,10 @@ public final class MMain {
             if(sentDesktopLinkWatcher != null ) sentDesktopLinkWatcher.shutdown();
             if(notSentDesktopLinkWatcher != null ) notSentDesktopLinkWatcher.shutdown();
         } catch (Exception exc) {
-            exc.printStackTrace();
+            System.err.println(exception.getMessage());
+            if(isDbg()) exc.printStackTrace();
         }
-        System.out.println("Program terminated. Exit code: " + code);
+        System.out.println("Exiting program with code " + code);
         System.exit(code);
     }
 
