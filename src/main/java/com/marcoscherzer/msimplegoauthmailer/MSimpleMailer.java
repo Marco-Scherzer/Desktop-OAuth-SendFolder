@@ -4,6 +4,7 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.*;
@@ -185,6 +186,7 @@ public abstract class MSimpleMailer {
             GoogleAuthorizationCodeFlow flow;
             int gglsLocalJettyPort = 8888;
             String oAuthLink=null;
+            GoogleAuthorizationCodeRequestUrl url;
 
             if (doNotPersistOAuthToken) {
                 if (keystore.contains("OAuth")) {
@@ -196,13 +198,15 @@ public abstract class MSimpleMailer {
                         .setApprovalPrompt("force")
                         .setCredentialDataStore(new MemoryDataStoreFactory().getDataStore("tempsession"))
                         .build();
-                oAuthLink = createOAuthLink(flow,clientSecrets,gglsLocalJettyPort);
+                url = flow.newAuthorizationUrl();
+                //oAuthLink = createOAuthLink(flow,clientSecrets,gglsLocalJettyPort);
             } else {
                 flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
                         .setAccessType("offline")
                         .setCredentialDataStore(new MSimpleKeystoreDataStoreFactory(keystore).getDataStore("OAuth"))
                         .build();
-                oAuthLink = createOAuthLink(flow,clientSecrets, gglsLocalJettyPort);
+                url = flow.newAuthorizationUrl();
+                //oAuthLink = createOAuthLink(flow,clientSecrets, gglsLocalJettyPort);
             }
 
             LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(gglsLocalJettyPort).build();
@@ -213,7 +217,8 @@ public abstract class MSimpleMailer {
 
             applicationName += " [" + keystore.get("clientId") + "]";
 
-            onStartOAuth(oAuthLink);
+            onStartOAuth(url.setRedirectUri(receiver.getRedirectUri()).toString());
+
             this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
                     .setApplicationName(applicationName)
                     .build();
