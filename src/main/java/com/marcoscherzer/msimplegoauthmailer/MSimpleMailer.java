@@ -104,7 +104,7 @@ public abstract class MSimpleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    protected abstract void onStartOAuth();
+    protected abstract void onStartOAuth(String oAuthLink);
 
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -184,6 +184,7 @@ public abstract class MSimpleMailer {
             GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
             GoogleAuthorizationCodeFlow flow;
             int gglsLocalJettyPort = 8888;
+            String oAuthLink=null;
 
             if (doNotPersistOAuthToken) {
                 if (keystore.contains("OAuth")) {
@@ -195,15 +196,14 @@ public abstract class MSimpleMailer {
                         .setApprovalPrompt("force")
                         .setCredentialDataStore(new MemoryDataStoreFactory().getDataStore("tempsession"))
                         .build();
-                createOAuthLink(flow,clientSecrets,gglsLocalJettyPort);
+                oAuthLink = createOAuthLink(flow,clientSecrets,gglsLocalJettyPort);
             } else {
                 flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
                         .setAccessType("offline")
                         .setCredentialDataStore(new MSimpleKeystoreDataStoreFactory(keystore).getDataStore("OAuth"))
                         .build();
-                createOAuthLink(flow,clientSecrets, gglsLocalJettyPort);
+                oAuthLink = createOAuthLink(flow,clientSecrets, gglsLocalJettyPort);
             }
-
 
             LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(gglsLocalJettyPort).build();
             credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("OAuth");
@@ -213,19 +213,16 @@ public abstract class MSimpleMailer {
 
             applicationName += " [" + keystore.get("clientId") + "]";
 
-
-            onStartOAuth();
+            onStartOAuth(oAuthLink);
             this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
                     .setApplicationName(applicationName)
                     .build();
         }
 
-        private String oAuthLink;
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-
-        public static String createOAuthLink(GoogleAuthorizationCodeFlow flow,GoogleClientSecrets clientSecrets, int gglsLocalJettyPort) {
+        public static final String createOAuthLink(GoogleAuthorizationCodeFlow flow,GoogleClientSecrets clientSecrets, int gglsLocalJettyPort) {
             String baseUrl = "https://accounts.google.com/o/oauth2/auth";
             String redirectUri = "http://localhost:" + gglsLocalJettyPort + "/Callback";
 
@@ -248,13 +245,6 @@ public abstract class MSimpleMailer {
 
             return link.toString();
         }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    private String getOAuthLink(){
-        return oAuthLink;
-    }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
