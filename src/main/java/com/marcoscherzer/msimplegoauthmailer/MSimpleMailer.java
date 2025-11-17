@@ -101,6 +101,11 @@ public abstract class MSimpleMailer {
      */
     protected abstract void onPasswordIntegritySuccess();
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    protected abstract void onStartOAuth();
+
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
@@ -204,11 +209,14 @@ public abstract class MSimpleMailer {
 
             applicationName += " [" + keystore.get("clientId") + "]";
 
+
+            onStartOAuth(createOAuthLink(String clientId, String accessType, int gglsLocalJettyPort, String scope, String responseType, String state, String prompt));
             this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
                     .setApplicationName(applicationName)
                     .build();
         }
 
+        private String oAuthLink;
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -230,6 +238,12 @@ public abstract class MSimpleMailer {
             link.append("&prompt=").append(prompt);
         }
         return link.toString();
+    }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private String getOAuthLink(){
+        return oAuthLink;
     }
 
     /**
