@@ -108,20 +108,25 @@ public final class MMain {
 
                        printConfiguration(fromAddress, toAddress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
                        trayIcon.displayMessage("OAuth Desktop FileSend Folder", "To send mail drag files onto its dolphin icon on the desktop or click it.", TrayIcon.MessageType.INFO);
-                   } catch (Throwable exc){ exit(exc,1);}
+                   } catch (Throwable exc){
+                       System.err.println(exc.getMessage());
+                       exit(exc,1);
+                   }
                 }
 
                 @Override
-                protected final void onCommonInitializationFailure(Throwable exc) { exit(exc,1);}
+                protected final void onCommonInitializationFailure(Throwable exc) { System.err.println(exc.getMessage());exit(exc,1);}
 
                 @Override
                 protected final void onClientSecretInitalizationFailure(MClientSecretException exc) {
+                    System.err.println(exc.getMessage());
                     createMessageDialogAndWait("Client Secret Error:\n" + exc.getMessage() + " Setup will be restarted on next launch.", "Error");
                     exit(exc,1);
                 }
 
                 @Override
                 protected final void onPasswordIntegrityFailure(MPasswordIntegrityException exc) {
+                    System.err.println(exc.getMessage());
                     createMessageDialogAndWait("Password Integrity Error:\n" + exc.getMessage(), "Error");
                     exit(exc,1);
                 }
@@ -184,7 +189,6 @@ public final class MMain {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     private static void exit(Throwable exception,int code) {
-        System.err.println(exception.getMessage());
         if(isDbg() && exception!=null){exception.printStackTrace();}
         try {
             if(mailer != null && mailer.isInDoNotPersistOAuthTokenMode()) mailer.revokeOAuthTokenFromServer();
@@ -207,10 +211,6 @@ public final class MMain {
     private static boolean isDbg(){
        return (arg != null && arg[0]!=null && arg[0].equals("-debug"));
     }
-
-
-
-
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

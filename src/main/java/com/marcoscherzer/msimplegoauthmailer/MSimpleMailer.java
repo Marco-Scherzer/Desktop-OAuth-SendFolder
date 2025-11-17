@@ -24,6 +24,7 @@ import jakarta.activation.DataSource;
 import jakarta.activation.FileDataSource;
 import org.apache.commons.codec.binary.Base64;
 
+import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
@@ -112,10 +113,7 @@ public abstract class MSimpleMailer {
             try {
                 keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
                 keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
-
-                HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
                 JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-
                 String clientId;
                 String clientSecret;
                 if(!keystore.newCreated()) onPasswordIntegritySuccess();
@@ -146,43 +144,8 @@ public abstract class MSimpleMailer {
                 clientId = keystore.get("google-client-id");
                 clientSecret = keystore.get("google-client-secret");
 
-                GoogleClientSecrets.Details details = new GoogleClientSecrets.Details()
-                        .setClientId(clientId)
-                        .setClientSecret(clientSecret)
-                        .setAuthUri("https://accounts.google.com/o/oauth2/auth")
-                        .setTokenUri("https://oauth2.googleapis.com/token");
+                doBrowserOAuthFlow(keystore, jsonFactory, applicationName, clientId, clientSecret);
 
-                GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
-                GoogleAuthorizationCodeFlow flow;
-
-                if (doNotPersistOAuthToken) {
-                    if (keystore.contains("OAuth")) {
-                        System.out.println("Securer OAuth Mode was chosen. Not keeping old tokens. Removing persistent OAuth token.");
-                        keystore.remove("OAuth");
-                    }
-                    flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
-                            .setAccessType("online")
-                            .setApprovalPrompt("force")
-                            .setCredentialDataStore(new MemoryDataStoreFactory().getDataStore("tempsession"))
-                            .build();
-                } else {
-                    flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
-                            .setAccessType("offline")
-                            .setCredentialDataStore(new MSimpleKeystoreDataStoreFactory(keystore).getDataStore("OAuth"))
-                            .build();
-                }
-
-                LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-                credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("OAuth");
-                if (credential == null) {
-                    throw new IllegalStateException("No stored OAuth credential found.");
-                }
-
-                applicationName += " [" + keystore.get("clientId") + "]";
-
-                this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
-                        .setApplicationName(applicationName)
-                        .build();
 
                 if (jsonFile.exists()) {
                     boolean jsonFileDeleted = jsonFile.delete();
@@ -201,6 +164,49 @@ public abstract class MSimpleMailer {
                 if (exc instanceof MPasswordIntegrityException){onPasswordIntegrityFailure((MPasswordIntegrityException)exc);}
                 else onCommonInitializationFailure(exc);
             }
+        }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+        private void doBrowserOAuthFlow(MSimpleKeystore keystore,JsonFactory jsonFactory,String applicationName, String clientId,String clientSecret) throws Exception {
+            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            GoogleClientSecrets.Details details = new GoogleClientSecrets.Details()
+                    .setClientId(clientId)
+                    .setClientSecret(clientSecret)
+                    .setAuthUri("https://accounts.google.com/o/oauth2/auth")
+                    .setTokenUri("https://oauth2.googleapis.com/token");
+
+            GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
+            GoogleAuthorizationCodeFlow flow;
+
+            if (doNotPersistOAuthToken) {
+                if (keystore.contains("OAuth")) {
+                    System.out.println("Securer OAuth Mode was chosen. Not keeping old tokens. Removing persistent OAuth token.");
+                    keystore.remove("OAuth");
+                }
+                flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
+                        .setAccessType("online")
+                        .setApprovalPrompt("force")
+                        .setCredentialDataStore(new MemoryDataStoreFactory().getDataStore("tempsession"))
+                        .build();
+            } else {
+                flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
+                        .setAccessType("offline")
+                        .setCredentialDataStore(new MSimpleKeystoreDataStoreFactory(keystore).getDataStore("OAuth"))
+                        .build();
+            }
+
+            LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+            credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("OAuth");
+            if (credential == null) {
+                throw new IllegalStateException("No stored OAuth credential found.");
+            }
+
+            applicationName += " [" + keystore.get("clientId") + "]";
+
+            this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
+                    .setApplicationName(applicationName)
+                    .build();
         }
 
     /**
