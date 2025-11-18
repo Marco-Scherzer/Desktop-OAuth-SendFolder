@@ -99,6 +99,11 @@ public abstract class MSimpleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
+    protected abstract void onPasswordComplexityFailure(MPasswordComplexityException exc);
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     protected abstract void onPasswordIntegritySuccess();
 
     /**
@@ -113,21 +118,27 @@ public abstract class MSimpleMailer {
             File keystoreFile = new File(clientSecretDir, "mystore.p12");
             File jsonFile = new File(clientSecretDir, "client_secret.json");
 
-            if (!keystoreFile.exists()) checkParameters(applicationName, keystorePassword);
-
             try {
+                checkPasswordComplexity(keystorePassword, 15, true, true, true);
                 keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
                 keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
-
-                if(!keystore.newCreated()) onPasswordIntegritySuccess();
+                if (!keystore.newCreated()) onPasswordIntegritySuccess();
                 //setup mode, setzt "clientId", "google-client-id", "google-client-secret"
                 checkAndSetupIfNeeded(jsonFile);
+            } catch(MPasswordIntegrityException exc ){
+                    onPasswordIntegrityFailure(exc);return;
+            } catch (MClientSecretException exc){
+                //try { clearKeystore(); } catch (Exception exc2) { exc.addSuppressed(exc2);};
+                onClientSecretInitalizationFailure((MClientSecretException)exc);return;
+            } catch (Exception exc) {
+                   onCommonInitializationFailure(exc);return;
+            }
 
+            try{
+                if (applicationName == null || applicationName.isBlank()) throw new IllegalArgumentException("Application name must not be empty.");
                 String clientId = keystore.get("google-client-id");
                 String clientSecret = keystore.get("google-client-secret");
-
                 doBrowserOAuthFlow(keystore, applicationName, clientId, clientSecret);
-
                 //token funktioniert, file köschen
                 if (jsonFile.exists()) {
                     boolean jsonFileDeleted = jsonFile.delete();
@@ -137,17 +148,9 @@ public abstract class MSimpleMailer {
                         System.out.println("client_secret.json successfully imported and deleted.");
                     }
                 }
-
             } catch (Exception exc) {
                 //System.err.println("Error in initialization."+ exc.getMessage());
-                if (exc instanceof MClientSecretException){ //token hat nicht funktioniert
-                    //try { clearKeystore(); } catch (Exception exc2) { exc.addSuppressed(exc2);};
-                    onClientSecretInitalizationFailure((MClientSecretException)exc);
-                }
-                else if (exc instanceof MPasswordIntegrityException){
-                    onPasswordIntegrityFailure((MPasswordIntegrityException)exc);
-                }
-                else onCommonInitializationFailure(exc);
+                onCommonInitializationFailure(exc);return;
             }
         }
     /**
@@ -246,15 +249,7 @@ public abstract class MSimpleMailer {
                 }
             }
         }
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    private void checkParameters(String applicationName, String keystorePassword) throws IllegalArgumentException {
-        if (applicationName == null || applicationName.isBlank()) {
-            throw new IllegalArgumentException("Application name must not be empty.");
-        }
-        checkPasswordComplexity(keystorePassword, 15, true, true, true);
-    }
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
