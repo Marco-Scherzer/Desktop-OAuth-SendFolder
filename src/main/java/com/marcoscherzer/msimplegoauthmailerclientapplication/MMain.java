@@ -73,8 +73,38 @@ public final class MMain {
                 }
             } catch (Exception exc){ exit(exc,1); }
 
-            MSimpleMailer.setClientKeystoreDir(userDir);
-            mailer = new MSimpleMailer("BackupMailer", pw, true) {
+            MSimpleMailerKeystore k = new MSimpleMailerKeystore(userDir, pw) {
+                @Override
+                protected final void onClientSecretInitalizationFailure(MClientSecretException exc) {
+                    System.err.println(exc.getMessage());
+                    createMessageDialogAndWait("Client Secret Error:\n" + exc.getMessage() + " Setup will be restarted on next launch.", "Error");
+                    exit(exc,1);
+                }
+
+                @Override
+                protected final void onPasswordIntegrityFailure(MPasswordIntegrityException exc) {
+                    System.err.println(exc.getMessage());
+                    createMessageDialogAndWait("Password Integrity Error:\n" + exc.getMessage(), "Error");
+                    exit(exc,1);
+                }
+
+                @Override
+                protected void onPasswordIntegritySuccess() {
+                    System.out.println("Access-level 1 granted: Application");
+                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
+                }
+
+                @Override
+                protected void onPasswordComplexityFailure(MPasswordComplexityException exc) {
+
+                }
+
+                @Override
+                protected final void onCommonInitializationFailure(Throwable exc) { System.err.println(exc.getMessage());exit(exc,1);}
+
+            };
+
+            mailer = new MSimpleMailer(k,"BackupMailer",true) {
                 @Override
                 protected void onOAuthSucceeded() {
                    try {
@@ -113,39 +143,15 @@ public final class MMain {
                 }
 
                 @Override
-                protected void onPasswordComplexityFailure(MPasswordComplexityException exc) {
+                protected void onStartOAuth(String oAuthLink) {
+                    System.out.println("Additional authentification needed "+oAuthLink);
+                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Additional authentification needed\n", TrayIcon.MessageType.INFO);
 
                 }
 
                 @Override
                 protected final void onCommonInitializationFailure(Throwable exc) { System.err.println(exc.getMessage());exit(exc,1);}
 
-                @Override
-                protected final void onClientSecretInitalizationFailure(MClientSecretException exc) {
-                    System.err.println(exc.getMessage());
-                    createMessageDialogAndWait("Client Secret Error:\n" + exc.getMessage() + " Setup will be restarted on next launch.", "Error");
-                    exit(exc,1);
-                }
-
-                @Override
-                protected final void onPasswordIntegrityFailure(MPasswordIntegrityException exc) {
-                    System.err.println(exc.getMessage());
-                    createMessageDialogAndWait("Password Integrity Error:\n" + exc.getMessage(), "Error");
-                    exit(exc,1);
-                }
-
-                @Override
-                protected void onPasswordIntegritySuccess() {
-                    System.out.println("Access-level 1 granted: Application");
-                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
-                }
-
-                @Override
-                protected void onStartOAuth(String oAuthLink) {
-                    System.out.println("Additional authentification needed "+oAuthLink);
-                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Additional authentification needed\n", TrayIcon.MessageType.INFO);
-
-                }
             };
             mailer.startOAuth();
     }
