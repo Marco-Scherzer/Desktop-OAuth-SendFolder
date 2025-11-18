@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegoauthmailer;
+package com.marcoscherzer.msimplegoauthmailer.keystore;
 
 public class MKeystoreException extends Throwable {
     /**

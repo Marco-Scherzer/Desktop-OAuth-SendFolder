@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegoauthmailer;
+package com.marcoscherzer.msimplegoauthmailer.keystore;
 import com.google.api.client.util.store.DataStore;
 import com.google.api.client.util.store.DataStoreFactory;
 

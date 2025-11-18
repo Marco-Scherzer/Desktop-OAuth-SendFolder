@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegoauthmailer;
+package com.marcoscherzer.msimplegoauthmailer.keystore;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
