@@ -27,7 +27,7 @@ public final class MAppPwDialog {
             if (option == JOptionPane.OK_OPTION) {
                 result = new String(pwField.getPassword());
             } else {
-                result = null; // kein Exit, nur null zurück
+                result = null;
             }
         };
         SwingUtilities.invokeAndWait(task);

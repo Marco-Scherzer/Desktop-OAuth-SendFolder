@@ -66,19 +66,19 @@ public final class MMain {
                     String to = setupedValues[1];
                     pw = new MAppSetupDialog(true).createAndShowDialog()[2];
                     store = new MSimpleMailerKeystore(pw,userDir);
-                    System.out.println("Access-level 1 granted: Application");
-                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
                     store.getKeyStore().put("fromAddress", from);
                     store.getKeyStore().put("toAddress", to);
-
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup completed.", TrayIcon.MessageType.INFO);
                     System.out.println("setup completed");
                 } else {
                     System.out.println("showing password dialog");
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Password required.\n", TrayIcon.MessageType.INFO);
                     pw = new MAppPwDialog().createAndShowDialog();
-                    if(pw != null) System.out.println("checking password");
-                    else { exit(null,0); }
+                    if(pw == null) exit(null,1);
+                    else{
+                        System.out.println("Access-level 1 granted: Application");
+                        trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
+                    }
                 }
             } catch (Exception exc){
                 System.err.println(exc.getMessage());
@@ -147,7 +147,7 @@ public final class MMain {
                 }
 
             };
-            mailer.startOAuth();
+          //  mailer.startOAuth();
         }
     }
 
