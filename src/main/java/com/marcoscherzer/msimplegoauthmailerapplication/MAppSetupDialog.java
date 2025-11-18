@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegoauthmailerclientapplication;
+package com.marcoscherzer.msimplegoauthmailerapplication;
 
 import com.marcoscherzer.msimplegoauthmailer.MMailAdressFormatException;
 import com.marcoscherzer.msimplekeystore.MPasswordComplexityException;

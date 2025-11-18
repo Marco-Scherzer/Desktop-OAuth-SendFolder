@@ -1,10 +1,8 @@
-package com.marcoscherzer.msimplegoauthmailerclientapplication;
+package com.marcoscherzer.msimplegoauthmailerapplication;
 
 import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.WinReg;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.Console;
 import java.io.File;
 import java.io.IOException;

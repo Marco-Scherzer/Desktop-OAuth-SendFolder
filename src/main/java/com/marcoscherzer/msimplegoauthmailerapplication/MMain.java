@@ -1,8 +1,8 @@
-package com.marcoscherzer.msimplegoauthmailerclientapplication;
+package com.marcoscherzer.msimplegoauthmailerapplication;
 
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.marcoscherzer.msimplegoauthmailer.*;
-import com.marcoscherzer.msimplegoauthmailerclientapplication.server.MAttachmentWatcher;
+import com.marcoscherzer.msimplegoauthmailerapplication.core.MAttachmentWatcher;
 import com.marcoscherzer.msimplekeystore.*;
 
 import javax.imageio.ImageIO;
@@ -11,7 +11,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.nio.file.*;
 
-import static com.marcoscherzer.msimplegoauthmailerclientapplication.MUtil.*;
+import static com.marcoscherzer.msimplegoauthmailerapplication.MUtil.*;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

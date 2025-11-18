@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegoauthmailerclientapplication;
+package com.marcoscherzer.msimplegoauthmailerapplication;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;

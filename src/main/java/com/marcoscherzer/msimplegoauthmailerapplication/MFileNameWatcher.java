@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegoauthmailerclientapplication;
+package com.marcoscherzer.msimplegoauthmailerapplication;
 
 import java.io.IOException;
 import java.nio.file.*;
