@@ -3,14 +3,15 @@ package com.marcoscherzer.msimplegoauthmailer;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
+import com.marcoscherzer.msimplekeystore.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.UUID;
 
-import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkPasswordComplexity;
+import static com.marcoscherzer.msimplekeystore.MSimpleKeystoreUtil.checkPasswordComplexity;
+
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

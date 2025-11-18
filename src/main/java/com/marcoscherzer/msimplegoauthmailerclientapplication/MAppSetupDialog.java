@@ -1,7 +1,7 @@
 package com.marcoscherzer.msimplegoauthmailerclientapplication;
 
 import com.marcoscherzer.msimplegoauthmailer.MMailAdressFormatException;
-import com.marcoscherzer.msimplegoauthmailer.MPasswordComplexityException;
+import com.marcoscherzer.msimplekeystore.MPasswordComplexityException;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkMailAddress;
-import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkPasswordComplexity;
+import static com.marcoscherzer.msimplekeystore.MSimpleKeystoreUtil.checkPasswordComplexity;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

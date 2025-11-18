@@ -14,6 +14,9 @@ import com.google.api.client.util.store.MemoryDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Message;
+import com.marcoscherzer.msimplekeystore.MKeystoreException;
+import com.marcoscherzer.msimplekeystore.MSimpleKeystore;
+import com.marcoscherzer.msimplegoauthmailer.msimplekeystoredatastoreadapter.MSimpleKeystoreDataStoreFactory;
 import jakarta.mail.Session;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeBodyPart;
@@ -73,7 +76,7 @@ public abstract class MSimpleMailer {
                             System.out.println("client_secret.json successfully imported and deleted.");
                         }
                     }
-                } catch (Exception  | MKeystoreException exc) {
+                } catch (Exception | MKeystoreException exc) {
                     //System.err.println("Error in initialization."+ exc.getMessage());
                     onOAuthFailure(exc);
                 }

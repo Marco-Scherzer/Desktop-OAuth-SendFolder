@@ -1,7 +1,9 @@
-package com.marcoscherzer.msimplegoauthmailer.keystore;
+package com.marcoscherzer.msimplegoauthmailer.msimplekeystoredatastoreadapter;
 
 import com.google.api.client.util.store.DataStore;
 import com.google.api.client.util.store.DataStoreFactory;
+import com.marcoscherzer.msimplekeystore.MKeystoreException;
+import com.marcoscherzer.msimplekeystore.MSimpleKeystore;
 
 import java.io.*;
 import java.util.*;

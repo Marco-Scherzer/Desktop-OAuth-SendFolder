@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegoauthmailer.keystore;
+package com.marcoscherzer.msimplekeystore;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -228,5 +228,6 @@ public final class MSimpleKeystore {
         } else
             throw new MKeystoreException("Error in context with keystore while clear, because keystore was not successfully initialized");
     }
+
 }
 

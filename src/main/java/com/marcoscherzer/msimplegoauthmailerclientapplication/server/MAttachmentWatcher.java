@@ -1,8 +1,9 @@
-package com.marcoscherzer.msimplegoauthmailerclientapplication;
+package com.marcoscherzer.msimplegoauthmailerclientapplication.server;
 
 import com.marcoscherzer.msimplegoauthmailer.MMailAdressFormatException;
 import com.marcoscherzer.msimplegoauthmailer.MOutgoingMail;
 import com.marcoscherzer.msimplegoauthmailer.MSimpleMailer;
+import com.marcoscherzer.msimplegoauthmailerclientapplication.MUtil;
 
 import java.io.BufferedReader;
 import java.io.File;

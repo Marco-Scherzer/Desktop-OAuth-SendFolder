@@ -2,6 +2,8 @@ package com.marcoscherzer.msimplegoauthmailerclientapplication;
 
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.marcoscherzer.msimplegoauthmailer.*;
+import com.marcoscherzer.msimplegoauthmailerclientapplication.server.MAttachmentWatcher;
+import com.marcoscherzer.msimplekeystore.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -74,11 +76,12 @@ public final class MMain {
                     System.out.println("showing password dialog");
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Password required.\n", TrayIcon.MessageType.INFO);
                     pw = new MAppPwDialog().createAndShowDialog();
-                    if(pw == null) exit(null,1);
-                    else{
-                        System.out.println("Access-level 1 granted: Application");
-                        trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
-                    }
+                    if(pw == null) exit(null,1);//canceled
+                    store = new MSimpleMailerKeystore(pw,userDir);
+
+                    System.out.println("Access-level 1 granted: Application");
+                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
+
                 }
             } catch (Exception exc){
                 System.err.println(exc.getMessage());

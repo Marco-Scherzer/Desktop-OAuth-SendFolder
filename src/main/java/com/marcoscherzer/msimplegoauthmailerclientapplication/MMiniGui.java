@@ -2,6 +2,7 @@ package com.marcoscherzer.msimplegoauthmailerclientapplication;
 
 import com.marcoscherzer.msimplegoauthmailer.MOutgoingMail;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.marcoscherzer.msimplegoauthmailerclientapplication.server.MAttachmentWatcher;
 
 import javax.swing.*;
 import java.awt.*;
