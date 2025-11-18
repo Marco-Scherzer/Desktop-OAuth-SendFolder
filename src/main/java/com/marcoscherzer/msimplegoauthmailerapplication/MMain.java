@@ -34,6 +34,7 @@ public final class MMain {
      */
     public static final void main(String[] args) {
         isDbg = (args != null && args[0]!=null && args[0].equals("-debug"));
+        isDbg = true; //dbg
         /*
             FlatLightLaf.setup(), FlatDarkLaf.setup(), FlatIntelliJLaf.setup(), FlatDarculaLaf.setup(),
             FlatArcDarkIJTheme.setup(), FlatArcIJTheme.setup(), FlatArcOrangeIJTheme.setup(),
