@@ -11,6 +11,7 @@ import java.util.List;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+ * unready
  */
 public final class MFileLinkCollector {
 
@@ -20,6 +21,7 @@ public final class MFileLinkCollector {
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
      */
     public static final void main(String[] args) {
         PrintStream logStream;
@@ -63,6 +65,7 @@ public final class MFileLinkCollector {
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
      */
     public static final void exit(int nr) {
         alreadyCalledExit=true;

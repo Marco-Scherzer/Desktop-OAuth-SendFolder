@@ -195,9 +195,8 @@ public final class MAppSetupDialog {
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
      */
-    public static JPanel createTwoPartLabel(String mainText, String hintText, float mainFontSize, float hintFontSize) {
+    public static final JPanel createTwoPartLabel(String mainText, String hintText, float mainFontSize, float hintFontSize) {
         JPanel labelPanel = new JPanel();
         labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
 

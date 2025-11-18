@@ -2,12 +2,10 @@ package com.marcoscherzer.msimplekeystore;
 
 public class MSimpleKeystoreUtil {
 
-
-
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static void checkPasswordComplexity(String password, int minLength, boolean requireUppercase, boolean requireDigit, boolean requireSpecial) throws MPasswordComplexityException {
+    public static final void checkPasswordComplexity(String password, int minLength, boolean requireUppercase, boolean requireDigit, boolean requireSpecial) throws MPasswordComplexityException {
         StringBuilder requirements = new StringBuilder("Password must meet the following requirements:");
         requirements.append("\n- Minimum length: ").append(minLength).append(" characters");
         if (requireUppercase) requirements.append("\n- At least one uppercase letter");

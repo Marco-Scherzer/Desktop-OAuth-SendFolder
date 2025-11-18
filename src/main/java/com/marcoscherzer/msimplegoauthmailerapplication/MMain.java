@@ -15,14 +15,11 @@ import static com.marcoscherzer.msimplegoauthmailerapplication.MUtil.*;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- * unready
  */
 public final class MMain {
 
     private static MAttachmentWatcher watcher;
     private static MSimpleMailer mailer;
-    private static MFileNameWatcher notSentDesktopLinkWatcher;
-    private static MFileNameWatcher sentDesktopLinkWatcher;
     private static MAppLoggingArea logFrame;
     private static boolean isDbg;
     private static TrayIcon trayIcon;
@@ -34,9 +31,8 @@ public final class MMain {
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
      */
-    public static void main(String[] args) {
+    public static final void main(String[] args) {
         isDbg = (args != null && args[0]!=null && args[0].equals("-debug"));
         /*
             FlatLightLaf.setup(), FlatDarkLaf.setup(), FlatIntelliJLaf.setup(), FlatDarculaLaf.setup(),
@@ -55,8 +51,7 @@ public final class MMain {
                 logFrame = new MAppLoggingArea(true);
                 setupTrayIcon();
                 if (isDbg) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
-                Path keystorePath = Paths.get(userDir, "mystore.p12");
-                boolean setup = !Files.exists(keystorePath);
+                boolean setup = !Files.exists(Paths.get(keystorePath));
                 if (setup) {
                     System.out.println("showing setup dialog");
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup started. \nInfo: Use the SystemTray Icon to view log Information", TrayIcon.MessageType.INFO);
@@ -64,7 +59,7 @@ public final class MMain {
                     String from = setupedValues[0];
                     String to = setupedValues[1];
                     pw = new MAppSetupDialog(true).createAndShowDialog()[2];
-                    store = new MSimpleMailerKeystore(pw,userDir+"\\client_secret.json",userDir+"\\mystore.p12");
+                    store = new MSimpleMailerKeystore(pw,clientSecretJsonPath, keystorePath);
                     store.getKeyStore().put("fromAddress", from);
                     store.getKeyStore().put("toAddress", to);
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup completed.", TrayIcon.MessageType.INFO);
@@ -74,7 +69,7 @@ public final class MMain {
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Password required.\n", TrayIcon.MessageType.INFO);
                     pw = new MAppPwDialog().createAndShowDialog();
                     if(pw == null) exit(null,1);//canceled
-                    store = new MSimpleMailerKeystore(pw,userDir+"\\client_secret.json",userDir+"\\mystore.p12");
+                    store = new MSimpleMailerKeystore(pw,clientSecretJsonPath, keystorePath);
                     System.out.println("Access-level 1 granted: Application");
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
                 }
@@ -108,20 +103,22 @@ public final class MMain {
                         MSimpleKeystore store = mailer.getKeystore();
                         String clientAndPathUUID = store.get("clientId");
                         Path sentFolder = createPathIfNotExists(Paths.get(mailFoldersPath, clientAndPathUUID + "-sent"), "Sent folder");
-                        Path notSentFolder = createPathIfNotExists(Paths.get(mailFoldersPath, clientAndPathUUID + "-notSent"), "NotSent folder");
+                        Path unsentFolder = createPathIfNotExists(Paths.get(mailFoldersPath, clientAndPathUUID + "-notSent"), "NotSent folder");
 
                         String fromAddress = store.get("fromAddress");
                         String toAddress = store.get("toAddress");
 
-                        watcher = new MAttachmentWatcher(sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
+                        watcher = new MAttachmentWatcher(sentFolder, unsentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
                             @Override
                             public final MConsentQuestioner askForConsent(MOutgoingMail mail) {
                                 return new MMiniGui(mail, 900, 600, 16);
                             }
                         }.startServer();
 
-                        sentDesktopLinkWatcher = createAndWatchFolderDesktopLink(sentFolder.toString(), "Sent Things", "Sent");
-                        notSentDesktopLinkWatcher = createAndWatchFolderDesktopLink(notSentFolder.toString(), "NotSent Things", "NotSent");
+                        Path linkPath = createFolderDesktopLink(sentFolder.toString(), "Sent Things");
+                        if (linkPath == null) {System.out.println("Desktop link for '" + linkPath + " could not be created. Please create it manually.");};
+                             linkPath = createFolderDesktopLink(unsentFolder.toString(), "Unsent Things");
+                        if (linkPath == null) {System.out.println("Desktop link for '" + linkPath + " could not be created. Please create it manually.");};
 
                         printConfiguration(fromAddress, toAddress, mailFoldersPath, clientAndPathUUID, clientAndPathUUID + "-sent");
                         trayIcon.displayMessage("OAuth Desktop FileSend Folder", "To send mail drag files onto its dolphin icon on the desktop or click it.", TrayIcon.MessageType.INFO);
@@ -151,7 +148,6 @@ public final class MMain {
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
      */
     private static void setupTrayIcon() throws Exception {
         PopupMenu traymenu = new PopupMenu();
@@ -190,7 +186,7 @@ public final class MMain {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static void createMessageDialogAndWait(String message, String title){
+    private static void createMessageDialogAndWait(String message, String title){
          JOptionPane.showMessageDialog(null,message, title, JOptionPane.ERROR_MESSAGE);
     }
 
@@ -202,8 +198,6 @@ public final class MMain {
         try {
             if(mailer != null && mailer.isInDoNotPersistOAuthTokenMode()) mailer.revokeOAuthTokenFromServer();
             if (watcher != null) watcher.shutdown();
-            if(sentDesktopLinkWatcher != null ) sentDesktopLinkWatcher.shutdown();
-            if(notSentDesktopLinkWatcher != null ) notSentDesktopLinkWatcher.shutdown();
         } catch (Exception exc) {
             System.err.println(exception.getMessage());
             if(isDbg) exc.printStackTrace();
@@ -215,7 +209,6 @@ public final class MMain {
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
      */
     private static void printConfiguration(String fromAddress, String toAddress, String basePath, String outFolder, String sentFolder) {
         System.out.println(
@@ -243,31 +236,6 @@ public final class MMain {
                         "\n=========================================================================="
         );
     }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    private static MFileNameWatcher createAndWatchFolderDesktopLink(String folderPath, String linkName, String label) throws Exception {
-        Path linkPath = createFolderDesktopLink(folderPath, linkName);
-        if (linkPath == null) {
-            System.out.println("Desktop link for '" + linkName + "' (" + label + ") could not be created. Please create it manually.");
-            return null;
-        }
-
-        MFileNameWatcher watcher = new MFileNameWatcher(linkPath) {
-            @Override
-            protected void onFileNameChanged(WatchEvent.Kind<?> kind, Path fileName) {
-                System.out.println("Security integrity violated. Desktop Folder Link \""
-                        + linkPath + "\" (" + label + ") changed. Shutting down.");
-                exit(null,0);
-            }
-        };
-
-        watcher.startWatching();
-        System.out.println("Monitoring \"" + linkPath + "\" (" + label + ") for name integrity violations...");
-        return watcher;
-    }
-
 
 }
 

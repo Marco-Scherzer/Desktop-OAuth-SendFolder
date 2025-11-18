@@ -9,7 +9,6 @@ import java.awt.*;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- * unready
  */
 public final class MMiniGui implements MAttachmentWatcher.MConsentQuestioner {
     private JFrame consentFrame;
@@ -18,14 +17,12 @@ public final class MMiniGui implements MAttachmentWatcher.MConsentQuestioner {
     private Boolean result;
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
      */
     public MMiniGui(MOutgoingMail mail) {
         this(mail, 900, 600, 16); // Defaultwerte: Breite 900, Höhe 600, Schriftgröße 16
     }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
      */
     public MMiniGui(MOutgoingMail mail, int windowWidth, int windowHeight, int fontSize) {
         SwingUtilities.invokeLater(() -> {
@@ -159,10 +156,9 @@ public final class MMiniGui implements MAttachmentWatcher.MConsentQuestioner {
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
      */
     @Override
-    public Boolean getResult() {
+    public final Boolean getResult() {
         return result;
     }
 }
