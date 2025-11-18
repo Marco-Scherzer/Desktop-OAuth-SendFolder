@@ -3,7 +3,7 @@ package com.marcoscherzer.msimplegoauthmailer;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MPasswordComplexityException extends Exception{
+public final class MPasswordComplexityException extends Throwable{
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

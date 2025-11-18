@@ -21,44 +21,44 @@ public final class MSimpleMailerUtil {
 
         if (password == null || password.isBlank()) {
             System.err.println(requirements.toString());
-            throw new IllegalArgumentException(requirements.toString());
+            throw new MPasswordComplexityException(requirements.toString());
         }
 
         if (password.length() < minLength) {
             System.err.println(requirements.toString());
-            throw new IllegalArgumentException(requirements.toString());
+            throw new MPasswordComplexityException(requirements.toString());
         }
 
         if (requireUppercase && !password.matches(".*[A-Z].*")) {
             System.err.println(requirements.toString());
-            throw new IllegalArgumentException(requirements.toString());
+            throw new MPasswordComplexityException(requirements.toString());
         }
 
         if (requireDigit && !password.matches(".*\\d.*")) {
             System.err.println(requirements.toString());
-            throw new IllegalArgumentException(requirements.toString());
+            throw new MPasswordComplexityException(requirements.toString());
         }
 
         if (requireSpecial && !password.matches(".*[^a-zA-Z0-9].*")) {
             System.err.println(requirements.toString());
-            throw new IllegalArgumentException(requirements.toString());
+            throw new MPasswordComplexityException(requirements.toString());
         }
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static final String checkMailAddress(String email) {
+    public static final String checkMailAddress(String email) throws MMailAdressFormatException {
         if (email == null || email.isBlank()) {
             System.err.println("Error: Sender address must not be empty.");
-            throw new IllegalArgumentException("Sender address must not be empty.");
+            throw new MMailAdressFormatException("Sender address must not be empty.");
         }
 
         Pattern emailPattern = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$",
                 Pattern.CASE_INSENSITIVE);
         if (!emailPattern.matcher(email).matches()) {
             System.err.println("Error: Invalid email format:" + email);
-            throw new IllegalArgumentException("Invalid email format: " + email);
+            throw new MMailAdressFormatException("Invalid email format: " + email);
         }
         return email;
     }

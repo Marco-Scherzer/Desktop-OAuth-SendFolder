@@ -27,16 +27,12 @@ import org.apache.commons.codec.binary.Base64;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.UUID;
-
-import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkPasswordComplexity;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -44,6 +40,7 @@ import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkPassw
 public abstract class MSimpleMailer {
 
     private final List<String> scopes = Collections.singletonList(GmailScopes.GMAIL_SEND);
+    private final String appName;
     private Thread initThread;
     private Credential credential;
     private boolean doNotPersistOAuthToken;
@@ -55,13 +52,31 @@ public abstract class MSimpleMailer {
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
-        public MSimpleMailer(MSimpleMailerKeystore keystore,String applicationName, boolean doNotPersistOAuthToken){
-            this.keystore = keystore.getKeyStore();
+        public MSimpleMailer(MSimpleMailerKeystore mailerKeystore,String applicationName, boolean doNotPersistOAuthToken){
+
+            this.keystore = mailerKeystore.getKeyStore();
+            this.appName = applicationName ;
+            this.doNotPersistOAuthToken = doNotPersistOAuthToken;
 
             initThread = new Thread(() -> {
-                String applicationName_= applicationName;
-                boolean doNotPersistOAuthToken_ = doNotPersistOAuthToken;
-                doOAuth(applicationName_,doNotPersistOAuthToken_);
+                try{
+                    if (appName == null || appName.isBlank()) throw new IllegalArgumentException("Application name must not be empty.");
+                    String clientId = keystore.get("google-client-id");
+                    String clientSecret = keystore.get("google-client-secret");
+                    doBrowserOAuthFlow(keystore, doNotPersistOAuthToken, appName, clientId, clientSecret);
+                    //token funktioniert, file löschen
+                    if (jsonFile.exists()) {
+                        boolean jsonFileDeleted = jsonFile.delete();
+                        if (!jsonFileDeleted) {
+                            System.out.println("File \"client_secret.json\" could not be deleted. Please delete it manually.");
+                        } else {
+                            System.out.println("client_secret.json successfully imported and deleted.");
+                        }
+                    }
+                } catch (Exception  | MKeystoreException exc) {
+                    //System.err.println("Error in initialization."+ exc.getMessage());
+                    onOAuthFailure(exc);
+                }
                 onOAuthSucceeded();
             }, "MSimpleMailer-Init");
         }
@@ -73,40 +88,15 @@ public abstract class MSimpleMailer {
         initThread.start();
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    protected abstract void onOAuthFailure(Throwable exc);
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private void doOAuth(String applicationName, boolean doNotPersistOAuthToken) {
-        try{
-            if (applicationName == null || applicationName.isBlank()) throw new IllegalArgumentException("Application name must not be empty.");
-            String clientId = keystore.get("google-client-id");
-            String clientSecret = keystore.get("google-client-secret");
-            doBrowserOAuthFlow(keystore, doNotPersistOAuthToken, applicationName, clientId, clientSecret);
-            //token funktioniert, file köschen
-            if (jsonFile.exists()) {
-                boolean jsonFileDeleted = jsonFile.delete();
-                if (!jsonFileDeleted) {
-                    System.out.println("File \"client_secret.json\" could not be deleted. Please delete it manually.");
-                } else {
-                    System.out.println("client_secret.json successfully imported and deleted.");
-                }
-            }
-        } catch (Exception exc) {
-            //System.err.println("Error in initialization."+ exc.getMessage());
-            onCommonInitializationFailure(exc);return;
-        }
-    }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    protected abstract void onCommonInitializationFailure(Throwable exc);
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    private void doBrowserOAuthFlow(MSimpleKeystore keystore, boolean doNotPersistOAuthToken, String applicationName, String clientId,String clientSecret) throws Exception {
+    private void doBrowserOAuthFlow(MSimpleKeystore keystore, boolean doNotPersistOAuthToken, String applicationName, String clientId,String clientSecret) throws Exception, MKeystoreException {
         JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         GoogleClientSecrets.Details details = new GoogleClientSecrets.Details()
@@ -157,22 +147,6 @@ public abstract class MSimpleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private void clearKeystore() throws Exception {
-        if (keystore.successfullyInitialized()) {
-            System.out.println("clearing KeyStore");
-            try {
-                keystore.clear();
-            } catch (Exception exc) {
-                System.err.println("Error while clearing keystore.\n" + exc.getMessage());
-                System.err.println("Initialization failed and keystore could not be cleared. Please delete it manually");
-                throw new Exception(exc);
-            }
-        }
-    }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
     protected abstract void onOAuthSucceeded();
 
 
@@ -196,7 +170,7 @@ public abstract class MSimpleMailer {
         try {
             System.out.println("Removing persistet OAuth Token from KeyStore.");
            if(keystore.contains("OAuth")) this.keystore.remove("OAuth"); else System.out.println("OAuth Token not contained. Started in doNotPersistOAuthToken Mode ?)");
-        } catch (Exception exc) {
+        } catch (Exception | MKeystoreException exc) {
             System.err.println("Error removing OAuth token from Keystore. " +
                     "\nPlease delete the keystore file manually and restart the program (you have to setup pw and mail adresses new)." +
                     "\nConsider to use secure OAuthMode Parameter next time."+ exc.getMessage());

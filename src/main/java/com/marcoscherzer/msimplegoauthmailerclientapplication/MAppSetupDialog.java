@@ -1,5 +1,8 @@
 package com.marcoscherzer.msimplegoauthmailerclientapplication;
 
+import com.marcoscherzer.msimplegoauthmailer.MMailAdressFormatException;
+import com.marcoscherzer.msimplegoauthmailer.MPasswordComplexityException;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -105,18 +108,18 @@ public final class MAppSetupDialog {
             List<String> errors = new ArrayList<>();
             try {
                 checkMailAddress(from);
-            } catch (IllegalArgumentException e) {
+            } catch (MMailAdressFormatException e) {
                 errors.add("Sender email invalid: " + e.getMessage());
             }
             try {
                 checkMailAddress(to);
-            } catch (IllegalArgumentException e) {
+            } catch (MMailAdressFormatException e) {
                 errors.add("Recipient email invalid: " + e.getMessage());
             }
             if (setPw) {
                 try {
                     checkPasswordComplexity(pw, 15, true, true, true);
-                } catch (IllegalArgumentException e) {
+                } catch (MPasswordComplexityException e) {
                     errors.add("Password invalid: " + e.getMessage());
                 }
             }
@@ -143,7 +146,7 @@ public final class MAppSetupDialog {
                 try {
                     checkMailAddress(field.getText().trim());
                     field.setBorder(UIManager.getBorder("TextField.border"));
-                } catch (IllegalArgumentException ex) {
+                } catch (MMailAdressFormatException exc) {
                     field.setBorder(BorderFactory.createLineBorder(Color.MAGENTA));
                 }
             }
@@ -171,7 +174,7 @@ public final class MAppSetupDialog {
                 try {
                     checkPasswordComplexity(new String(field.getPassword()), 15, true, true, true);
                     field.setBorder(UIManager.getBorder("TextField.border"));
-                } catch (IllegalArgumentException ex) {
+                } catch (MPasswordComplexityException ex) {
                     field.setBorder(BorderFactory.createLineBorder(Color.MAGENTA));
                 }
             }

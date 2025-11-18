@@ -51,17 +51,26 @@ public final class MMain {
             UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
 
             String pw=null;
+            MSimpleMailerKeystore store = null;
             try {
                 logFrame = new MAppLoggingArea(true);
                 setupTrayIcon();
                 if (isDbg()) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
                 Path keystorePath = Paths.get(userDir, "mystore.p12");
-                boolean keystoreFileExists = Files.exists(keystorePath);
-
-                if (!keystoreFileExists) {
+                boolean setup = !Files.exists(keystorePath);
+                if (setup) {
                     System.out.println("showing setup dialog");
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup started. \nInfo: Use the SystemTray Icon to view log Information", TrayIcon.MessageType.INFO);
+                    String[] setupedValues = new MAppSetupDialog(true).createAndShowDialog();
+                    String from = setupedValues[0];
+                    String to = setupedValues[1];
                     pw = new MAppSetupDialog(true).createAndShowDialog()[2];
+                    store = new MSimpleMailerKeystore(pw,userDir);
+                    System.out.println("Access-level 1 granted: Application");
+                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
+                    store.getKeyStore().put("fromAddress", from);
+                    store.getKeyStore().put("toAddress", to);
+
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup completed.", TrayIcon.MessageType.INFO);
                     System.out.println("setup completed");
                 } else {
@@ -71,89 +80,75 @@ public final class MMain {
                     if(pw != null) System.out.println("checking password");
                     else { exit(null,0); }
                 }
-            } catch (Exception exc){ exit(exc,1); }
+            } catch (Exception exc){
+                System.err.println(exc.getMessage());
+                createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
+                exit(exc,1);
+            } catch (MKeystoreException exc) {
+                System.err.println(exc.getMessage());
+                createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
+                exit(exc,1);
+            } catch (MPasswordIntegrityException exc) {
+                System.err.println(exc.getMessage());
+                createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
+                exit(exc,1);
+            } catch (MPasswordComplexityException exc) {
+                System.err.println(exc.getMessage());
+                createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
+                exit(exc,1);
+            } catch (MClientSecretException exc) {
+                System.err.println(exc.getMessage());
+                createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
+                exit(exc,1);
+            }
 
-            MSimpleMailerKeystore k = new MSimpleMailerKeystore(userDir, pw) {
+        if(store!=null) {
+            mailer = new MSimpleMailer(store, "BackupMailer", true) {
                 @Override
-                protected final void onClientSecretInitalizationFailure(MClientSecretException exc) {
-                    System.err.println(exc.getMessage());
-                    createMessageDialogAndWait("Client Secret Error:\n" + exc.getMessage() + " Setup will be restarted on next launch.", "Error");
-                    exit(exc,1);
+                protected final void onOAuthSucceeded() {
+                    try {
+                        MSimpleKeystore store = mailer.getKeystore();
+                        clientAndPathUUID = store.get("clientId");
+                        sentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-sent"), "Sent folder");
+                        notSentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-notSent"), "NotSent folder");
+
+                        fromAddress = store.get("fromAddress");
+                        toAddress = store.get("toAddress");
+
+                        watcher = new MAttachmentWatcher(sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
+                            @Override
+                            public final MConsentQuestioner askForConsent(MOutgoingMail mail) {
+                                return new MMiniGui(mail, 900, 600, 16);
+                            }
+                        }.startServer();
+
+                        sentDesktopLinkWatcher = createAndWatchFolderDesktopLink(sentFolder.toString(), "Sent Things", "Sent");
+                        notSentDesktopLinkWatcher = createAndWatchFolderDesktopLink(notSentFolder.toString(), "NotSent Things", "NotSent");
+
+                        printConfiguration(fromAddress, toAddress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
+                        trayIcon.displayMessage("OAuth Desktop FileSend Folder", "To send mail drag files onto its dolphin icon on the desktop or click it.", TrayIcon.MessageType.INFO);
+                    } catch (Throwable exc) {
+                        System.err.println(exc.getMessage());
+                        exit(exc, 1);
+                    }
                 }
 
                 @Override
-                protected final void onPasswordIntegrityFailure(MPasswordIntegrityException exc) {
-                    System.err.println(exc.getMessage());
-                    createMessageDialogAndWait("Password Integrity Error:\n" + exc.getMessage(), "Error");
-                    exit(exc,1);
-                }
-
-                @Override
-                protected void onPasswordIntegritySuccess() {
-                    System.out.println("Access-level 1 granted: Application");
-                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
-                }
-
-                @Override
-                protected void onPasswordComplexityFailure(MPasswordComplexityException exc) {
-
-                }
-
-                @Override
-                protected final void onCommonInitializationFailure(Throwable exc) { System.err.println(exc.getMessage());exit(exc,1);}
-
-            };
-
-            mailer = new MSimpleMailer(k,"BackupMailer",true) {
-                @Override
-                protected void onOAuthSucceeded() {
-                   try {
-                       MSimpleKeystore store = mailer.getKeystore();
-                       //setup
-                       if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
-                           String[] setupedValues = new MAppSetupDialog(false).createAndShowDialog();
-                           String from = setupedValues[0];
-                           String to = setupedValues[1];
-                           store.put("fromAddress", from);
-                           store.put("toAddress", to);
-                       }
-                       clientAndPathUUID = store.get("clientId");
-                       sentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-sent"), "Sent folder");
-                       notSentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-notSent"), "NotSent folder");
-
-                       fromAddress = store.get("fromAddress");
-                       toAddress = store.get("toAddress");
-
-                       watcher = new MAttachmentWatcher(sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
-                           @Override
-                           public final MConsentQuestioner askForConsent(MOutgoingMail mail) {
-                               return new MMiniGui(mail, 900, 600, 16);
-                           }
-                       }.startServer();
-
-                       sentDesktopLinkWatcher = createAndWatchFolderDesktopLink(sentFolder.toString(), "Sent Things", "Sent");
-                       notSentDesktopLinkWatcher = createAndWatchFolderDesktopLink(notSentFolder.toString(), "NotSent Things", "NotSent");
-
-                       printConfiguration(fromAddress, toAddress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
-                       trayIcon.displayMessage("OAuth Desktop FileSend Folder", "To send mail drag files onto its dolphin icon on the desktop or click it.", TrayIcon.MessageType.INFO);
-                   } catch (Throwable exc){
-                       System.err.println(exc.getMessage());
-                       exit(exc,1);
-                   }
-                }
-
-                @Override
-                protected void onStartOAuth(String oAuthLink) {
-                    System.out.println("Additional authentification needed "+oAuthLink);
+                protected final void onStartOAuth(String oAuthLink) {
+                    System.out.println("Additional authentification needed " + oAuthLink);
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Additional authentification needed\n", TrayIcon.MessageType.INFO);
 
                 }
 
                 @Override
-                protected final void onCommonInitializationFailure(Throwable exc) { System.err.println(exc.getMessage());exit(exc,1);}
+                protected final void onOAuthFailure(Throwable exc) {
+                    System.err.println(exc.getMessage());
+                    exit(exc, 1);
+                }
 
             };
             mailer.startOAuth();
+        }
     }
 
     /**

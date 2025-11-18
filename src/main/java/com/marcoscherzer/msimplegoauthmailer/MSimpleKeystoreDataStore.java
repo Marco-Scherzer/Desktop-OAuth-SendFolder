@@ -58,7 +58,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
      */
     @Override
     public final boolean containsKey(String key) throws IOException {
-        try { return keystore.contains(key); } catch (Exception e) { throw new IOException(e); }
+        try { return keystore.contains(key); } catch (Exception | MKeystoreException e) { throw new IOException(e); }
     }
 
     /**
@@ -107,7 +107,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
         try {
             String base64 = keystore.get(key);
             return base64 == null ? null : deserialize(base64);
-        } catch (Exception e) {
+        } catch (Exception | MKeystoreException e) {
             throw new IOException(e);
         }
     }
@@ -121,7 +121,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
             String base64 = serialize(value);
             keystore.put(key, base64);
             return this;
-        } catch (Exception e) {
+        } catch (Exception | MKeystoreException e) {
             throw new IOException(e);
         }
     }
@@ -134,7 +134,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
         try {
             keystore.remove(key);
             return this;
-        } catch (Exception e) {
+        } catch (Exception | MKeystoreException e) {
             throw new IOException(e);
         }
     }
@@ -147,7 +147,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
         try {
             keystore.clear();
             return this;
-        } catch (Exception e) {
+        } catch (Exception | MKeystoreException e) {
             throw new IOException(e);
         }
     }

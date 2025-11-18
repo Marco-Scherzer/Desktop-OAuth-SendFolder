@@ -15,7 +15,7 @@ public final class MOutgoingMail {
     /**
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MOutgoingMail(String from, String to) {
+    public MOutgoingMail(String from, String to) throws MMailAdressFormatException {
         MSimpleMailerUtil.checkMailAddress(from);
         MSimpleMailerUtil.checkMailAddress(to);
         this.from = from;

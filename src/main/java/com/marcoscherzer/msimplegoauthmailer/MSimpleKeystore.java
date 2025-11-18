@@ -33,13 +33,13 @@ public final class MSimpleKeystore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final synchronized void loadKeyStoreOrCreateKeyStoreIfNotExists() throws Exception {
-        try { keyStore = KeyStore.getInstance(KEYSTORE_TYPE); } catch (Exception exc) { throw new Exception("Error in context with keystore while instantiating keystore", exc); }
+    public final synchronized void loadKeyStoreOrCreateKeyStoreIfNotExists() throws MKeystoreException,MPasswordIntegrityException {
+        try { keyStore = KeyStore.getInstance(KEYSTORE_TYPE); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while instantiating keystore", exc); }
 
         if (ksFile.exists()) {
             System.out.println("loading keystore " + ksFile);
             FileInputStream fis = null;
-            try { fis = new FileInputStream(ksFile);} catch (Exception exc) { throw new Exception("Error in context with keystore while opening keystore file", exc); }
+            try { fis = new FileInputStream(ksFile);} catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while opening keystore file", exc); }
             try { keyStore.load(fis, keystorePassword.toCharArray()); } catch (IOException exc) {
                 Throwable cause = exc.getCause();
                 if (cause instanceof InvalidKeyException || cause instanceof UnrecoverableKeyException || cause instanceof UnrecoverableEntryException || cause instanceof BadPaddingException) {
@@ -49,22 +49,22 @@ public final class MSimpleKeystore {
                     throw new MPasswordIntegrityException("Error in context with keystore while decrypting block (possible wrong password or corruption)\n"+cause.getMessage(), exc);
                 }
                 if (cause instanceof EOFException) {
-                    throw new Exception("Error in context with keystore while reading file (unexpected end of file)\n"+cause.getMessage(), exc);
+                    throw new MKeystoreException("Error in context with keystore while reading file (unexpected end of file)\n"+cause.getMessage(), exc);
                 }
-                throw new Exception("Error in context with keystore while loading existing keystore", exc);
-            } catch (Exception exc) { throw new Exception("Error in context with keystore while loading existing keystore", exc); }
-            try { fis.close(); } catch (Exception exc) { throw new Exception("Error in context with keystore while closing keystore file", exc); }
+                throw new MKeystoreException("Error in context with keystore while loading existing keystore", exc);
+            } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while loading existing keystore", exc); }
+            try { fis.close(); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while closing keystore file", exc); }
             successfullyInitialized = true;
             newCreated = false;
             System.out.println("keystore successfully loaded");
         } else {
             System.out.println("creating keystore " + ksFile);
-            try { keyStore.load(null, keystorePassword.toCharArray()); } catch (Exception exc) { throw new Exception("Error in context with keystore while initializing new keystore", exc); }
-            try { ksFile.getParentFile().mkdirs();} catch (Exception exc) { throw new Exception("Error in context with keystore while creating parent directories", exc); }
+            try { keyStore.load(null, keystorePassword.toCharArray()); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while initializing new keystore", exc); }
+            try { ksFile.getParentFile().mkdirs();} catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while creating parent directories", exc); }
             FileOutputStream fos = null;
-            try { fos = new FileOutputStream(ksFile); } catch (Exception exc) { throw new Exception("Error in context with keystore while opening fileoutputstream", exc); }
-            try { keyStore.store(fos, keystorePassword.toCharArray()); } catch (Exception exc) { throw new Exception("Error in context with keystore while storing new keystore", exc); }
-            try { fos.close(); } catch (Exception exc) { throw new Exception("Error in context with keystore while closing fileoutputstream", exc); }
+            try { fos = new FileOutputStream(ksFile); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while opening fileoutputstream", exc); }
+            try { keyStore.store(fos, keystorePassword.toCharArray()); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while storing new keystore", exc); }
+            try { fos.close(); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while closing fileoutputstream", exc); }
             successfullyInitialized = true;
             newCreated = true;
             System.out.println("keystore successfully created");
@@ -98,106 +98,106 @@ public final class MSimpleKeystore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final synchronized MSimpleKeystore put(String alias, String token) throws Exception {
+    public final synchronized MSimpleKeystore put(String alias, String token) throws MKeystoreException {
         if(successfullyInitialized) {
             SecretKey secretKey;
             try {
                 secretKey = new SecretKeySpec(token.getBytes(), "AES");
             } catch (Exception exc) {
-                throw new Exception("Error in context with keystore while creating secret key", exc);
+                throw new MKeystoreException("Error in context with keystore while creating secret key", exc);
             }
             KeyStore.SecretKeyEntry entry = new KeyStore.SecretKeyEntry(secretKey);
             KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(keystorePassword.toCharArray());
             try {
                 keyStore.setEntry(alias, entry, protParam);
             } catch (Exception exc) {
-                throw new Exception("Error in context with keystore while setting entry " + alias, exc);
+                throw new MKeystoreException("Error in context with keystore while setting entry " + alias, exc);
             }
             FileOutputStream fos = null;
             try {
                 fos = new FileOutputStream(ksFile);
             } catch (Exception exc) {
-                throw new Exception("Error in context with keystore while opening fileoutputstream", exc);
+                throw new MKeystoreException("Error in context with keystore while opening fileoutputstream", exc);
             }
             try {
                 keyStore.store(fos, keystorePassword.toCharArray());
             } catch (Exception exc) {
-                throw new Exception("Error in context with keystore while storing after add", exc);
+                throw new MKeystoreException("Error in context with keystore while storing after add", exc);
             }
             try {
                 fos.close();
             } catch (Exception exc) {
-                throw new Exception("Error in context with keystore while closing fileoutputstream", exc);
+                throw new MKeystoreException("Error in context with keystore while closing fileoutputstream", exc);
             }
-        } else throw new Exception("Error in context with keystore while add, because keystore was not successfully initialized");
+        } else throw new MKeystoreException("Error in context with keystore while add, because keystore was not successfully initialized");
         return this;
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final synchronized boolean containsAllNonNullKeys(String... keys) throws Exception {
+    public final synchronized boolean containsAllNonNullKeys(String... keys) throws MKeystoreException {
         if(successfullyInitialized) {
             for (String key : keys) {
                 String value;
                 try {
                     value = get(key);
                 } catch (Exception exc) {
-                    throw new Exception("Error in context with keystore while checking key " + key, exc);
+                    throw new MKeystoreException("Error in context with keystore while checking key " + key, exc);
                 }
                 if (value == null || value.isBlank()) return false;
             }
             return true;
-        } else throw new Exception("Error in context with keystore while contains, because keystore was not successfully initialized");
+        } else throw new MKeystoreException("Error in context with keystore while contains, because keystore was not successfully initialized");
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final synchronized  String get(String alias) throws Exception {
+    public final synchronized  String get(String alias) throws MKeystoreException {
         if(successfullyInitialized) {
         KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(keystorePassword.toCharArray());
         KeyStore.SecretKeyEntry entry;
-        try { entry = (KeyStore.SecretKeyEntry) keyStore.getEntry(alias, protParam); } catch (Exception exc) { throw new Exception("Error in context with keystore while retrieving entry " + alias, exc); }
+        try { entry = (KeyStore.SecretKeyEntry) keyStore.getEntry(alias, protParam); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while retrieving entry " + alias, exc); }
         if (entry == null) return null;
         SecretKey secretKey;
-        try { secretKey = entry.getSecretKey(); } catch (Exception exc) { throw new Exception("Error in context with keystore while accessing secret key for " + alias, exc); }
+        try { secretKey = entry.getSecretKey(); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while accessing secret key for " + alias, exc); }
         return new String(secretKey.getEncoded());
-        } else throw new Exception("Error in context with keystore while get, because keystore was not successfully initialized");
+        } else throw new MKeystoreException("Error in context with keystore while get, because keystore was not successfully initialized");
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final synchronized boolean contains(String alias) throws Exception {
+    public final synchronized boolean contains(String alias) throws MKeystoreException {
         if(successfullyInitialized) {
-        try { return keyStore.containsAlias(alias); } catch (Exception exc) { throw new Exception("Error in context with keystore while checking contains " + alias, exc); }
-        } else throw new Exception("Error in context with keystore while contains, because keystore was not successfully initialized");
+        try { return keyStore.containsAlias(alias); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while checking contains " + alias, exc); }
+        } else throw new MKeystoreException("Error in context with keystore while contains, because keystore was not successfully initialized");
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final synchronized  boolean remove(String key) throws Exception {
+    public final synchronized  boolean remove(String key) throws MKeystoreException {
         if(successfullyInitialized) {
         boolean contains;
-        try { contains = keyStore.containsAlias(key); } catch (Exception exc) { throw new Exception("Error in context with keystore while checking contains " + key, exc); }
+        try { contains = keyStore.containsAlias(key); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while checking contains " + key, exc); }
         if (contains) {
-            try { keyStore.deleteEntry(key); } catch (Exception exc) { throw new Exception("Error in context with keystore while deleting entry " + key, exc); }
+            try { keyStore.deleteEntry(key); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while deleting entry " + key, exc); }
             FileOutputStream fos = null;
-            try { fos = new FileOutputStream(ksFile); } catch (Exception exc) { throw new Exception("Error in context with keystore while opening fileoutputstream", exc); }
-            try { keyStore.store(fos, keystorePassword.toCharArray()); } catch (Exception exc) { throw new Exception("Error in context with keystore while storing keystore", exc); }
-            try { fos.close(); } catch (Exception exc) { throw new Exception("Error in context with keystore while closing fileoutputstream", exc); }
+            try { fos = new FileOutputStream(ksFile); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while opening fileoutputstream", exc); }
+            try { keyStore.store(fos, keystorePassword.toCharArray()); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while storing keystore", exc); }
+            try { fos.close(); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while closing fileoutputstream", exc); }
             return true;
         }
-        } else throw new Exception("Error in context with keystore while remove, because keystore was not successfully initialized");
+        } else throw new MKeystoreException("Error in context with keystore while remove, because keystore was not successfully initialized");
         return false;
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final synchronized void clear() throws Exception {
+    public final synchronized void clear() throws MKeystoreException {
         if (successfullyInitialized) {
             System.out.println("Clearing all entries from keystore");
             List<String> aliasList = new ArrayList<>();
@@ -205,7 +205,7 @@ public final class MSimpleKeystore {
             try {
                 aliases = keyStore.aliases();
             } catch (Exception exc) {
-                throw new Exception("Error in context with keystore while listing aliases", exc);
+                throw new MKeystoreException("Error in context with keystore while listing aliases", exc);
             }
             while (aliases.hasMoreElements()) {
                 aliasList.add(aliases.nextElement());
@@ -215,18 +215,18 @@ public final class MSimpleKeystore {
                     keyStore.deleteEntry(alias);
                     System.out.println("Deleted entry " + alias);
                 } catch (Exception exc) {
-                    throw new Exception("Error in context with keystore while deleting entry " + alias, exc);
+                    throw new MKeystoreException("Error in context with keystore while deleting entry " + alias, exc);
                 }
             }
 
             try (FileOutputStream fos = new FileOutputStream(ksFile)) {
                 keyStore.store(fos, keystorePassword.toCharArray());
             } catch (Exception exc) {
-                throw new Exception("Error in context with keystore while storing after clear", exc);
+                throw new MKeystoreException("Error in context with keystore while storing after clear", exc);
             }
             System.out.println("Keystore successfully cleared and saved");
         } else
-            throw new Exception("Error in context with keystore while clear, because keystore was not successfully initialized");
+            throw new MKeystoreException("Error in context with keystore while clear, because keystore was not successfully initialized");
     }
 }
 

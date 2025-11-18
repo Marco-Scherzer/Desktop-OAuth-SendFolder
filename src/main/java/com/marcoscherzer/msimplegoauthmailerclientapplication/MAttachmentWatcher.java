@@ -1,5 +1,6 @@
 package com.marcoscherzer.msimplegoauthmailerclientapplication;
 
+import com.marcoscherzer.msimplegoauthmailer.MMailAdressFormatException;
 import com.marcoscherzer.msimplegoauthmailer.MOutgoingMail;
 import com.marcoscherzer.msimplegoauthmailer.MSimpleMailer;
 
@@ -100,7 +101,7 @@ public abstract class MAttachmentWatcher {
                                 System.out.println("incomingPaths.isEmpty() = " + incomingPaths.isEmpty());//dbg
                                 System.out.println("creating Mail...");
                                 onNewAttachmentList(incomingPaths);
-                            } catch (IOException e) {
+                            } catch (IOException | MMailAdressFormatException e) {
                                 System.err.println("Error in MailJob: " + e.getMessage());
                                 try {
                                     if (reader != null) reader.close();
@@ -139,7 +140,7 @@ public abstract class MAttachmentWatcher {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
-        private void onNewAttachmentList(List<String> list) {
+        private void onNewAttachmentList(List<String> list) throws MMailAdressFormatException {
             fileLinkList.clear();
             fileLinkList.addAll(list);
             String sendDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));

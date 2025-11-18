@@ -1,21 +1,18 @@
 package com.marcoscherzer.msimplegoauthmailer;
 
-/**
- * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
-public final class MPasswordIntegrityException extends Throwable{
+public class MMailAdressFormatException extends Throwable {
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    MPasswordIntegrityException(String txt){
+    MMailAdressFormatException(String txt){
         super(txt);
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    MPasswordIntegrityException(String txt, Exception exc){
+    MMailAdressFormatException(String txt, Exception exc){
         super(txt, exc);
     }
 }
