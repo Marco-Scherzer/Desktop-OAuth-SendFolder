@@ -78,7 +78,6 @@ public final class MMain {
                     pw = new MAppPwDialog().createAndShowDialog();
                     if(pw == null) exit(null,1);//canceled
                     store = new MSimpleMailerKeystore(pw,userDir);
-
                     System.out.println("Access-level 1 granted: Application");
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
 

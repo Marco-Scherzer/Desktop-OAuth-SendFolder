@@ -10,9 +10,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.UUID;
 
-import static com.marcoscherzer.msimplekeystore.MSimpleKeystoreUtil.checkPasswordComplexity;
-
-
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
@@ -41,13 +38,10 @@ public class MSimpleMailerKeystore {
     private final boolean initializeKeyStore(String keystorePassword, String clientSecretFileDir) throws MKeystoreException, MClientSecretException, MPasswordComplexityException, MPasswordIntegrityException, IOException {
         File keystoreFile = new File(clientSecretFileDir, "mystore.p12");
         File jsonFile = new File(clientSecretFileDir, "client_secret.json");
-
-            checkPasswordComplexity(keystorePassword, 15, true, true, true);
-            keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
-            keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
-            //setup mode, setzt "clientId", "google-client-id", "google-client-secret"
-            checkAndSetupKeystoreIfNeeded(jsonFile,clientSecretFileDir);
-
+        keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
+        keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
+        //setup mode, setzt "clientId", "google-client-id", "google-client-secret"
+        checkAndSetupKeystoreIfNeeded(jsonFile,clientSecretFileDir);
         return true;
     }
 

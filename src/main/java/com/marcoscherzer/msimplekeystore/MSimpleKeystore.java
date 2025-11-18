@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+import static com.marcoscherzer.msimplekeystore.MSimpleKeystoreUtil.checkPasswordComplexity;
+
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
@@ -33,7 +35,7 @@ public final class MSimpleKeystore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final synchronized void loadKeyStoreOrCreateKeyStoreIfNotExists() throws MKeystoreException,MPasswordIntegrityException {
+    public final synchronized void loadKeyStoreOrCreateKeyStoreIfNotExists() throws MKeystoreException, MPasswordIntegrityException, MPasswordComplexityException {
         try { keyStore = KeyStore.getInstance(KEYSTORE_TYPE); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while instantiating keystore", exc); }
 
         if (ksFile.exists()) {
@@ -58,6 +60,7 @@ public final class MSimpleKeystore {
             newCreated = false;
             System.out.println("keystore successfully loaded");
         } else {
+            checkPasswordComplexity(keystorePassword, 15, true, true, true);
             System.out.println("creating keystore " + ksFile);
             try { keyStore.load(null, keystorePassword.toCharArray()); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while initializing new keystore", exc); }
             try { ksFile.getParentFile().mkdirs();} catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while creating parent directories", exc); }
