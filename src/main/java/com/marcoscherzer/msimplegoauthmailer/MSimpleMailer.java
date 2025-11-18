@@ -119,38 +119,15 @@ public abstract class MSimpleMailer {
             try {
                 keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
                 keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
-                JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-                String clientId;
-                String clientSecret;
+
                 if(!keystore.newCreated()) onPasswordIntegritySuccess();
-                if (keystore.newCreated() || !keystore.containsAllNonNullKeys("clientId", "google-client-id", "google-client-secret")) {
-                    System.out.println("Checking if file \"client_secret.json\" exists");
-                    if (jsonFile.exists()) {
-                        System.out.println("File \"client_secret.json\" found. Reading tokens.");
-                        GoogleClientSecrets secrets = GoogleClientSecrets.load(jsonFactory, new FileReader(jsonFile));
-                        clientId = secrets.getDetails().getClientId();
-                        clientSecret = secrets.getDetails().getClientSecret();
-                        if (clientId != null && clientSecret != null) {
-                            System.out.println("Tokens exist. Saving found tokens to encrypted keystore. ");
-                            keystore.add("google-client-id", clientId).add("google-client-secret", clientSecret);
-                            System.out.println("Tokens successfully saved");
-                        } else {
-                            throw new MClientSecretException("client_secret.json does not contain valid credentials.");
-                        }
-                    } else {
-                        throw new MClientSecretException("client_secret.json must be placed in the directory \"" + clientSecretDir + "\" before first launch.");
-                    }
+                //setup mode
+                setup(jsonFile);
 
-                    UUID uuid = UUID.randomUUID();
-                    System.out.println("Client security UUID generated. " + uuid + ". Saving UUID in encrypted keystore. ");
-                    keystore.add("clientId", uuid.toString());
-                }
+                String clientId = keystore.get("google-client-id");
+                String clientSecret = keystore.get("google-client-secret");
 
-                clientId = keystore.get("google-client-id");
-                clientSecret = keystore.get("google-client-secret");
-
-                doBrowserOAuthFlow(keystore, jsonFactory, applicationName, clientId, clientSecret);
-
+                doBrowserOAuthFlow(keystore, applicationName, clientId, clientSecret);
 
                 if (jsonFile.exists()) {
                     boolean jsonFileDeleted = jsonFile.delete();
@@ -173,7 +150,38 @@ public abstract class MSimpleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-        private void doBrowserOAuthFlow(MSimpleKeystore keystore,JsonFactory jsonFactory,String applicationName, String clientId,String clientSecret) throws Exception {
+       private void setup(File jsonFile) throws Exception {
+           JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+           String clientId;
+           String clientSecret;
+            if (keystore.newCreated() || !keystore.containsAllNonNullKeys("clientId", "google-client-id", "google-client-secret")) {
+                System.out.println("Checking if file \"client_secret.json\" exists");
+                if (jsonFile.exists()) {
+                    System.out.println("File \"client_secret.json\" found. Reading tokens.");
+                    GoogleClientSecrets secrets = GoogleClientSecrets.load(jsonFactory, new FileReader(jsonFile));
+                    clientId = secrets.getDetails().getClientId();
+                    clientSecret = secrets.getDetails().getClientSecret();
+                    if (clientId != null && clientSecret != null) {
+                        System.out.println("Tokens exist. Saving found tokens to encrypted keystore. ");
+                        keystore.add("google-client-id", clientId).add("google-client-secret", clientSecret);
+                        System.out.println("Tokens successfully saved");
+                    } else {
+                        throw new MClientSecretException("client_secret.json does not contain valid credentials.");
+                    }
+                } else {
+                    throw new MClientSecretException("client_secret.json must be placed in the directory \"" + clientSecretDir + "\" before first launch.");
+                }
+
+                UUID uuid = UUID.randomUUID();
+                System.out.println("Client security UUID generated. " + uuid + ". Saving UUID in encrypted keystore. ");
+                keystore.add("clientId", uuid.toString());
+            }
+        }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+        private void doBrowserOAuthFlow(MSimpleKeystore keystore, String applicationName, String clientId,String clientSecret) throws Exception {
+            JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             GoogleClientSecrets.Details details = new GoogleClientSecrets.Details()
                     .setClientId(clientId)
