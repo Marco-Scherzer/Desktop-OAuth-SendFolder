@@ -19,28 +19,25 @@ import static com.marcoscherzer.msimplegoauthmailerapplication.MUtil.*;
  */
 public final class MMain {
 
-    private static final String userDir = System.getProperty("user.dir");
-    private static final String basePath = userDir + "\\mail";
-    private static Path notSentFolder;
-    private static Path sentFolder;
-    private static String clientAndPathUUID;
     private static MAttachmentWatcher watcher;
-    private static String fromAddress;
-    private static String toAddress;
     private static MSimpleMailer mailer;
     private static MFileNameWatcher notSentDesktopLinkWatcher;
     private static MFileNameWatcher sentDesktopLinkWatcher;
-
     private static MAppLoggingArea logFrame;
-    private static String[] arg;
+    private static boolean isDbg;
     private static TrayIcon trayIcon;
+    private static final String userDir = System.getProperty("user.dir");
+    private static final String clientSecretJsonPath = userDir+"\\client_secret.json";
+    private static final String keystorePath = userDir+"\\mystore.p12";
+    private static final String mailFoldersPath = userDir + "\\mail";
+    private static String trayIconPathWithinResourcesFolder = "/5.png";
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
     public static void main(String[] args) {
-         arg = new String[]{"-debug"};
+        isDbg = (args != null && args[0]!=null && args[0].equals("-debug"));
         /*
             FlatLightLaf.setup(), FlatDarkLaf.setup(), FlatIntelliJLaf.setup(), FlatDarculaLaf.setup(),
             FlatArcDarkIJTheme.setup(), FlatArcIJTheme.setup(), FlatArcOrangeIJTheme.setup(),
@@ -52,12 +49,12 @@ public final class MMain {
             FlatCarbonIJTheme.setup();
             UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
 
-            String pw=null;
+            String pw;
             MSimpleMailerKeystore store = null;
             try {
                 logFrame = new MAppLoggingArea(true);
                 setupTrayIcon();
-                if (isDbg()) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
+                if (isDbg) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
                 Path keystorePath = Paths.get(userDir, "mystore.p12");
                 boolean setup = !Files.exists(keystorePath);
                 if (setup) {
@@ -67,7 +64,7 @@ public final class MMain {
                     String from = setupedValues[0];
                     String to = setupedValues[1];
                     pw = new MAppSetupDialog(true).createAndShowDialog()[2];
-                    store = new MSimpleMailerKeystore(pw,userDir);
+                    store = new MSimpleMailerKeystore(pw,userDir+"\\client_secret.json",userDir+"\\mystore.p12");
                     store.getKeyStore().put("fromAddress", from);
                     store.getKeyStore().put("toAddress", to);
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup completed.", TrayIcon.MessageType.INFO);
@@ -77,10 +74,9 @@ public final class MMain {
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Password required.\n", TrayIcon.MessageType.INFO);
                     pw = new MAppPwDialog().createAndShowDialog();
                     if(pw == null) exit(null,1);//canceled
-                    store = new MSimpleMailerKeystore(pw,userDir);
+                    store = new MSimpleMailerKeystore(pw,userDir+"\\client_secret.json",userDir+"\\mystore.p12");
                     System.out.println("Access-level 1 granted: Application");
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
-
                 }
             } catch (Exception exc){
                 System.err.println(exc.getMessage());
@@ -110,12 +106,12 @@ public final class MMain {
                 protected final void onOAuthSucceeded() {
                     try {
                         MSimpleKeystore store = mailer.getKeystore();
-                        clientAndPathUUID = store.get("clientId");
-                        sentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-sent"), "Sent folder");
-                        notSentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-notSent"), "NotSent folder");
+                        String clientAndPathUUID = store.get("clientId");
+                        Path sentFolder = createPathIfNotExists(Paths.get(mailFoldersPath, clientAndPathUUID + "-sent"), "Sent folder");
+                        Path notSentFolder = createPathIfNotExists(Paths.get(mailFoldersPath, clientAndPathUUID + "-notSent"), "NotSent folder");
 
-                        fromAddress = store.get("fromAddress");
-                        toAddress = store.get("toAddress");
+                        String fromAddress = store.get("fromAddress");
+                        String toAddress = store.get("toAddress");
 
                         watcher = new MAttachmentWatcher(sentFolder, notSentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
                             @Override
@@ -127,7 +123,7 @@ public final class MMain {
                         sentDesktopLinkWatcher = createAndWatchFolderDesktopLink(sentFolder.toString(), "Sent Things", "Sent");
                         notSentDesktopLinkWatcher = createAndWatchFolderDesktopLink(notSentFolder.toString(), "NotSent Things", "NotSent");
 
-                        printConfiguration(fromAddress, toAddress, basePath, clientAndPathUUID, clientAndPathUUID + "-sent");
+                        printConfiguration(fromAddress, toAddress, mailFoldersPath, clientAndPathUUID, clientAndPathUUID + "-sent");
                         trayIcon.displayMessage("OAuth Desktop FileSend Folder", "To send mail drag files onto its dolphin icon on the desktop or click it.", TrayIcon.MessageType.INFO);
                     } catch (Throwable exc) {
                         System.err.println(exc.getMessage());
@@ -149,7 +145,7 @@ public final class MMain {
                 }
 
             };
-          //  mailer.startOAuth();
+            mailer.startOAuth();
         }
     }
 
@@ -185,7 +181,7 @@ public final class MMain {
         }
 
         SystemTray tray = SystemTray.getSystemTray();
-        Image image = ImageIO.read(MMain.class.getResourceAsStream("/5.png"));
+        Image image = ImageIO.read(MMain.class.getResourceAsStream(trayIconPathWithinResourcesFolder));
         trayIcon = new TrayIcon(image, "OAuth Desktop FileSend Folder", traymenu);
         trayIcon.setImageAutoSize(true);
         tray.add(trayIcon);
@@ -202,7 +198,7 @@ public final class MMain {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     private static void exit(Throwable exception,int code) {
-        if(isDbg() && exception!=null){exception.printStackTrace();}
+        if(isDbg && exception!=null){exception.printStackTrace();}
         try {
             if(mailer != null && mailer.isInDoNotPersistOAuthTokenMode()) mailer.revokeOAuthTokenFromServer();
             if (watcher != null) watcher.shutdown();
@@ -210,20 +206,12 @@ public final class MMain {
             if(notSentDesktopLinkWatcher != null ) notSentDesktopLinkWatcher.shutdown();
         } catch (Exception exc) {
             System.err.println(exception.getMessage());
-            if(isDbg()) exc.printStackTrace();
+            if(isDbg) exc.printStackTrace();
         }
         System.out.println("Exiting program with code " + code);
         System.exit(code);
     }
 
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * unready
-     */
-    private static boolean isDbg(){
-       return (arg != null && arg[0]!=null && arg[0].equals("-debug"));
-    }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

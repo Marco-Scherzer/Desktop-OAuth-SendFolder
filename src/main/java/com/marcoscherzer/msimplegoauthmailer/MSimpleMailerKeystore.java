@@ -8,21 +8,23 @@ import com.marcoscherzer.msimplekeystore.*;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.UUID;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public class MSimpleMailerKeystore {
+public final class MSimpleMailerKeystore {
 
     private MSimpleKeystore keystore;
-
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleMailerKeystore(String keystorePassword,String clientSecretFileDir) throws MKeystoreException, MClientSecretException, MPasswordComplexityException, MPasswordIntegrityException, IOException {
-        initializeKeyStore(keystorePassword, clientSecretFileDir);
+    public MSimpleMailerKeystore(String keystorePassword, String clientSecretJsonFile, String keystoreFile) throws MKeystoreException, MClientSecretException, MPasswordComplexityException, MPasswordIntegrityException, IOException {
+        File clientSecretFile = new File(clientSecretJsonFile);
+        File ksFile = new File(keystoreFile);
+        initializeKeyStore(keystorePassword, clientSecretFile, ksFile);
     }
 
     /**
@@ -35,20 +37,18 @@ public class MSimpleMailerKeystore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private final boolean initializeKeyStore(String keystorePassword, String clientSecretFileDir) throws MKeystoreException, MClientSecretException, MPasswordComplexityException, MPasswordIntegrityException, IOException {
-        File keystoreFile = new File(clientSecretFileDir, "mystore.p12");
-        File jsonFile = new File(clientSecretFileDir, "client_secret.json");
+    private final boolean initializeKeyStore(String keystorePassword, File clientSecretJsonFile, File keystoreFile) throws MKeystoreException, MClientSecretException, MPasswordComplexityException, MPasswordIntegrityException, IOException {
         keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
         keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
         //setup mode, setzt "clientId", "google-client-id", "google-client-secret"
-        checkAndSetupKeystoreIfNeeded(jsonFile,clientSecretFileDir);
+        checkAndSetupKeystoreIfNeeded(clientSecretJsonFile);
         return true;
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private void checkAndSetupKeystoreIfNeeded(File jsonFile, String clientSecretFileDir) throws MKeystoreException, MClientSecretException, IOException {
+    private void checkAndSetupKeystoreIfNeeded(File jsonFile) throws MKeystoreException, MClientSecretException, IOException {
         JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
         String clientId;
         String clientSecret;
@@ -69,7 +69,7 @@ public class MSimpleMailerKeystore {
                         throw new MClientSecretException("client_secret.json does not contain valid credentials.");
                     }
                 } else {
-                    throw new MClientSecretException("client_secret.json must be placed in the directory \"" + clientSecretFileDir + "\" before first launch.");
+                    throw new MClientSecretException("client_secret.json must be placed in the directory \"" + jsonFile.getPath() + "\" before first launch.");
                 }
 
                 UUID uuid = UUID.randomUUID();
@@ -82,7 +82,7 @@ public class MSimpleMailerKeystore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public void clearKeystore() throws MKeystoreException, Exception {
+    public final void clearKeystore() throws MKeystoreException, Exception {
         if (keystore.successfullyInitialized()) {
             System.out.println("clearing KeyStore");
             try {
