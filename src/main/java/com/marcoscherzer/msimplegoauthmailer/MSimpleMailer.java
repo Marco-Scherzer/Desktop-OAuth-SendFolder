@@ -123,7 +123,6 @@ public abstract class MSimpleMailer {
                 String clientId;
                 String clientSecret;
                 if(!keystore.newCreated()) onPasswordIntegritySuccess();
-                else
                 if (keystore.newCreated() || !keystore.containsAllNonNullKeys("clientId", "google-client-id", "google-client-secret")) {
                     System.out.println("Checking if file \"client_secret.json\" exists");
                     if (jsonFile.exists()) {
@@ -185,7 +184,6 @@ public abstract class MSimpleMailer {
             GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
             GoogleAuthorizationCodeFlow flow;
             int gglsLocalJettyPort = 8888;
-            String oAuthLink=null;
             GoogleAuthorizationCodeRequestUrl url;
 
             if (doNotPersistOAuthToken) {
@@ -199,17 +197,17 @@ public abstract class MSimpleMailer {
                         .setCredentialDataStore(new MemoryDataStoreFactory().getDataStore("tempsession"))
                         .build();
                 url = flow.newAuthorizationUrl();
-                //oAuthLink = createOAuthLink(flow,clientSecrets,gglsLocalJettyPort);
             } else {
                 flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
                         .setAccessType("offline")
                         .setCredentialDataStore(new MSimpleKeystoreDataStoreFactory(keystore).getDataStore("OAuth"))
                         .build();
                 url = flow.newAuthorizationUrl();
-                //oAuthLink = createOAuthLink(flow,clientSecrets, gglsLocalJettyPort);
             }
 
             LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(gglsLocalJettyPort).build();
+            onStartOAuth(url.setRedirectUri(receiver.getRedirectUri()).toString());
+
             credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("OAuth");
             if (credential == null) {
                 throw new IllegalStateException("No stored OAuth credential found.");
@@ -217,38 +215,9 @@ public abstract class MSimpleMailer {
 
             applicationName += " [" + keystore.get("clientId") + "]";
 
-            onStartOAuth(url.setRedirectUri(receiver.getRedirectUri()).toString());
-
             this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
                     .setApplicationName(applicationName)
                     .build();
-        }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-        public static final String createOAuthLink(GoogleAuthorizationCodeFlow flow,GoogleClientSecrets clientSecrets, int gglsLocalJettyPort) {
-            String baseUrl = "https://accounts.google.com/o/oauth2/auth";
-            String redirectUri = "http://localhost:" + gglsLocalJettyPort + "/Callback";
-
-            String clientId = clientSecrets.getDetails().getClientId();
-            String accessType = flow.getAccessType();
-            String prompt = flow.getApprovalPrompt();
-            String responseType = "code"; // Standard für Authorization Code Flow
-            String scope = String.join(" ", flow.getScopes());
-
-            StringBuilder link = new StringBuilder(baseUrl)
-                    .append("?access_type=").append(accessType)
-                    .append("&client_id=").append(clientId)
-                    .append("&redirect_uri=").append(redirectUri)
-                    .append("&response_type=").append(responseType)
-                    .append("&scope=").append(scope);
-
-            if (prompt != null && !prompt.isEmpty()) {
-                link.append("&prompt=").append(prompt);
-            }
-
-            return link.toString();
         }
 
     /**

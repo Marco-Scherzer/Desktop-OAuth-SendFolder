@@ -49,7 +49,6 @@ public final class MMain {
             FlatHighContrastIJTheme.setup(), FlatMonokaiProIJTheme.setup(), FlatSolarizedLightIJTheme.setup(),
             FlatSolarizedDarkIJTheme.setup(), FlatDraculaIJTheme.setup()
         */
-
             FlatCarbonIJTheme.setup();
             UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
 
@@ -77,7 +76,7 @@ public final class MMain {
             } catch (Exception exc){ exit(exc,1); }
 
             MSimpleMailer.setClientKeystoreDir(userDir);
-            mailer = new MSimpleMailer("BackupMailer", pw, false) {
+            mailer = new MSimpleMailer("BackupMailer", pw, true) {
                 @Override
                 protected void onInitializeSucceeded() {
                    try {
