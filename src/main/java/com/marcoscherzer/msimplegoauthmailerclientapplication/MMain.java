@@ -76,7 +76,7 @@ public final class MMain {
             MSimpleMailer.setClientKeystoreDir(userDir);
             mailer = new MSimpleMailer("BackupMailer", pw, true) {
                 @Override
-                protected void onInitializeSucceeded() {
+                protected void onOAuthSucceeded() {
                    try {
                        MSimpleKeystore store = mailer.getKeystore();
                        //setup
@@ -113,6 +113,11 @@ public final class MMain {
                 }
 
                 @Override
+                protected void onPasswordComplexityFailure(MPasswordComplexityException exc) {
+
+                }
+
+                @Override
                 protected final void onCommonInitializationFailure(Throwable exc) { System.err.println(exc.getMessage());exit(exc,1);}
 
                 @Override
@@ -142,7 +147,7 @@ public final class MMain {
 
                 }
             };
-            mailer.startInitialization();
+            mailer.startOAuth();
     }
 
     /**

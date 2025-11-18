@@ -43,13 +43,15 @@ import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkPassw
  */
 public abstract class MSimpleMailer {
 
-    private static String clientSecretDir = System.getProperty("user.dir");
     private final List<String> scopes = Collections.singletonList(GmailScopes.GMAIL_SEND);
-    private final Thread initThread;
+    private Thread initThread;
     private Credential credential;
     private boolean doNotPersistOAuthToken;
     private Gmail service;
     private MSimpleKeystore keystore;
+    private static String clientSecretDir = System.getProperty("user.dir");
+    private File keystoreFile = new File(clientSecretDir, "mystore.p12");
+    private File jsonFile = new File(clientSecretDir, "client_secret.json");
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
@@ -60,27 +62,170 @@ public abstract class MSimpleMailer {
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
-        public MSimpleMailer(String applicationName, String keystorePassword, boolean doNotPersistOAuthToken) {
-            this.doNotPersistOAuthToken = doNotPersistOAuthToken;
+        public MSimpleMailer(String keystorePassword,String applicationName, boolean doNotPersistOAuthToken){
+            if(!initializeKeyStore(keystorePassword)) return;
             initThread = new Thread(() -> {
-                String applicationName_=applicationName;
-                String keystorePassword_=keystorePassword;
-                initialize(applicationName_, keystorePassword_);
-                onInitializeSucceeded();
+                String applicationName_= applicationName;
+                boolean doNotPersistOAuthToken_ = doNotPersistOAuthToken;
+                doOAuth(applicationName_,doNotPersistOAuthToken_);
+                onOAuthSucceeded();
             }, "MSimpleMailer-Init");
         }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-        public final void startInitialization() {
-            initThread.start();
+    public final void startOAuth() {
+        initThread.start();
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+        private final boolean initializeKeyStore(String keystorePassword){
+            try {
+                checkPasswordComplexity(keystorePassword, 15, true, true, true);
+                keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
+                keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
+                if (!keystore.newCreated()) onPasswordIntegritySuccess();
+                //setup mode, setzt "clientId", "google-client-id", "google-client-secret"
+                checkAndSetupKeystoreIfNeeded(jsonFile);
+            } catch(MPasswordIntegrityException exc ){
+                onPasswordIntegrityFailure(exc);return false;
+            } catch (MClientSecretException exc){
+                //try { clearKeystore(); } catch (Exception exc2) { exc.addSuppressed(exc2);};
+                onClientSecretInitalizationFailure((MClientSecretException)exc);return false;
+            } catch (Exception exc) {
+                onCommonInitializationFailure(exc);return false;
+            }
+            return true;
         }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    protected abstract void onInitializeSucceeded();
+    private void doOAuth(String applicationName, boolean doNotPersistOAuthToken) {
+        try{
+            if (applicationName == null || applicationName.isBlank()) throw new IllegalArgumentException("Application name must not be empty.");
+            String clientId = keystore.get("google-client-id");
+            String clientSecret = keystore.get("google-client-secret");
+            doBrowserOAuthFlow(keystore, doNotPersistOAuthToken, applicationName, clientId, clientSecret);
+            //token funktioniert, file köschen
+            if (jsonFile.exists()) {
+                boolean jsonFileDeleted = jsonFile.delete();
+                if (!jsonFileDeleted) {
+                    System.out.println("File \"client_secret.json\" could not be deleted. Please delete it manually.");
+                } else {
+                    System.out.println("client_secret.json successfully imported and deleted.");
+                }
+            }
+        } catch (Exception exc) {
+            //System.err.println("Error in initialization."+ exc.getMessage());
+            onCommonInitializationFailure(exc);return;
+        }
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private void checkAndSetupKeystoreIfNeeded(File jsonFile) throws Exception {
+        JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+        String clientId;
+        String clientSecret;
+        if (keystore.newCreated() || !keystore.containsAllNonNullKeys("clientId", "google-client-id", "google-client-secret")) {
+            System.out.println("Checking if file \"client_secret.json\" exists");
+            if (jsonFile.exists()) {
+                System.out.println("File \"client_secret.json\" found. Reading tokens.");
+                GoogleClientSecrets secrets = GoogleClientSecrets.load(jsonFactory, new FileReader(jsonFile));
+                clientId = secrets.getDetails().getClientId();
+                clientSecret = secrets.getDetails().getClientSecret();
+                if (clientId != null && clientSecret != null) {
+                    System.out.println("Tokens exist. Saving found tokens to encrypted keystore. ");
+                    keystore.put("google-client-id", clientId).put("google-client-secret", clientSecret);
+                    System.out.println("Tokens successfully saved");
+                } else {
+                    throw new MClientSecretException("client_secret.json does not contain valid credentials.");
+                }
+            } else {
+                throw new MClientSecretException("client_secret.json must be placed in the directory \"" + clientSecretDir + "\" before first launch.");
+            }
+
+            UUID uuid = UUID.randomUUID();
+            System.out.println("Client security UUID generated. " + uuid + ". Saving UUID in encrypted keystore. ");
+            keystore.put("clientId", uuid.toString());
+        }
+    }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private void doBrowserOAuthFlow(MSimpleKeystore keystore, boolean doNotPersistOAuthToken, String applicationName, String clientId,String clientSecret) throws Exception {
+        JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+        HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        GoogleClientSecrets.Details details = new GoogleClientSecrets.Details()
+                .setClientId(clientId)
+                .setClientSecret(clientSecret)
+                .setAuthUri("https://accounts.google.com/o/oauth2/auth")
+                .setTokenUri("https://oauth2.googleapis.com/token");
+
+        GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
+        GoogleAuthorizationCodeFlow flow;
+        int gglsLocalJettyPort = 8888;
+        GoogleAuthorizationCodeRequestUrl url;
+
+        if (doNotPersistOAuthToken) {
+            if (keystore.contains("OAuth")) {
+                System.out.println("Securer OAuth Mode was chosen. Not keeping old tokens. Removing persistent OAuth token.");
+                keystore.remove("OAuth");
+            }
+            flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
+                    .setAccessType("online")
+                    .setApprovalPrompt("force")
+                    .setCredentialDataStore(new MemoryDataStoreFactory().getDataStore("tempsession"))
+                    .build();
+            url = flow.newAuthorizationUrl();
+        } else {
+            flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
+                    .setAccessType("offline")
+                    .setCredentialDataStore(new MSimpleKeystoreDataStoreFactory(keystore).getDataStore("OAuth"))
+                    .build();
+            url = flow.newAuthorizationUrl();
+        }
+
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(gglsLocalJettyPort).build();
+        onStartOAuth(url.setRedirectUri(receiver.getRedirectUri()).toString());
+
+        credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("OAuth");
+        if (credential == null) {
+            throw new IllegalStateException("No stored OAuth credential found.");
+        }
+
+        applicationName += " [" + keystore.get("clientId") + "]";
+
+        this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
+                .setApplicationName(applicationName)
+                .build();
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private void clearKeystore() throws Exception {
+        if (keystore.successfullyInitialized()) {
+            System.out.println("clearing KeyStore");
+            try {
+                keystore.clear();
+            } catch (Exception exc) {
+                System.err.println("Error while clearing keystore.\n" + exc.getMessage());
+                System.err.println("Initialization failed and keystore could not be cleared. Please delete it manually");
+                throw new Exception(exc);
+            }
+        }
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    protected abstract void onOAuthSucceeded();
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -110,145 +255,6 @@ public abstract class MSimpleMailer {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     protected abstract void onStartOAuth(String oAuthLink);
-
-        /**
-         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-         */
-        private void initialize(String applicationName, String keystorePassword) {
-            File keystoreFile = new File(clientSecretDir, "mystore.p12");
-            File jsonFile = new File(clientSecretDir, "client_secret.json");
-
-            try {
-                checkPasswordComplexity(keystorePassword, 15, true, true, true);
-                keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
-                keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
-                if (!keystore.newCreated()) onPasswordIntegritySuccess();
-                //setup mode, setzt "clientId", "google-client-id", "google-client-secret"
-                checkAndSetupIfNeeded(jsonFile);
-            } catch(MPasswordIntegrityException exc ){
-                    onPasswordIntegrityFailure(exc);return;
-            } catch (MClientSecretException exc){
-                //try { clearKeystore(); } catch (Exception exc2) { exc.addSuppressed(exc2);};
-                onClientSecretInitalizationFailure((MClientSecretException)exc);return;
-            } catch (Exception exc) {
-                   onCommonInitializationFailure(exc);return;
-            }
-
-            try{
-                if (applicationName == null || applicationName.isBlank()) throw new IllegalArgumentException("Application name must not be empty.");
-                String clientId = keystore.get("google-client-id");
-                String clientSecret = keystore.get("google-client-secret");
-                doBrowserOAuthFlow(keystore, applicationName, clientId, clientSecret);
-                //token funktioniert, file köschen
-                if (jsonFile.exists()) {
-                    boolean jsonFileDeleted = jsonFile.delete();
-                    if (!jsonFileDeleted) {
-                        System.out.println("File \"client_secret.json\" could not be deleted. Please delete it manually.");
-                    } else {
-                        System.out.println("client_secret.json successfully imported and deleted.");
-                    }
-                }
-            } catch (Exception exc) {
-                //System.err.println("Error in initialization."+ exc.getMessage());
-                onCommonInitializationFailure(exc);return;
-            }
-        }
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-       private void checkAndSetupIfNeeded(File jsonFile) throws Exception {
-           JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-           String clientId;
-           String clientSecret;
-            if (keystore.newCreated() || !keystore.containsAllNonNullKeys("clientId", "google-client-id", "google-client-secret")) {
-                System.out.println("Checking if file \"client_secret.json\" exists");
-                if (jsonFile.exists()) {
-                    System.out.println("File \"client_secret.json\" found. Reading tokens.");
-                    GoogleClientSecrets secrets = GoogleClientSecrets.load(jsonFactory, new FileReader(jsonFile));
-                    clientId = secrets.getDetails().getClientId();
-                    clientSecret = secrets.getDetails().getClientSecret();
-                    if (clientId != null && clientSecret != null) {
-                        System.out.println("Tokens exist. Saving found tokens to encrypted keystore. ");
-                        keystore.put("google-client-id", clientId).put("google-client-secret", clientSecret);
-                        System.out.println("Tokens successfully saved");
-                    } else {
-                        throw new MClientSecretException("client_secret.json does not contain valid credentials.");
-                    }
-                } else {
-                    throw new MClientSecretException("client_secret.json must be placed in the directory \"" + clientSecretDir + "\" before first launch.");
-                }
-
-                UUID uuid = UUID.randomUUID();
-                System.out.println("Client security UUID generated. " + uuid + ". Saving UUID in encrypted keystore. ");
-                keystore.put("clientId", uuid.toString());
-            }
-        }
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-        private void doBrowserOAuthFlow(MSimpleKeystore keystore, String applicationName, String clientId,String clientSecret) throws Exception {
-            JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            GoogleClientSecrets.Details details = new GoogleClientSecrets.Details()
-                    .setClientId(clientId)
-                    .setClientSecret(clientSecret)
-                    .setAuthUri("https://accounts.google.com/o/oauth2/auth")
-                    .setTokenUri("https://oauth2.googleapis.com/token");
-
-            GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
-            GoogleAuthorizationCodeFlow flow;
-            int gglsLocalJettyPort = 8888;
-            GoogleAuthorizationCodeRequestUrl url;
-
-            if (doNotPersistOAuthToken) {
-                if (keystore.contains("OAuth")) {
-                    System.out.println("Securer OAuth Mode was chosen. Not keeping old tokens. Removing persistent OAuth token.");
-                    keystore.remove("OAuth");
-                }
-                flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
-                        .setAccessType("online")
-                        .setApprovalPrompt("force")
-                        .setCredentialDataStore(new MemoryDataStoreFactory().getDataStore("tempsession"))
-                        .build();
-                url = flow.newAuthorizationUrl();
-            } else {
-                flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
-                        .setAccessType("offline")
-                        .setCredentialDataStore(new MSimpleKeystoreDataStoreFactory(keystore).getDataStore("OAuth"))
-                        .build();
-                url = flow.newAuthorizationUrl();
-            }
-
-            LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(gglsLocalJettyPort).build();
-            onStartOAuth(url.setRedirectUri(receiver.getRedirectUri()).toString());
-
-            credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("OAuth");
-            if (credential == null) {
-                throw new IllegalStateException("No stored OAuth credential found.");
-            }
-
-            applicationName += " [" + keystore.get("clientId") + "]";
-
-            this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
-                    .setApplicationName(applicationName)
-                    .build();
-        }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-        private void clearKeystore() throws Exception {
-            if (keystore.successfullyInitialized()) {
-                System.out.println("clearing KeyStore");
-                try {
-                    keystore.clear();
-                } catch (Exception exc) {
-                    System.err.println("Error while clearing keystore.\n" + exc.getMessage());
-                    System.err.println("Initialization failed and keystore could not be cleared. Please delete it manually");
-                    throw new Exception(exc);
-                }
-            }
-        }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
