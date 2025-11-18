@@ -98,7 +98,7 @@ public final class MSimpleKeystore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final synchronized MSimpleKeystore add(String alias, String token) throws Exception {
+    public final synchronized MSimpleKeystore put(String alias, String token) throws Exception {
         if(successfullyInitialized) {
             SecretKey secretKey;
             try {

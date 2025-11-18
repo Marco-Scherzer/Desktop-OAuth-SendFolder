@@ -7,8 +7,6 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.*;
 
 import static com.marcoscherzer.msimplegoauthmailerclientapplication.MUtil.*;
@@ -81,12 +79,13 @@ public final class MMain {
                 protected void onInitializeSucceeded() {
                    try {
                        MSimpleKeystore store = mailer.getKeystore();
+                       //setup
                        if (!store.containsAllNonNullKeys("fromAddress", "toAddress")) {
                            String[] setupedValues = new MAppSetupDialog(false).createAndShowDialog();
                            String from = setupedValues[0];
                            String to = setupedValues[1];
-                           store.add("fromAddress", from);
-                           store.add("toAddress", to);
+                           store.put("fromAddress", from);
+                           store.put("toAddress", to);
                        }
                        clientAndPathUUID = store.get("clientId");
                        sentFolder = createPathIfNotExists(Paths.get(basePath, clientAndPathUUID + "-sent"), "Sent folder");

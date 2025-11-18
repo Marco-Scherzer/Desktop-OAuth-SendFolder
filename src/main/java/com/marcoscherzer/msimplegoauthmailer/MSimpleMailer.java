@@ -25,7 +25,6 @@ import jakarta.activation.DataSource;
 import jakarta.activation.FileDataSource;
 import org.apache.commons.codec.binary.Base64;
 
-import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
@@ -121,14 +120,15 @@ public abstract class MSimpleMailer {
                 keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
 
                 if(!keystore.newCreated()) onPasswordIntegritySuccess();
-                //setup mode
-                setup(jsonFile);
+                //setup mode, setzt "clientId", "google-client-id", "google-client-secret"
+                checkAndSetupIfNeeded(jsonFile);
 
                 String clientId = keystore.get("google-client-id");
                 String clientSecret = keystore.get("google-client-secret");
 
                 doBrowserOAuthFlow(keystore, applicationName, clientId, clientSecret);
 
+                //token funktioniert, file köschen
                 if (jsonFile.exists()) {
                     boolean jsonFileDeleted = jsonFile.delete();
                     if (!jsonFileDeleted) {
@@ -137,20 +137,23 @@ public abstract class MSimpleMailer {
                         System.out.println("client_secret.json successfully imported and deleted.");
                     }
                 }
+
             } catch (Exception exc) {
                 //System.err.println("Error in initialization."+ exc.getMessage());
-                try { clearKeystore(); } catch (Exception exc2) { exc.addSuppressed(exc2);};
-                if (exc instanceof MClientSecretException){
-                    onClientSecretInitalizationFailure((MClientSecretException)exc);}
-                else
-                if (exc instanceof MPasswordIntegrityException){onPasswordIntegrityFailure((MPasswordIntegrityException)exc);}
+                if (exc instanceof MClientSecretException){ //token hat nicht funktioniert
+                    //try { clearKeystore(); } catch (Exception exc2) { exc.addSuppressed(exc2);};
+                    onClientSecretInitalizationFailure((MClientSecretException)exc);
+                }
+                else if (exc instanceof MPasswordIntegrityException){
+                    onPasswordIntegrityFailure((MPasswordIntegrityException)exc);
+                }
                 else onCommonInitializationFailure(exc);
             }
         }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-       private void setup(File jsonFile) throws Exception {
+       private void checkAndSetupIfNeeded(File jsonFile) throws Exception {
            JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
            String clientId;
            String clientSecret;
@@ -163,7 +166,7 @@ public abstract class MSimpleMailer {
                     clientSecret = secrets.getDetails().getClientSecret();
                     if (clientId != null && clientSecret != null) {
                         System.out.println("Tokens exist. Saving found tokens to encrypted keystore. ");
-                        keystore.add("google-client-id", clientId).add("google-client-secret", clientSecret);
+                        keystore.put("google-client-id", clientId).put("google-client-secret", clientSecret);
                         System.out.println("Tokens successfully saved");
                     } else {
                         throw new MClientSecretException("client_secret.json does not contain valid credentials.");
@@ -174,7 +177,7 @@ public abstract class MSimpleMailer {
 
                 UUID uuid = UUID.randomUUID();
                 System.out.println("Client security UUID generated. " + uuid + ". Saving UUID in encrypted keystore. ");
-                keystore.add("clientId", uuid.toString());
+                keystore.put("clientId", uuid.toString());
             }
         }
     /**

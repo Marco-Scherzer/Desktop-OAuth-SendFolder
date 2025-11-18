@@ -119,7 +119,7 @@ public final class MSimpleKeystoreDataStore<V extends Serializable> implements D
     public final DataStore<V> set(String key, V value) throws IOException {
         try {
             String base64 = serialize(value);
-            keystore.add(key, base64);
+            keystore.put(key, base64);
             return this;
         } catch (Exception e) {
             throw new IOException(e);
