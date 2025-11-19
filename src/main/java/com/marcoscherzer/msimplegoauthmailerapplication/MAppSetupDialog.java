@@ -6,6 +6,7 @@ import com.marcoscherzer.msimplekeystore.MPasswordComplexityException;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -52,9 +53,6 @@ public final class MAppSetupDialog {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
     private String[] buildAndShowDialog() {
         // Eingabefelder mit Platzhaltertext
         JTextField fromField = new JTextField("Sender email address");
@@ -63,18 +61,13 @@ public final class MAppSetupDialog {
         JTextField jsonPathField = new JTextField("client_secret.json file");
         jsonPathField.setEditable(false);
 
-        // FileChooser-Button direkt daneben
+        // FileChooser-Button direkt neben dem JSON-Feld
         JButton chooseJsonButton = new JButton("Choose...");
-        JPanel jsonPanel = new JPanel(new BorderLayout(5,0));
-        jsonPanel.add(jsonPathField, BorderLayout.CENTER);
-        jsonPanel.add(chooseJsonButton, BorderLayout.EAST);
-
         chooseJsonButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Select client_secret.json file");
             fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            int result = fileChooser.showOpenDialog(null);
-            if (result == JFileChooser.APPROVE_OPTION) {
+            if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
                 jsonPathField.setText(selectedFile.getAbsolutePath());
             }
@@ -89,15 +82,112 @@ public final class MAppSetupDialog {
         infoLabel.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
         infoLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
+        // Abstandszeile
+        JLabel spacer = new JLabel(" ");
+
+        // Placeholder-Verhalten
+        addPlaceholderBehavior(fromField, "Sender email address");
+        addPlaceholderBehavior(toField, "Recipient email address");
+        addPlaceholderBehavior(pwField, "Program startup password");
+
         // Validierungen
         addMailValidation(fromField);
         addMailValidation(toField);
-        if (setPw) addPasswordValidation(pwField);
+        addPasswordValidation(pwField);
 
-        // Dialog-Inhalt: nur Überschrift, Unterüberschrift, Textfelder
-        Object[] message = setPw
-                ? new Object[]{heading, null, infoLabel, null, jsonPanel, fromField, toField, pwField}
-                : new Object[]{heading, null, infoLabel, null, jsonPanel, fromField, toField};
+        // Elternpanel für alle Zeilen
+        JPanel rowsPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints rp = new GridBagConstraints();
+        rp.gridx = 0; rp.gridy = 0; rp.weightx = 1.0; rp.fill = GridBagConstraints.HORIZONTAL;
+        rp.insets = new Insets(5,5,5,5);
+
+        // Labels fett und kleiner
+        Font baseFont = fromField.getFont();
+        Font labelFont = baseFont.deriveFont(Font.BOLD, baseFont.getSize() - 2f);
+
+        // Row 1: JSON Label
+        JPanel jsonLabelRow = new JPanel(new GridBagLayout());
+        GridBagConstraints l1 = new GridBagConstraints();
+        l1.gridx = 0; l1.gridy = 0; l1.weightx = 1.0; l1.fill = GridBagConstraints.HORIZONTAL;
+        JLabel jsonLabel = new JLabel("JSON file:");
+        jsonLabel.setFont(labelFont);
+        jsonLabelRow.add(jsonLabel, l1);
+        rowsPanel.add(jsonLabelRow, rp);
+        rp.gridy++;
+
+        // Row 1: JSON Field + Button
+        JPanel jsonRow = new JPanel(new GridBagLayout());
+        GridBagConstraints r1 = new GridBagConstraints();
+        r1.insets = new Insets(0,0,0,0);
+        r1.fill = GridBagConstraints.HORIZONTAL;
+        r1.gridx = 0; r1.gridy = 0; r1.weightx = 1.0;
+        jsonRow.add(jsonPathField, r1);
+        r1.gridx = 1; r1.gridy = 0; r1.weightx = 0;
+        jsonRow.add(chooseJsonButton, r1);
+        rowsPanel.add(jsonRow, rp);
+        rp.gridy++;
+
+        // Row 2: Sender Label
+        JPanel senderLabelRow = new JPanel(new GridBagLayout());
+        GridBagConstraints l2 = new GridBagConstraints();
+        l2.gridx = 0; l2.gridy = 0; l2.weightx = 1.0; l2.fill = GridBagConstraints.HORIZONTAL;
+        JLabel senderLabel = new JLabel("Sender:");
+        senderLabel.setFont(labelFont);
+        senderLabelRow.add(senderLabel, l2);
+        rowsPanel.add(senderLabelRow, rp);
+        rp.gridy++;
+
+        // Row 2: Sender Field
+        JPanel senderRow = new JPanel(new GridBagLayout());
+        GridBagConstraints r2 = new GridBagConstraints();
+        r2.gridx = 0; r2.gridy = 0; r2.weightx = 1.0; r2.fill = GridBagConstraints.HORIZONTAL;
+        senderRow.add(fromField, r2);
+        rowsPanel.add(senderRow, rp);
+        rp.gridy++;
+
+        // Row 3: Recipient Label
+        JPanel recipientLabelRow = new JPanel(new GridBagLayout());
+        GridBagConstraints l3 = new GridBagConstraints();
+        l3.gridx = 0; l3.gridy = 0; l3.weightx = 1.0; l3.fill = GridBagConstraints.HORIZONTAL;
+        JLabel recipientLabel = new JLabel("Recipient:");
+        recipientLabel.setFont(labelFont);
+        recipientLabelRow.add(recipientLabel, l3);
+        rowsPanel.add(recipientLabelRow, rp);
+        rp.gridy++;
+
+        // Row 3: Recipient Field
+        JPanel recipientRow = new JPanel(new GridBagLayout());
+        GridBagConstraints r3 = new GridBagConstraints();
+        r3.gridx = 0; r3.gridy = 0; r3.weightx = 1.0; r3.fill = GridBagConstraints.HORIZONTAL;
+        recipientRow.add(toField, r3);
+        rowsPanel.add(recipientRow, rp);
+        rp.gridy++;
+
+        // Row 4: Password Label
+        JPanel passwordLabelRow = new JPanel(new GridBagLayout());
+        GridBagConstraints l4 = new GridBagConstraints();
+        l4.gridx = 0; l4.gridy = 0; l4.weightx = 1.0; l4.fill = GridBagConstraints.HORIZONTAL;
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setFont(labelFont);
+        passwordLabelRow.add(passwordLabel, l4);
+        rowsPanel.add(passwordLabelRow, rp);
+        rp.gridy++;
+
+        // Row 4: Password Field
+        JPanel passwordRow = new JPanel(new GridBagLayout());
+        GridBagConstraints r4 = new GridBagConstraints();
+        r4.gridx = 0; r4.gridy = 0; r4.weightx = 1.0; r4.fill = GridBagConstraints.HORIZONTAL;
+        passwordRow.add(pwField, r4);
+        rowsPanel.add(passwordRow, rp);
+        rp.gridy++;
+
+        // Dialog-Inhalt
+        Object[] message = {
+                heading, null,
+                infoLabel, null,
+                spacer, null,
+                rowsPanel
+        };
 
         int option = JOptionPane.showConfirmDialog(
                 null,
@@ -110,16 +200,14 @@ public final class MAppSetupDialog {
         if (option == JOptionPane.OK_OPTION) {
             String from = fromField.getText().trim();
             String to   = toField.getText().trim();
-            String pw   = setPw ? new String(pwField.getPassword()) : null;
+            String pw   = new String(pwField.getPassword());
             String jsonPath = jsonPathField.getText().trim();
 
             // Validierungen
             List<String> errors = new ArrayList<>();
             try { checkMailAddress(from); } catch (MMailAdressFormatException e) { errors.add("Sender email invalid: " + e.getMessage()); }
             try { checkMailAddress(to); } catch (MMailAdressFormatException e) { errors.add("Recipient email invalid: " + e.getMessage()); }
-            if (setPw) {
-                try { checkPasswordComplexity(pw, 15, true, true, true); } catch (MPasswordComplexityException e) { errors.add("Password invalid: " + e.getMessage()); }
-            }
+            try { checkPasswordComplexity(pw, 15, true, true, true); } catch (MPasswordComplexityException e) { errors.add("Password invalid: " + e.getMessage()); }
             if (jsonPath.isBlank() || jsonPath.equals("client_secret.json file")) {
                 errors.add("client_secret.json file not selected.");
             }
@@ -128,14 +216,59 @@ public final class MAppSetupDialog {
                 StringBuilder sb = new StringBuilder("Invalid format(s):\n");
                 for (String err : errors) sb.append("* ").append(err).append("\n");
                 JOptionPane.showMessageDialog(null, sb.toString(), "Error", JOptionPane.ERROR_MESSAGE);
-                return new MAppSetupDialog(setPw).buildAndShowDialog();
+                return new MAppSetupDialog(true).buildAndShowDialog();
             }
 
-            return setPw ? new String[]{from, to, pw, jsonPath} : new String[]{from, to, jsonPath};
+            return new String[]{from, to, pw, jsonPath};
         } else {
             return null;
         }
     }
+
+
+
+
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private JLabel createFormLabel(String text, int width) {
+        JLabel label = new JLabel(text, SwingConstants.RIGHT);
+        label.setPreferredSize(new Dimension(width, label.getPreferredSize().height));
+        Font baseFont = label.getFont();
+        label.setFont(baseFont.deriveFont(Font.BOLD, 14));
+
+        return label;
+    }
+
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+
+    private void addPlaceholderBehavior(final JTextComponent field, final String placeholder) {
+        field.setForeground(Color.GRAY);
+        field.setText(placeholder);
+
+        field.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {
+                if (field.getText().equals(placeholder)) {
+                    field.setText("");
+                    field.setForeground(Color.BLACK); // normale Textfarbe
+                }
+            }
+
+            @Override
+            public void focusLost(java.awt.event.FocusEvent e) {
+                if (field.getText().isEmpty()) {
+                    field.setForeground(Color.GRAY);
+                    field.setText(placeholder);
+                }
+            }
+        });
+    }
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
