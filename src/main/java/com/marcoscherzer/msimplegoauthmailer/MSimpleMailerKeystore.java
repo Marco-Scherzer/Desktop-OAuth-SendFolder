@@ -23,8 +23,13 @@ public final class MSimpleMailerKeystore {
      */
     public MSimpleMailerKeystore(String keystorePassword, String clientSecretJsonFile, String keystoreFile) throws MKeystoreException, MClientSecretException, MPasswordComplexityException, MPasswordIntegrityException, IOException {
         File clientSecretFile = new File(clientSecretJsonFile);
-        File ksFile = new File(keystoreFile);
-        initializeKeyStore(keystorePassword, clientSecretFile, ksFile);
+        File keyStoreFile = new File(keystoreFile);
+
+
+        keystore = new MSimpleKeystore(keyStoreFile, keystorePassword);
+        keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
+        //setup mode, setzt "clientId", "google-client-id", "google-client-secret"
+        checkAndSetupKeystoreIfNeeded(clientSecretFile);
     }
 
     /**
@@ -32,17 +37,6 @@ public final class MSimpleMailerKeystore {
      */
     public final MSimpleKeystore getKeyStore(){
           return keystore;
-    }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    private final boolean initializeKeyStore(String keystorePassword, File clientSecretJsonFile, File keystoreFile) throws MKeystoreException, MClientSecretException, MPasswordComplexityException, MPasswordIntegrityException, IOException {
-        keystore = new MSimpleKeystore(keystoreFile, keystorePassword);
-        keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
-        //setup mode, setzt "clientId", "google-client-id", "google-client-secret"
-        checkAndSetupKeystoreIfNeeded(clientSecretJsonFile);
-        return true;
     }
 
     /**

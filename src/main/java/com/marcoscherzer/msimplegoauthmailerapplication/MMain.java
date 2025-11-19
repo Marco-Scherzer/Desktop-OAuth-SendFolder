@@ -55,12 +55,12 @@ public final class MMain {
                 boolean setup = !Files.exists(Paths.get(keystorePath));
                 if (setup) {
                     System.out.println("showing setup dialog");
-                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup started. \nInfo: Use the SystemTray Icon to view log Information", TrayIcon.MessageType.INFO);
+                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup started."+ (isDbg?"\nInfo: Use the SystemTray Icon to view log Information":""), TrayIcon.MessageType.INFO);
                     String[] setupedValues = new MAppSetupDialog(true).createAndShowDialog();
+                    if(setupedValues == null) exit(null,1);//canceled
                     String from = setupedValues[0];
                     String to = setupedValues[1];
-                    pw = new MAppSetupDialog(true).createAndShowDialog()[2];
-                    store = new MSimpleMailerKeystore(pw,clientSecretJsonPath, keystorePath);
+                    store = new MSimpleMailerKeystore(setupedValues[2],clientSecretJsonPath, keystorePath);
                     store.getKeyStore().put("fromAddress", from);
                     store.getKeyStore().put("toAddress", to);
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup completed.", TrayIcon.MessageType.INFO);

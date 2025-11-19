@@ -27,51 +27,53 @@ public final class MSimpleKeystore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleKeystore(File ksFile, String keystorePassword) {
+    public MSimpleKeystore(File ksFile, String keystorePassword) throws MKeystoreException {
         this.ksFile = ksFile;
         this.keystorePassword = keystorePassword;
+        try { keyStore = KeyStore.getInstance(KEYSTORE_TYPE); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while instantiating keystore of type "+KEYSTORE_TYPE, exc); }
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final synchronized void loadKeyStoreOrCreateKeyStoreIfNotExists() throws MKeystoreException, MPasswordIntegrityException, MPasswordComplexityException {
-        try { keyStore = KeyStore.getInstance(KEYSTORE_TYPE); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while instantiating keystore", exc); }
+    public final synchronized void createKeystore() throws MKeystoreException, MPasswordComplexityException {
+        checkPasswordComplexity(keystorePassword, 15, true, true, true);
+        System.out.println("creating keystore " + ksFile);
+        try { keyStore.load(null, keystorePassword.toCharArray()); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while initializing new keystore", exc); }
+        try { ksFile.getParentFile().mkdirs();} catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while creating parent directories", exc); }
+        FileOutputStream fos = null;
+        try { fos = new FileOutputStream(ksFile); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while opening fileoutputstream", exc); }
+        try { keyStore.store(fos, keystorePassword.toCharArray()); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while storing new keystore", exc); }
+        try { fos.close(); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while closing fileoutputstream", exc); }
+        successfullyInitialized = true;
+        newCreated = true;
+        System.out.println("keystore successfully created");
+    }
 
-        if (ksFile.exists()) {
-            System.out.println("loading keystore " + ksFile);
-            FileInputStream fis = null;
-            try { fis = new FileInputStream(ksFile);} catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while opening keystore file", exc); }
-            try { keyStore.load(fis, keystorePassword.toCharArray()); } catch (IOException exc) {
-                Throwable cause = exc.getCause();
-                if (cause instanceof InvalidKeyException || cause instanceof UnrecoverableKeyException || cause instanceof UnrecoverableEntryException || cause instanceof BadPaddingException) {
-                    throw new MPasswordIntegrityException("Password seems to not work (possible wrong password or corruption)\n"+cause.getMessage(), exc);
-                }
-                if (cause instanceof IllegalBlockSizeException) {
-                    throw new MPasswordIntegrityException("Error in context with keystore while decrypting block (possible wrong password or corruption)\n"+cause.getMessage(), exc);
-                }
-                if (cause instanceof EOFException) {
-                    throw new MKeystoreException("Error in context with keystore while reading file (unexpected end of file)\n"+cause.getMessage(), exc);
-                }
-                throw new MKeystoreException("Error in context with keystore while loading existing keystore", exc);
-            } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while loading existing keystore", exc); }
-            try { fis.close(); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while closing keystore file", exc); }
-            successfullyInitialized = true;
-            newCreated = false;
-            System.out.println("keystore successfully loaded");
-        } else {
-            checkPasswordComplexity(keystorePassword, 15, true, true, true);
-            System.out.println("creating keystore " + ksFile);
-            try { keyStore.load(null, keystorePassword.toCharArray()); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while initializing new keystore", exc); }
-            try { ksFile.getParentFile().mkdirs();} catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while creating parent directories", exc); }
-            FileOutputStream fos = null;
-            try { fos = new FileOutputStream(ksFile); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while opening fileoutputstream", exc); }
-            try { keyStore.store(fos, keystorePassword.toCharArray()); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while storing new keystore", exc); }
-            try { fos.close(); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while closing fileoutputstream", exc); }
-            successfullyInitialized = true;
-            newCreated = true;
-            System.out.println("keystore successfully created");
-        }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final synchronized void loadKeystore()  throws MKeystoreException, MPasswordIntegrityException {
+        System.out.println("loading keystore " + ksFile);
+        FileInputStream fis = null;
+        try { fis = new FileInputStream(ksFile);} catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while opening keystore file", exc); }
+        try { keyStore.load(fis, keystorePassword.toCharArray()); } catch (IOException exc) {
+            Throwable cause = exc.getCause();
+            if (cause instanceof InvalidKeyException || cause instanceof UnrecoverableKeyException || cause instanceof UnrecoverableEntryException || cause instanceof BadPaddingException) {
+                throw new MPasswordIntegrityException("Password seems to not work (possible wrong password or corruption)\n"+cause.getMessage(), exc);
+            }
+            if (cause instanceof IllegalBlockSizeException) {
+                throw new MPasswordIntegrityException("Error in context with keystore while decrypting block (possible wrong password or corruption)\n"+cause.getMessage(), exc);
+            }
+            if (cause instanceof EOFException) {
+                throw new MKeystoreException("Error in context with keystore while reading file (unexpected end of file)\n"+cause.getMessage(), exc);
+            }
+            throw new MKeystoreException("Error in context with keystore while loading existing keystore", exc);
+        } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while loading existing keystore", exc); }
+        try { fis.close(); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while closing keystore file", exc); }
+        successfullyInitialized = true;
+        newCreated = false;
+        System.out.println("keystore successfully loaded");
     }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
