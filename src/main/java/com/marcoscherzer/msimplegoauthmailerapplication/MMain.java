@@ -138,8 +138,8 @@ public final class MMain {
                 @Override
                 protected final void onStartOAuth(String oAuthLink) {
                     System.out.println("Additional authentification needed " + oAuthLink);
+                    createMessageDialogAndWait("Additional authentification needed " + oAuthLink,"Information");
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Additional authentification needed\n", TrayIcon.MessageType.INFO);
-
                 }
 
                 @Override
