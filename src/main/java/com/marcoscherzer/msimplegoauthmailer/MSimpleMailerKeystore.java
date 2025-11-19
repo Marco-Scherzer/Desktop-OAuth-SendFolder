@@ -24,10 +24,8 @@ public final class MSimpleMailerKeystore {
     public MSimpleMailerKeystore(String keystorePassword, String clientSecretJsonFile, String keystoreFile) throws MKeystoreException, MClientSecretException, MPasswordComplexityException, MPasswordIntegrityException, IOException {
         File clientSecretFile = new File(clientSecretJsonFile);
         File keyStoreFile = new File(keystoreFile);
-
-
         keystore = new MSimpleKeystore(keyStoreFile, keystorePassword);
-        if(keyStoreFile.exists()) keystore.loadKeystore(); else keystore.createKeystore();
+        if(keyStoreFile.exists()) keystore.loadKeystore(); else{ keystore.createKeystore();}
         //setup mode, setzt "clientId", "google-client-id", "google-client-secret"
         checkAndSetupKeystoreIfNeeded(clientSecretFile);
     }
@@ -48,7 +46,7 @@ public final class MSimpleMailerKeystore {
         String clientSecret;
         boolean incomplete;
         try { incomplete= !keystore.containsAllNonNullKeys("clientId", "google-client-id", "google-client-secret");} catch(Exception exc){ throw exc;}
-            if (keystore.newCreated() || incomplete) {
+            if (incomplete) {
                 System.out.println("Checking if file \"client_secret.json\" exists");
                 if (jsonFile.exists()) {
                     System.out.println("File \"client_secret.json\" found. Reading tokens.");
