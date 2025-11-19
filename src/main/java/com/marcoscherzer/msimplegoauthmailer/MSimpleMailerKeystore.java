@@ -22,12 +22,13 @@ public final class MSimpleMailerKeystore {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public MSimpleMailerKeystore(String keystorePassword, String clientSecretJsonFile, String keystoreFile) throws MKeystoreException, MClientSecretException, MPasswordComplexityException, MPasswordIntegrityException, IOException {
-        File clientSecretFile = new File(clientSecretJsonFile);
+        File jsonFile = new File(clientSecretJsonFile);
         File keyStoreFile = new File(keystoreFile);
         keystore = new MSimpleKeystore(keyStoreFile, keystorePassword);
+        if (!keyStoreFile.exists() && !jsonFile.exists()) throw new MClientSecretException("client_secret.json must be placed in the directory \"" + jsonFile.getPath() + "\" before first launch.");
         if(keyStoreFile.exists()) keystore.loadKeystore(); else{ keystore.createKeystore();}
-        //setup mode, setzt "clientId", "google-client-id", "google-client-secret"
-        checkAndSetupKeystoreIfNeeded(clientSecretFile);
+        //check if incomplete for existing or new created keystore , sets "clientId", "google-client-id", "google-client-secret" if not existing
+        checkAndSetupKeystoreIfNeeded(jsonFile);
     }
 
     /**
@@ -46,9 +47,8 @@ public final class MSimpleMailerKeystore {
         String clientSecret;
         boolean incomplete;
         try { incomplete= !keystore.containsAllNonNullKeys("clientId", "google-client-id", "google-client-secret");} catch(Exception exc){ throw exc;}
-            if (incomplete) {
-                System.out.println("Checking if file \"client_secret.json\" exists");
-                if (jsonFile.exists()) {
+            if (incomplete) {  //check if incomplete for existing or new created keystore
+                    System.out.println("Checking if file \"client_secret.json\" exists");
                     System.out.println("File \"client_secret.json\" found. Reading tokens.");
                     GoogleClientSecrets secrets = GoogleClientSecrets.load(jsonFactory, new FileReader(jsonFile));
                     clientId = secrets.getDetails().getClientId();
@@ -60,15 +60,10 @@ public final class MSimpleMailerKeystore {
                     } else {
                         throw new MClientSecretException("client_secret.json does not contain valid credentials.");
                     }
-                } else {
-                    throw new MClientSecretException("client_secret.json must be placed in the directory \"" + jsonFile.getPath() + "\" before first launch.");
-                }
-
                 UUID uuid = UUID.randomUUID();
                 System.out.println("Client security UUID generated. " + uuid + ". Saving UUID in encrypted keystore. ");
                 keystore.put("clientId", uuid.toString());
             }
-
     }
 
     /**
