@@ -52,15 +52,23 @@ public final class MAppSetupDialog {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     private String[] buildAndShowDialog() {
-        // Eingabefelder
-        JTextField fromField = new JTextField("m.scherzer@hotmail.com");
-        JTextField toField = new JTextField("m.scherzer@hotmail.com");
-        JPasswordField pwField = new JPasswordField("testTesttest-123)");
-        JTextField jsonPathField = new JTextField();
+        // Eingabefelder mit Platzhaltertext
+        JTextField fromField = new JTextField("Sender email address");
+        JTextField toField   = new JTextField("Recipient email address");
+        JPasswordField pwField = new JPasswordField("Program startup password");
+        JTextField jsonPathField = new JTextField("client_secret.json file");
         jsonPathField.setEditable(false);
 
-        JButton chooseJsonButton = new JButton("Choose client_secret.json");
+        // FileChooser-Button direkt daneben
+        JButton chooseJsonButton = new JButton("Choose...");
+        JPanel jsonPanel = new JPanel(new BorderLayout(5,0));
+        jsonPanel.add(jsonPathField, BorderLayout.CENTER);
+        jsonPanel.add(chooseJsonButton, BorderLayout.EAST);
+
         chooseJsonButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Select client_secret.json file");
@@ -72,47 +80,28 @@ public final class MAppSetupDialog {
             }
         });
 
+        // Überschrift und Unterüberschrift
         JLabel heading = new JLabel("OAuth FileSendFolder Setup");
         JLabel infoLabel = new JLabel("(Requires an email account (tested with Gmail) and a clientSecret.json file provided by Google)\n\n");
-        JLabel label0 = new JLabel("\n");
-        JLabel label1 = new JLabel("Email address:");
-        JLabel label2 = new JLabel("Default recipient address:");
-        JPanel label3 = createTwoPartLabel("Program startup password:",
-                "(Do not use any account or email account password!)",
-                16, 11);
 
         heading.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 23f));
         heading.setHorizontalAlignment(SwingConstants.CENTER);
         infoLabel.setFont(infoLabel.getFont().deriveFont(Font.BOLD, 16f));
         infoLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
+        // Validierungen
         addMailValidation(fromField);
         addMailValidation(toField);
         if (setPw) addPasswordValidation(pwField);
 
-        Object[] message = {
-                heading, null,
-                infoLabel, null,
-                new JLabel("client_secret.json File:"), jsonPathField, chooseJsonButton,
-                label0, null,
-                label1, fromField,
-                label2, toField,
-                label3, pwField,
-                "\n"
-        };
-        Object[] message2 = {
-                heading, null,
-                infoLabel, null,
-                new JLabel("client_secret.json File:"), jsonPathField, chooseJsonButton,
-                label0, null,
-                label1, fromField,
-                label2, toField,
-                "\n"
-        };
+        // Dialog-Inhalt: nur Überschrift, Unterüberschrift, Textfelder
+        Object[] message = setPw
+                ? new Object[]{heading, null, infoLabel, null, jsonPanel, fromField, toField, pwField}
+                : new Object[]{heading, null, infoLabel, null, jsonPanel, fromField, toField};
 
         int option = JOptionPane.showConfirmDialog(
                 null,
-                setPw ? message : message2,
+                message,
                 "",
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.INFORMATION_MESSAGE
@@ -120,8 +109,8 @@ public final class MAppSetupDialog {
 
         if (option == JOptionPane.OK_OPTION) {
             String from = fromField.getText().trim();
-            String to = toField.getText().trim();
-            String pw = setPw ? new String(pwField.getPassword()) : null;
+            String to   = toField.getText().trim();
+            String pw   = setPw ? new String(pwField.getPassword()) : null;
             String jsonPath = jsonPathField.getText().trim();
 
             // Validierungen
@@ -131,7 +120,7 @@ public final class MAppSetupDialog {
             if (setPw) {
                 try { checkPasswordComplexity(pw, 15, true, true, true); } catch (MPasswordComplexityException e) { errors.add("Password invalid: " + e.getMessage()); }
             }
-            if (jsonPath.isBlank()) {
+            if (jsonPath.isBlank() || jsonPath.equals("client_secret.json file")) {
                 errors.add("client_secret.json file not selected.");
             }
 
@@ -147,7 +136,6 @@ public final class MAppSetupDialog {
             return null;
         }
     }
-
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
