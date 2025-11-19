@@ -111,7 +111,6 @@ public abstract class MSimpleMailer {
         GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setInstalled(details);
         GoogleAuthorizationCodeFlow flow;
         int gglsLocalJettyPort = 8888;
-        GoogleAuthorizationCodeRequestUrl url;
 
         if (doNotPersistOAuthToken) {
             if (keystore.contains("OAuth")) {
@@ -123,17 +122,20 @@ public abstract class MSimpleMailer {
                     .setApprovalPrompt("force")
                     .setCredentialDataStore(new MemoryDataStoreFactory().getDataStore("tempsession"))
                     .build();
-            url = flow.newAuthorizationUrl();
         } else {
             flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
                     .setAccessType("offline")
                     .setCredentialDataStore(new MSimpleKeystoreDataStoreFactory(keystore).getDataStore("OAuth"))
                     .build();
-            url = flow.newAuthorizationUrl();
         }
 
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(gglsLocalJettyPort).build();
-        onStartOAuth(url.setRedirectUri(receiver.getRedirectUri()).toString());
+
+        onStartOAuth(flow.newAuthorizationUrl()
+                .toString()
+                .replaceFirst("redirect_uri", "redirect_uri=http://localhost:" +gglsLocalJettyPort +"/Callback"
+                                +"&response_type=code"
+                                +"&scope=" +flow.getScopesAsString()));
 
         credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("OAuth");
         if (credential == null) {
