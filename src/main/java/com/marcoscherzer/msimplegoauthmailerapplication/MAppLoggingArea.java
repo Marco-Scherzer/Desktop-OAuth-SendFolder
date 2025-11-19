@@ -16,7 +16,7 @@ public final class MAppLoggingArea {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MAppLoggingArea(boolean wait) throws InterruptedException, InvocationTargetException {
+    public MAppLoggingArea() throws InterruptedException, InvocationTargetException {
         Runnable task = () -> {
             logArea = new JTextArea(20, 80);
             logArea.setEditable(false);
@@ -48,11 +48,9 @@ public final class MAppLoggingArea {
             System.setErr(ps);
         };
 
-        if (wait) {
-            SwingUtilities.invokeAndWait(task);
-        } else {
-            SwingUtilities.invokeLater(task);
-        }
+
+        SwingUtilities.invokeAndWait(task);
+
     }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

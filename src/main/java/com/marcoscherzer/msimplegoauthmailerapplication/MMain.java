@@ -48,7 +48,7 @@ public final class MMain {
 
             MSimpleMailerKeystore store = null;
             try {
-                logFrame = new MAppLoggingArea(true);
+                logFrame = new MAppLoggingArea();
                 setupTrayIcon();
                 if (isDbg) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
                 boolean setup = !Files.exists(Paths.get(keystorePath));
@@ -57,7 +57,7 @@ public final class MMain {
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder",
                             "Setup started." + (isDbg ? "\nInfo: Use the SystemTray Icon to view log Information" : ""),
                             TrayIcon.MessageType.INFO);
-                    String[] setupedValues = new MAppSetupDialog(true).createAndShowDialog();
+                    String[] setupedValues = MAppSetupDialog.createAndShowDialog();
                     if (setupedValues == null) exit(null, 1); // canceled
                     String from = setupedValues[0];
                     String to = setupedValues[1];
@@ -74,7 +74,7 @@ public final class MMain {
                 } else {
                     System.out.println("showing password dialog");
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Password required.\n", TrayIcon.MessageType.INFO);
-                    String pw = new MAppPwDialog().createAndShowDialog();
+                    String pw = MAppPwDialog.createAndShowDialog();
                     if(pw == null) exit(null,1);//canceled
                     store = new MSimpleMailerKeystore(pw,"", keystorePath);
                     System.out.println("Access-level 1 granted: Application");
