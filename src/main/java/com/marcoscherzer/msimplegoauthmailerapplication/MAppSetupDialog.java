@@ -12,48 +12,40 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.marcoscherzer.msimplegoauthmailer.MSimpleMailerUtil.checkMailAddress;
 import static com.marcoscherzer.msimplekeystore.MSimpleKeystoreUtil.checkPasswordComplexity;
-
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
 public final class MAppSetupDialog {
 
-    private MAppSetupDialog() { }
+    private String[] result;
+    private Exception capturedException;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static String[] createAndShowDialog() throws InterruptedException, InvocationTargetException, Exception {
-
-        final AtomicReference<String[]> resultRef = new AtomicReference<>();
-        final AtomicReference<Exception> exceptionRef = new AtomicReference<>();
-
+    public final String[] showAndWait() throws InterruptedException, InvocationTargetException, Exception {
         Runnable task = () -> {
             try {
-                resultRef.set(buildAndShowDialog());
+                result = buildAndShowDialog();
             } catch (Exception e) {
-                exceptionRef.set(e);
+                capturedException = e;
             }
         };
-
-        SwingUtilities.invokeAndWait(task);
-
-        if (exceptionRef.get() != null) {
-            throw exceptionRef.get();
-        }
-        return resultRef.get();
+            SwingUtilities.invokeAndWait(task);
+            if (capturedException != null) {
+                throw capturedException;
+            }
+            return result;
     }
-
+    
     /**
-     * Baut den Dialog und liefert die Werte zurück.
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private static String[] buildAndShowDialog() {
+    private String[] buildAndShowDialog() {
         // Eingabefelder mit Platzhaltertext
         JTextField fromField = new JTextField("Sender email address");
         JTextField toField   = new JTextField("Recipient email address");
@@ -118,6 +110,7 @@ public final class MAppSetupDialog {
         // Row 1: JSON Field + Button
         JPanel jsonRow = new JPanel(new GridBagLayout());
         GridBagConstraints r1 = new GridBagConstraints();
+        r1.insets = new Insets(0,0,0,0);
         r1.fill = GridBagConstraints.HORIZONTAL;
         r1.gridx = 0; r1.gridy = 0; r1.weightx = 1.0;
         jsonRow.add(jsonPathField, r1);
@@ -213,17 +206,9 @@ public final class MAppSetupDialog {
 
             if (!errors.isEmpty()) {
                 StringBuilder sb = new StringBuilder("Invalid format(s):\n");
-                for (String err : errors) {
-                    sb.append("* ").append(err).append("\n");
-                }
-                JOptionPane.showMessageDialog(
-                        null,
-                        sb.toString(),
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
-                );
-                // erneuter Aufruf sicher, da statisch und zustandslos
-                return buildAndShowDialog();
+                for (String err : errors) sb.append("* ").append(err).append("\n");
+                JOptionPane.showMessageDialog(null, sb.toString(), "Error", JOptionPane.ERROR_MESSAGE);
+                return new MAppSetupDialog().buildAndShowDialog();
             }
 
             return new String[]{from, to, pw, jsonPath};
@@ -233,11 +218,27 @@ public final class MAppSetupDialog {
     }
 
 
+
+
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private JLabel createFormLabel(String text, int width) {
+        JLabel label = new JLabel(text, SwingConstants.RIGHT);
+        label.setPreferredSize(new Dimension(width, label.getPreferredSize().height));
+        Font baseFont = label.getFont();
+        label.setFont(baseFont.deriveFont(Font.BOLD, 14));
+
+        return label;
+    }
+
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
 
-    private static void addPlaceholderBehavior(final JTextComponent field, final String placeholder) {
+    private void addPlaceholderBehavior(final JTextComponent field, final String placeholder) {
         field.setForeground(Color.GRAY);
         field.setText(placeholder);
 
@@ -264,7 +265,7 @@ public final class MAppSetupDialog {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private static void addMailValidation(JTextField field) {
+    private void addMailValidation(JTextField field) {
         field.getDocument().addDocumentListener(new DocumentListener() {
             private void validate() {
                 try {
@@ -292,7 +293,7 @@ public final class MAppSetupDialog {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private static void addPasswordValidation(JPasswordField field) {
+    private void addPasswordValidation(JPasswordField field) {
         field.getDocument().addDocumentListener(new DocumentListener() {
             private void validate() {
                 try {
@@ -320,7 +321,7 @@ public final class MAppSetupDialog {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static final JPanel createTwoPartLabel(String mainText, String hintText, float mainFontSize, float hintFontSize) {
+    private final JPanel createTwoPartLabel(String mainText, String hintText, float mainFontSize, float hintFontSize) {
         JPanel labelPanel = new JPanel();
         labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
 

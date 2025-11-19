@@ -50,7 +50,6 @@ public final class MAppLoggingArea {
 
 
         SwingUtilities.invokeAndWait(task);
-
     }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

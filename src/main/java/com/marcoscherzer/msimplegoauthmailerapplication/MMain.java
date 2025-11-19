@@ -9,7 +9,6 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.io.File;
 import java.nio.file.*;
 
 import static com.marcoscherzer.msimplegoauthmailerapplication.MUtil.*;
@@ -57,7 +56,7 @@ public final class MMain {
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder",
                             "Setup started." + (isDbg ? "\nInfo: Use the SystemTray Icon to view log Information" : ""),
                             TrayIcon.MessageType.INFO);
-                    String[] setupedValues = MAppSetupDialog.createAndShowDialog();
+                    String[] setupedValues = new MAppSetupDialog().showAndWait();
                     if (setupedValues == null) exit(null, 1); // canceled
                     String from = setupedValues[0];
                     String to = setupedValues[1];
@@ -74,7 +73,7 @@ public final class MMain {
                 } else {
                     System.out.println("showing password dialog");
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Password required.\n", TrayIcon.MessageType.INFO);
-                    String pw = MAppPwDialog.createAndShowDialog();
+                    String pw = new MAppPwDialog().showAndWait();
                     if(pw == null) exit(null,1);//canceled
                     store = new MSimpleMailerKeystore(pw,"", keystorePath);
                     System.out.println("Access-level 1 granted: Application");
