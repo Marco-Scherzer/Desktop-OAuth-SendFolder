@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,9 +53,24 @@ public final class MAppSetupDialog {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     private String[] buildAndShowDialog() {
+        // Eingabefelder
         JTextField fromField = new JTextField("m.scherzer@hotmail.com");
         JTextField toField = new JTextField("m.scherzer@hotmail.com");
         JPasswordField pwField = new JPasswordField("testTesttest-123)");
+        JTextField jsonPathField = new JTextField();
+        jsonPathField.setEditable(false);
+
+        JButton chooseJsonButton = new JButton("Choose client_secret.json");
+        chooseJsonButton.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Select client_secret.json file");
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            int result = fileChooser.showOpenDialog(null);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                jsonPathField.setText(selectedFile.getAbsolutePath());
+            }
+        });
 
         JLabel heading = new JLabel("OAuth FileSendFolder Setup");
         JLabel infoLabel = new JLabel("(Requires an email account (tested with Gmail) and a clientSecret.json file provided by Google)\n\n");
@@ -77,6 +93,7 @@ public final class MAppSetupDialog {
         Object[] message = {
                 heading, null,
                 infoLabel, null,
+                new JLabel("client_secret.json File:"), jsonPathField, chooseJsonButton,
                 label0, null,
                 label1, fromField,
                 label2, toField,
@@ -86,6 +103,7 @@ public final class MAppSetupDialog {
         Object[] message2 = {
                 heading, null,
                 infoLabel, null,
+                new JLabel("client_secret.json File:"), jsonPathField, chooseJsonButton,
                 label0, null,
                 label1, fromField,
                 label2, toField,
@@ -104,24 +122,17 @@ public final class MAppSetupDialog {
             String from = fromField.getText().trim();
             String to = toField.getText().trim();
             String pw = setPw ? new String(pwField.getPassword()) : null;
+            String jsonPath = jsonPathField.getText().trim();
 
+            // Validierungen
             List<String> errors = new ArrayList<>();
-            try {
-                checkMailAddress(from);
-            } catch (MMailAdressFormatException e) {
-                errors.add("Sender email invalid: " + e.getMessage());
-            }
-            try {
-                checkMailAddress(to);
-            } catch (MMailAdressFormatException e) {
-                errors.add("Recipient email invalid: " + e.getMessage());
-            }
+            try { checkMailAddress(from); } catch (MMailAdressFormatException e) { errors.add("Sender email invalid: " + e.getMessage()); }
+            try { checkMailAddress(to); } catch (MMailAdressFormatException e) { errors.add("Recipient email invalid: " + e.getMessage()); }
             if (setPw) {
-                try {
-                    checkPasswordComplexity(pw, 15, true, true, true);
-                } catch (MPasswordComplexityException e) {
-                    errors.add("Password invalid: " + e.getMessage());
-                }
+                try { checkPasswordComplexity(pw, 15, true, true, true); } catch (MPasswordComplexityException e) { errors.add("Password invalid: " + e.getMessage()); }
+            }
+            if (jsonPath.isBlank()) {
+                errors.add("client_secret.json file not selected.");
             }
 
             if (!errors.isEmpty()) {
@@ -131,11 +142,12 @@ public final class MAppSetupDialog {
                 return new MAppSetupDialog(setPw).buildAndShowDialog();
             }
 
-            return setPw ? new String[]{from, to, pw} : new String[]{from, to};
+            return setPw ? new String[]{from, to, pw, jsonPath} : new String[]{from, to, jsonPath};
         } else {
             return null;
         }
     }
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

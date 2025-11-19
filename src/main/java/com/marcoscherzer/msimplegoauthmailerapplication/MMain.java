@@ -9,6 +9,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.nio.file.*;
 
 import static com.marcoscherzer.msimplegoauthmailerapplication.MUtil.*;
@@ -24,7 +25,6 @@ public final class MMain {
     private static boolean isDbg;
     private static TrayIcon trayIcon;
     private static final String userDir = System.getProperty("user.dir");
-    private static final String clientSecretJsonPath = userDir+"\\client_secret.json";
     private static final String keystorePath = userDir+"\\mystore.p12";
     private static final String mailFoldersPath = userDir + "\\mail";
     private static String trayIconPathWithinResourcesFolder = "/5.png";
@@ -46,7 +46,6 @@ public final class MMain {
             FlatCarbonIJTheme.setup();
             UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
 
-            String pw;
             MSimpleMailerKeystore store = null;
             try {
                 logFrame = new MAppLoggingArea(true);
@@ -55,22 +54,29 @@ public final class MMain {
                 boolean setup = !Files.exists(Paths.get(keystorePath));
                 if (setup) {
                     System.out.println("showing setup dialog");
-                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup started."+ (isDbg?"\nInfo: Use the SystemTray Icon to view log Information":""), TrayIcon.MessageType.INFO);
+                    trayIcon.displayMessage("OAuth Desktop FileSend Folder",
+                            "Setup started." + (isDbg ? "\nInfo: Use the SystemTray Icon to view log Information" : ""),
+                            TrayIcon.MessageType.INFO);
                     String[] setupedValues = new MAppSetupDialog(true).createAndShowDialog();
-                    if(setupedValues == null) exit(null,1);//canceled
+                    if (setupedValues == null) exit(null, 1); // canceled
                     String from = setupedValues[0];
                     String to = setupedValues[1];
-                    store = new MSimpleMailerKeystore(setupedValues[2],clientSecretJsonPath, keystorePath);
+                    String pw = setupedValues[2];
+                    String clientSecretPath = setupedValues[3];
+
+                    // Keystore erstellen mit ausgewähltem client_secret.json
+                    store = new MSimpleMailerKeystore(pw, clientSecretPath, keystorePath);
                     store.getKeyStore().put("fromAddress", from);
                     store.getKeyStore().put("toAddress", to);
+
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup completed.", TrayIcon.MessageType.INFO);
                     System.out.println("setup completed");
                 } else {
                     System.out.println("showing password dialog");
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Password required.\n", TrayIcon.MessageType.INFO);
-                    pw = new MAppPwDialog().createAndShowDialog();
+                    String pw = new MAppPwDialog().createAndShowDialog();
                     if(pw == null) exit(null,1);//canceled
-                    store = new MSimpleMailerKeystore(pw,clientSecretJsonPath, keystorePath);
+                    store = new MSimpleMailerKeystore(pw,"", keystorePath);
                     System.out.println("Access-level 1 granted: Application");
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
                 }
