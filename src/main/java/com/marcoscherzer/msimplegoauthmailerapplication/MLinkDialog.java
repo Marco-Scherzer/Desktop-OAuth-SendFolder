@@ -5,19 +5,43 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 
 public final class MLinkDialog {
 
     private String result;
-    private HyperlinkListener hyperlinkListener;
+    private int dialogWidth = 600;   // Standardbreite
+    private int dialogHeight = 200;  // Standardhöhe
 
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
+    private String[] markerSigns = new String[]{"/", "?", "=", "&"}; // Standardmarker
+    private int maxLineLength = 60; // Standardwert für harte Umbrüche
+
+    private HyperlinkListener hyperlinkListener; // optionaler Listener
+
+    private final StringBuilder bodyBuilder = new StringBuilder();
+
     public MLinkDialog() { }
 
+    public MLinkDialog setDialogSize(int width, int height) {
+        this.dialogWidth = width;
+        this.dialogHeight = height;
+        return this;
+    }
+
     /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * Konfiguriert den Textumbruch.
+     *
+     * @param markerSigns   Zeichen, nach denen <wbr> eingefügt wird
+     * @param maxLineLength maximale Länge, nach der <br> eingefügt wird
+     */
+    public MLinkDialog setWrap(String[] markerSigns, int maxLineLength) {
+        this.markerSigns = markerSigns;
+        this.maxLineLength = maxLineLength;
+        return this;
+    }
+
+    /**
+     * Setzt einen HyperlinkListener, der Aktivierungen im JEditorPane verarbeitet.
      */
     public MLinkDialog setHyperlinkListener(HyperlinkListener listener) {
         this.hyperlinkListener = listener;
@@ -25,60 +49,98 @@ public final class MLinkDialog {
     }
 
     /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * Standardlistener: öffnet aktivierte Links im Systembrowser.
      */
     public static HyperlinkListener createDefaultHyperlinkListener() {
-        return new HyperlinkListener() {
-            @Override
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-                if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                    try {
-                        Desktop.getDesktop().browse(e.getURL().toURI());
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
+        return e -> {
+            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED && e.getURL() != null) {
+                try {
+                    Desktop.getDesktop().browse(URI.create(e.getURL().toString()));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
             }
         };
     }
 
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public final String showAndWait(String text, String redirectUrl) throws InterruptedException, InvocationTargetException {
+    // ---------------- Praktische Add-Methoden ----------------
 
+    public MLinkDialog addText(String text, String color, int fontSizePx, String decoration) {
+        bodyBuilder.append("<p style='color:")
+                .append(color)
+                .append("; font-size:")
+                .append(fontSizePx)
+                .append("px; text-decoration:")
+                .append(decoration)
+                .append(";'>")
+                .append(applyWrap(text))
+                .append("</p>");
+        return this;
+    }
+
+    public MLinkDialog addHyperlink(String text, String url, String color, int fontSizePx, String decoration) {
+        bodyBuilder.append("<p><a href='")
+                .append(url)
+                .append("' style='color:")
+                .append(color)
+                .append("; font-size:")
+                .append(fontSizePx)
+                .append("px; text-decoration:")
+                .append(decoration)
+                .append(";'>")
+                .append(applyWrap(text))
+                .append("</a></p>");
+        return this;
+    }
+
+    // ---------------- Wrap-Logik ----------------
+
+    private String applyWrap(String input) {
+        String wrapped = input;
+        for (String marker : markerSigns) {
+            wrapped = wrapped.replace(marker, marker + "<wbr>");
+        }
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+        for (char c : wrapped.toCharArray()) {
+            sb.append(c);
+            count++;
+            if (count >= maxLineLength) {
+                sb.append("<br>");
+                count = 0;
+            }
+        }
+        return sb.toString();
+    }
+
+    // ---------------- Dialog-Anzeige ----------------
+
+    public final String showAndWait() throws InterruptedException, InvocationTargetException {
         Runnable task = () -> {
             JEditorPane editorPane = new JEditorPane(
                     "text/html",
-                    "<html><body style='width:580px;'>" +
-                            "<p>" + text + "</p>" +
-                            "<a href='" + redirectUrl + "'>" + redirectUrl + "</a>" +
+                    "<html><body style='width:" + dialogWidth + "px; font-family:sans-serif;'>" +
+                            bodyBuilder.toString() +
                             "</body></html>"
             );
             editorPane.setEditable(false);
             editorPane.setBackground(UIManager.getColor("Panel.background"));
+            editorPane.setPreferredSize(new Dimension(dialogWidth, dialogHeight));
 
             if (hyperlinkListener != null) {
                 editorPane.addHyperlinkListener(hyperlinkListener);
             }
 
-            JScrollPane scrollPane = new JScrollPane(
-                    editorPane,
-                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
-            );
-            scrollPane.setPreferredSize(new Dimension(600, 200));
-
             int option = JOptionPane.showConfirmDialog(
                     null,
-                    scrollPane,
-                    "Google OAuth Redirect Link",
+                    editorPane,
+                    "Custom HTML Dialog",
                     JOptionPane.OK_CANCEL_OPTION,
                     JOptionPane.INFORMATION_MESSAGE
             );
 
             if (option == JOptionPane.OK_OPTION) {
-                result = redirectUrl;
+                result = "OK";
             } else {
                 result = null;
             }
@@ -88,6 +150,16 @@ public final class MLinkDialog {
         return result;
     }
 }
+
+
+
+
+
+
+
+
+
+
 
 
 

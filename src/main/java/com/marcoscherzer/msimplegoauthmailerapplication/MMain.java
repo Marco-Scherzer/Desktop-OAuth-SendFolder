@@ -140,13 +140,21 @@ public final class MMain {
                     System.out.println("Additional authentification needed " + oAuthLink);
                     try {
                         new MLinkDialog()
+                                .setDialogSize(700,  350)
                                 .setHyperlinkListener(MLinkDialog.createDefaultHyperlinkListener())
-                                .showAndWait("Additional authentification needed " + oAuthLink,"Information");
+                                .addText("Additional authentification needed.", "black", 18, "none")
+                                .addText("Please open the following address in your browser:", "black", 14, "none")
+                                .addHyperlink(oAuthLink, oAuthLink, "blue", 14, "underline")
+                                .showAndWait();
                     } catch (Exception exc) {
                         System.err.println(exc.getMessage());
                         exit(exc, 1);
                     }
-                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Additional authentification needed\n", TrayIcon.MessageType.INFO);
+                    trayIcon.displayMessage(
+                            "OAuth Desktop FileSend Folder",
+                            "Additional authentification needed\n",
+                            TrayIcon.MessageType.INFO
+                    );
                 }
 
                 @Override
