@@ -22,7 +22,6 @@ public final class MSimpleKeystore {
     private static final String KEYSTORE_TYPE = "PKCS12";
     private KeyStore keyStore;
     private boolean successfullyInitialized;
-    private boolean newCreated;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -46,7 +45,6 @@ public final class MSimpleKeystore {
         try { keyStore.store(fos, keystorePassword.toCharArray()); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while storing new keystore", exc); }
         try { fos.close(); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while closing fileoutputstream", exc); }
         successfullyInitialized = true;
-        newCreated = true;
         System.out.println("keystore successfully created");
     }
 
@@ -72,14 +70,7 @@ public final class MSimpleKeystore {
         } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while loading existing keystore", exc); }
         try { fis.close(); } catch (Exception exc) { throw new MKeystoreException("Error in context with keystore while closing keystore file", exc); }
         successfullyInitialized = true;
-        newCreated = false;
         System.out.println("keystore successfully loaded");
-    }
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public final boolean newCreated(){
-        return newCreated;
     }
 
     /**

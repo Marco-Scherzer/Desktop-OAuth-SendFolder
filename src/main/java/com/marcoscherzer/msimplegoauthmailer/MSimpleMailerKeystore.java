@@ -27,7 +27,7 @@ public final class MSimpleMailerKeystore {
 
 
         keystore = new MSimpleKeystore(keyStoreFile, keystorePassword);
-        keystore.loadKeyStoreOrCreateKeyStoreIfNotExists();
+        if(keyStoreFile.exists()) keystore.loadKeystore(); else keystore.createKeystore();
         //setup mode, setzt "clientId", "google-client-id", "google-client-secret"
         checkAndSetupKeystoreIfNeeded(clientSecretFile);
     }
