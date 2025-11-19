@@ -9,6 +9,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.*;
 
 import static com.marcoscherzer.msimplegoauthmailerapplication.MUtil.*;
@@ -137,9 +138,14 @@ public final class MMain {
                 @Override
                 protected final void onStartOAuth(String oAuthLink) {
                     System.out.println("Additional authentification needed " + oAuthLink);
-                    new MLinkDialog()
-                            .setHyperlinkListener()
-                            .showAndWait("Additional authentification needed " + oAuthLink,"Information");
+                    try {
+                        new MLinkDialog()
+                                .setHyperlinkListener(MLinkDialog.createDefaultHyperlinkListener())
+                                .showAndWait("Additional authentification needed " + oAuthLink,"Information");
+                    } catch (Exception exc) {
+                        System.err.println(exc.getMessage());
+                        exit(exc, 1);
+                    }
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Additional authentification needed\n", TrayIcon.MessageType.INFO);
                 }
 
