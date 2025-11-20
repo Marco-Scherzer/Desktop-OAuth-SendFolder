@@ -9,7 +9,6 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.*;
 
 import static com.marcoscherzer.msimplegoauthmailerapplication.MUtil.*;
@@ -139,22 +138,18 @@ public final class MMain {
                 protected final void onStartOAuth(String oAuthLink) {
                     System.out.println("Additional authentification needed " + oAuthLink);
                     try {
-                        new MLinkDialog()
+                        new MSimpleHtmlTextPanel()
                                 .setDialogSize(700,  350)
-                                .setHyperlinkListener(MLinkDialog.createDefaultHyperlinkListener())
-                                .addText("Additional authentification needed.", "black", 18, "none")
-                                .addText("Please open the following address in your browser:", "black", 14, "none")
+                                .setHyperlinkListener(MSimpleHtmlTextPanel.createDefaultHyperlinkListener())
+                                .addText("Additional authentification needed.", "white", 18, "none")
+                                .addText("Please open the following address in your browser:", "white", 14, "none")
                                 .addHyperlink(oAuthLink, oAuthLink, "blue", 14, "underline")
-                                .showAndWait();
+                                .create();
                     } catch (Exception exc) {
                         System.err.println(exc.getMessage());
                         exit(exc, 1);
                     }
-                    trayIcon.displayMessage(
-                            "OAuth Desktop FileSend Folder",
-                            "Additional authentification needed\n",
-                            TrayIcon.MessageType.INFO
-                    );
+                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Additional authentification needed\n", TrayIcon.MessageType.INFO);
                 }
 
                 @Override
