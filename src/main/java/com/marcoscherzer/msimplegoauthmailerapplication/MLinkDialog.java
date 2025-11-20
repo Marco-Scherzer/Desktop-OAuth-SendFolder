@@ -7,21 +7,27 @@ import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 
+/**
+ * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+ */
 public final class MLinkDialog {
 
     private String result;
-    private int dialogWidth = 600;   // Standardbreite
-    private int dialogHeight = 200;  // Standardhöhe
+    private int dialogWidth = 600;
+    private int dialogHeight = 200;
 
-    private String[] markerSigns = new String[]{"/", "?", "=", "&"}; // Standardmarker
-    private int maxLineLength = 60; // Standardwert für harte Umbrüche
+    private String[] markerSigns = new String[]{"/", "?", "=", "&"};
+    private int maxLineLength = 60;
 
-    private HyperlinkListener hyperlinkListener; // optionaler Listener
+    private HyperlinkListener hyperlinkListener;
 
     private final StringBuilder bodyBuilder = new StringBuilder();
 
     public MLinkDialog() { }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public MLinkDialog setDialogSize(int width, int height) {
         this.dialogWidth = width;
         this.dialogHeight = height;
@@ -29,10 +35,7 @@ public final class MLinkDialog {
     }
 
     /**
-     * Konfiguriert den Textumbruch.
-     *
-     * @param markerSigns   Zeichen, nach denen <wbr> eingefügt wird
-     * @param maxLineLength maximale Länge, nach der <br> eingefügt wird
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public MLinkDialog setWrap(String[] markerSigns, int maxLineLength) {
         this.markerSigns = markerSigns;
@@ -41,7 +44,7 @@ public final class MLinkDialog {
     }
 
     /**
-     * Setzt einen HyperlinkListener, der Aktivierungen im JEditorPane verarbeitet.
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public MLinkDialog setHyperlinkListener(HyperlinkListener listener) {
         this.hyperlinkListener = listener;
@@ -49,7 +52,7 @@ public final class MLinkDialog {
     }
 
     /**
-     * Standardlistener: öffnet aktivierte Links im Systembrowser.
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public static HyperlinkListener createDefaultHyperlinkListener() {
         return e -> {
@@ -63,8 +66,9 @@ public final class MLinkDialog {
         };
     }
 
-    // ---------------- Praktische Add-Methoden ----------------
-
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public MLinkDialog addText(String text, String color, int fontSizePx, String decoration) {
         bodyBuilder.append("<p style='color:")
                 .append(color)
@@ -78,6 +82,9 @@ public final class MLinkDialog {
         return this;
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public MLinkDialog addHyperlink(String text, String url, String color, int fontSizePx, String decoration) {
         bodyBuilder.append("<p><a href='")
                 .append(url)
@@ -93,8 +100,9 @@ public final class MLinkDialog {
         return this;
     }
 
-    // ---------------- Wrap-Logik ----------------
-
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     private String applyWrap(String input) {
         String wrapped = input;
         for (String marker : markerSigns) {
@@ -113,8 +121,9 @@ public final class MLinkDialog {
         return sb.toString();
     }
 
-    // ---------------- Dialog-Anzeige ----------------
-
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public final String showAndWait() throws InterruptedException, InvocationTargetException {
         Runnable task = () -> {
             JEditorPane editorPane = new JEditorPane(
