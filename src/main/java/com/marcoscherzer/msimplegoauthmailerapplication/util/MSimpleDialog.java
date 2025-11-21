@@ -166,7 +166,9 @@ public final class MSimpleDialog {
 
         SwingUtilities.invokeAndWait(task);
     }
-
+    /**
+     * Copyright Marco Scherzer, All rights reserved
+     */
     public JDialog getUIComponent() {
         return dialog;
     }
