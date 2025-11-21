@@ -3,7 +3,7 @@ package com.marcoscherzer.msimplegoauthmailerapplication.core;
 import com.marcoscherzer.msimplegoauthmailer.MMailAdressFormatException;
 import com.marcoscherzer.msimplegoauthmailer.MOutgoingMail;
 import com.marcoscherzer.msimplegoauthmailer.MSimpleMailer;
-import com.marcoscherzer.msimplegoauthmailerapplication.MUtil;
+import com.marcoscherzer.msimplegoauthmailerapplication.util.MUtil;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.marcoscherzer.msimplegoauthmailerapplication.MUtil.createFolderLink;
+import static com.marcoscherzer.msimplegoauthmailerapplication.util.MUtil.createFolderLink;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

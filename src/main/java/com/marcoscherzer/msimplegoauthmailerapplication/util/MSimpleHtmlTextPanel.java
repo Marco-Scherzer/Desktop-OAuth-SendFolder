@@ -1,10 +1,13 @@
-package com.marcoscherzer.msimplegoauthmailerapplication;
+package com.marcoscherzer.msimplegoauthmailerapplication.util;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import java.awt.*;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * @author Marco Scherzer
@@ -20,6 +23,12 @@ public final class MSimpleHtmlTextPanel extends JPanel {
     private String[] markerSigns = new String[]{"/", "?", "=", "&"};
     private int maxLineLength = 60;
 
+    // Map für URL → Handler
+    private final Map<String, Consumer<HyperlinkEvent>> hyperlinkHandlers = new HashMap<>();
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public MSimpleHtmlTextPanel() {
         super(new BorderLayout());
         editorPane = new JEditorPane("text/html", "");
@@ -28,6 +37,19 @@ public final class MSimpleHtmlTextPanel extends JPanel {
         this.add(editorPane, BorderLayout.CENTER);
         editorPane.setPreferredSize(new Dimension(dialogWidth, dialogHeight));
         this.setSize(dialogWidth, dialogHeight);
+
+        // Globaler Listener, der in der Map nachschaut
+        editorPane.addHyperlinkListener(new HyperlinkListener() {
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED && e.getURL() != null) {
+                    Consumer<HyperlinkEvent> handler = hyperlinkHandlers.get(e.getURL().toString());
+                    if (handler != null) {
+                        handler.accept(e);
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -67,9 +89,19 @@ public final class MSimpleHtmlTextPanel extends JPanel {
     }
 
     /**
+     * Standard-Link ohne spezifischen Handler (nutzt Default)
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final MSimpleHtmlTextPanel addHyperlink(String text, String url, String color, int fontSizePx, String decoration) {
+        addHyperlink(text, url, color, fontSizePx, decoration, DefaultHyperlinkHandler);
+        return this;
+    }
+
+    /**
+     * Link mit spezifischem Handler → wird in Map gespeichert
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final MSimpleHtmlTextPanel addHyperlink(String text, String url, String color, int fontSizePx, String decoration, Consumer<HyperlinkEvent> handler) {
         bodyBuilder.append("<p><a href='")
                 .append(url)
                 .append("' style='color:")
@@ -81,34 +113,34 @@ public final class MSimpleHtmlTextPanel extends JPanel {
                 .append(";'>")
                 .append(applyWrap(text))
                 .append("</a></p>");
+        if(handler !=null ) hyperlinkHandlers.put(url, handler);
         return this;
     }
 
     /**
+     * Default-Handler als Konstante
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final MSimpleHtmlTextPanel setHyperlinkListener(HyperlinkListener listener) {
-        editorPane.addHyperlinkListener(listener);
-        return this;
-    }
-
-    /**
-     * Standardlistener: öffnet aktivierte Links im Systembrowser.
-     *
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public static HyperlinkListener createDefaultHyperlinkListener() {
-        return e -> {
-            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED && e.getURL() != null) {
-                try {
-                    Desktop.getDesktop().browse(URI.create(e.getURL().toString()));
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+    public static final Consumer<HyperlinkEvent> DefaultHyperlinkHandler = e -> {
+        if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED && e.getURL() != null) {
+            try {
+                Desktop.getDesktop().browse(URI.create(e.getURL().toString()));
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-        };
+        }
+    };
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public static Consumer<HyperlinkEvent> getDefaultHyperlinkHandler() {
+        return DefaultHyperlinkHandler;
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     private String applyWrap(String input) {
         String wrapped = input;
         for (String marker : markerSigns) {
@@ -144,4 +176,6 @@ public final class MSimpleHtmlTextPanel extends JPanel {
         return editorPane;
     }
 }
+
+
 

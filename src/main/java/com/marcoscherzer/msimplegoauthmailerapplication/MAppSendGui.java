@@ -10,7 +10,7 @@ import java.awt.*;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MMiniGui implements MAttachmentWatcher.MConsentQuestioner {
+public final class MAppSendGui implements MAttachmentWatcher.MConsentQuestioner {
     private JFrame consentFrame;
     private JLabel counterLabel;
     private boolean showingPrefs = false;
@@ -18,13 +18,13 @@ public final class MMiniGui implements MAttachmentWatcher.MConsentQuestioner {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MMiniGui(MOutgoingMail mail) {
+    public MAppSendGui(MOutgoingMail mail) {
         this(mail, 900, 600, 16); // Defaultwerte: Breite 900, Höhe 600, Schriftgröße 16
     }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MMiniGui(MOutgoingMail mail, int windowWidth, int windowHeight, int fontSize) {
+    public MAppSendGui(MOutgoingMail mail, int windowWidth, int windowHeight, int fontSize) {
         SwingUtilities.invokeLater(() -> {
             consentFrame = new JFrame("OAuthFileSendFolder for Gmail (Prototype, preAlpha 0.1) - Send Mail");
             consentFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

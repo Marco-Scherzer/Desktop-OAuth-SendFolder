@@ -1,6 +1,7 @@
 package com.marcoscherzer.msimplegoauthmailer;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
@@ -14,6 +15,7 @@ import com.google.api.client.util.store.MemoryDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Message;
+import com.marcoscherzer.msimplegoauthmailerapplication.util.MMutableBoolean;
 import com.marcoscherzer.msimplekeystore.MKeystoreException;
 import com.marcoscherzer.msimplekeystore.MSimpleKeystore;
 import com.marcoscherzer.msimplegoauthmailer.msimplekeystoredatastoreadapter.MSimpleKeystoreDataStoreFactory;
@@ -28,9 +30,11 @@ import jakarta.activation.DataSource;
 import jakarta.activation.FileDataSource;
 import org.apache.commons.codec.binary.Base64;
 
+import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -99,7 +103,12 @@ public abstract class MSimpleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private void doBrowserOAuthFlow(MSimpleKeystore keystore, boolean doNotPersistOAuthToken, String applicationName, String clientId,String clientSecret) throws Exception, MKeystoreException {
+    private void doBrowserOAuthFlow(MSimpleKeystore keystore,
+                                    boolean doNotPersistOAuthToken,
+                                    String applicationName,
+                                    String clientId,
+                                    String clientSecret) throws Exception, MKeystoreException {
+
         JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         GoogleClientSecrets.Details details = new GoogleClientSecrets.Details()
@@ -119,7 +128,6 @@ public abstract class MSimpleMailer {
             }
             flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, scopes)
                     .setAccessType("online")
-                    .setApprovalPrompt("force")
                     .setCredentialDataStore(new MemoryDataStoreFactory().getDataStore("tempsession"))
                     .build();
         } else {
@@ -129,25 +137,40 @@ public abstract class MSimpleMailer {
                     .build();
         }
 
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(gglsLocalJettyPort).build();
+        MMutableBoolean continueOAuth = new MMutableBoolean(true);
 
-        onStartOAuth(flow.newAuthorizationUrl()
-                .toString()
-                .replaceFirst("redirect_uri", "redirect_uri=http://localhost:" +gglsLocalJettyPort +"/Callback"
-                                +"&response_type=code"
-                                +"&scope=" +flow.getScopesAsString()));
+        // URL mit prompt=login
+        GoogleAuthorizationCodeRequestUrl authUrl = flow.newAuthorizationUrl()
+                .setRedirectUri("http://localhost:" + gglsLocalJettyPort + "/Callback")
+                .set("response_type", "code")
+                .set("scope", String.join(" ", scopes))
+                .set("prompt", doNotPersistOAuthToken ? "login" : "consent");
 
-        credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("OAuth");
-        if (credential == null) {
-            throw new IllegalStateException("No stored OAuth credential found.");
+        String url = authUrl.build();
+        onStartOAuth(url, continueOAuth);
+
+        if (continueOAuth.get()) {
+            LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(gglsLocalJettyPort).build();
+            String redirectUri = receiver.getRedirectUri();
+
+            // Code abwarten und Tokens tauschen
+            String code = receiver.waitForCode();
+
+            TokenResponse tokenResponse = flow.newTokenRequest(code)
+                    .setRedirectUri(redirectUri)
+                    .execute();
+
+            Credential credential = flow.createAndStoreCredential(tokenResponse, "OAuth");
+            if (credential == null) {
+                throw new IllegalStateException("No OAuth credential obtained.");
+            }
+
+            this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
+                    .setApplicationName(applicationName + " [" + clientId + "]")
+                    .build();
         }
-
-        applicationName += " [" + keystore.get("clientId") + "]";
-
-        this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
-                .setApplicationName(applicationName)
-                .build();
     }
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -158,7 +181,7 @@ public abstract class MSimpleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    protected abstract void onStartOAuth(String oAuthLink);
+    protected abstract void onStartOAuth(String oAuthLink, MMutableBoolean continueOAuthOrNot);
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

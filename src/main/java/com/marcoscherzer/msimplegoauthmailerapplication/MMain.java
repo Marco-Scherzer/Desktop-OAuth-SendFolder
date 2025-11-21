@@ -3,15 +3,17 @@ package com.marcoscherzer.msimplegoauthmailerapplication;
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.marcoscherzer.msimplegoauthmailer.*;
 import com.marcoscherzer.msimplegoauthmailerapplication.core.MAttachmentWatcher;
+import com.marcoscherzer.msimplegoauthmailerapplication.util.MMutableBoolean;
 import com.marcoscherzer.msimplekeystore.*;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.nio.file.*;
 
-import static com.marcoscherzer.msimplegoauthmailerapplication.MUtil.*;
+import static com.marcoscherzer.msimplegoauthmailerapplication.util.MUtil.*;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -31,9 +33,10 @@ public final class MMain {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static final void main(String[] args) {
+    public static final void main(String[] args) throws InterruptedException, InvocationTargetException {
         isDbg = (args != null && args[0]!=null && args[0].equals("-debug"));
         isDbg = true; //dbg
+
         /*
             FlatLightLaf.setup(), FlatDarkLaf.setup(), FlatIntelliJLaf.setup(), FlatDarculaLaf.setup(),
             FlatArcDarkIJTheme.setup(), FlatArcIJTheme.setup(), FlatArcOrangeIJTheme.setup(),
@@ -74,6 +77,7 @@ public final class MMain {
                     System.out.println("showing password dialog");
                     trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Password required.\n", TrayIcon.MessageType.INFO);
                     String pw = new MAppPwDialog().showAndWait();
+                    pw="testTesttest-123"; //dbg
                     if(pw == null) exit(null,1);//canceled
                     store = new MSimpleMailerKeystore(pw,"", keystorePath);
                     System.out.println("Access-level 1 granted: Application");
@@ -117,7 +121,7 @@ public final class MMain {
                         watcher = new MAttachmentWatcher(sentFolder, unsentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
                             @Override
                             public final MConsentQuestioner askForConsent(MOutgoingMail mail) {
-                                return new MMiniGui(mail, 900, 600, 16);
+                                return new MAppSendGui(mail, 900, 600, 16);
                             }
                         }.startServer();
 
@@ -135,16 +139,18 @@ public final class MMain {
                 }
 
                 @Override
-                protected final void onStartOAuth(String oAuthLink) {
+                protected final void onStartOAuth(String oAuthLink, MMutableBoolean continueOAuthOrNot) {
                     System.out.println("Additional authentification needed " + oAuthLink);
                     try {
-                        new MSimpleHtmlTextPanel()
-                                .setDialogSize(700,  350)
-                                .setHyperlinkListener(MSimpleHtmlTextPanel.createDefaultHyperlinkListener())
-                                .addText("Additional authentification needed.", "white", 18, "none")
-                                .addText("Please open the following address in your browser:", "white", 14, "none")
-                                .addHyperlink(oAuthLink, oAuthLink, "blue", 14, "underline")
-                                .create();
+                        int option = new MAppRedirectLinkDialog().showAndWait(oAuthLink);// Index 0 = "OK"
+                        if (option == 0) {
+                            continueOAuthOrNot.set(true);
+                            if (Desktop.isDesktopSupported()) {
+                                Desktop.getDesktop().browse(URI.create(oAuthLink));
+                            } else {
+                                System.out.println("Browser can not be startet: Please open url manually: " + oAuthLink);
+                            }
+                        } else continueOAuthOrNot.set(false);
                     } catch (Exception exc) {
                         System.err.println(exc.getMessage());
                         exit(exc, 1);
@@ -162,6 +168,15 @@ public final class MMain {
             mailer.startOAuth();
         }
     }
+
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private static void createMessageDialogAndWait(String message, String title){
+        JOptionPane.showMessageDialog(null,message, title, JOptionPane.ERROR_MESSAGE);
+    }
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -198,13 +213,6 @@ public final class MMain {
         trayIcon = new TrayIcon(image, "OAuth Desktop FileSend Folder", traymenu);
         trayIcon.setImageAutoSize(true);
         tray.add(trayIcon);
-    }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    private static void createMessageDialogAndWait(String message, String title){
-         JOptionPane.showMessageDialog(null,message, title, JOptionPane.ERROR_MESSAGE);
     }
 
     /**
