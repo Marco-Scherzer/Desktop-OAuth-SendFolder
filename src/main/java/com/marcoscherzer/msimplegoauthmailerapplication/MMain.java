@@ -9,6 +9,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.nio.file.*;
@@ -29,7 +30,63 @@ public final class MMain {
     private static final String keystorePath = userDir+"\\mystore.p12";
     private static final String mailFoldersPath = userDir + "\\mail";
     private static String trayIconPathWithinResourcesFolder = "/5.png";
+    private static MSimpleMailerKeystore store;
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private static final void setup(){
+        try {
+            System.out.println("showing setup dialog");
+            trayIcon.displayMessage("OAuth Desktop FileSend Folder",
+                    "Setup started." + (isDbg ? "\nInfo: Use the SystemTray Icon to view log Information" : ""),
+                    TrayIcon.MessageType.INFO);
+            String[] setupedValues = new MAppSetupDialog().showAndWait();
+            if (setupedValues == null) exit(null, 1); // canceled
+            String from = setupedValues[0];
+            String to = setupedValues[1];
+            String pw = setupedValues[2];
+            String clientSecretPath = setupedValues[3];
+
+            // Keystore erstellen mit ausgewähltem client_secret.json
+            store = new MSimpleMailerKeystore(pw, clientSecretPath, keystorePath);
+            store.getKeyStore().put("fromAddress", from);
+            store.getKeyStore().put("toAddress", to);
+
+            trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup completed.", TrayIcon.MessageType.INFO);
+            System.out.println("setup completed");
+        } catch (Exception exc){
+            System.err.println(exc.getMessage());
+            createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
+            exit(exc,1);
+        }
+    }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private static final void checkPassword(){
+        try {
+            System.out.println("showing password dialog");
+            trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Password required.\n", TrayIcon.MessageType.INFO);
+
+             new MAppPwDialog()
+                    .setOkHandler(pw -> {
+                        try {
+                            store = new MSimpleMailerKeystore(pw, "", keystorePath);
+                            System.out.println("Access-level 1 granted: Application");
+                            trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
+                        } catch (Exception exc){
+                            System.err.println(exc.getMessage());
+                            createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
+                            exit(exc,1);
+                        }
+                    }).showAndWait();
+            } catch (Exception exc){
+                System.err.println(exc.getMessage());
+                createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
+                exit(exc,1);
+            }
+    }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -48,62 +105,11 @@ public final class MMain {
             FlatCarbonIJTheme.setup();
             UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
 
-            MSimpleMailerKeystore store = null;
-            try {
-                logFrame = new MAppLoggingArea();
-                setupTrayIcon();
-                if (isDbg) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
-                boolean setup = !Files.exists(Paths.get(keystorePath));
-                if (setup) {
-                    System.out.println("showing setup dialog");
-                    trayIcon.displayMessage("OAuth Desktop FileSend Folder",
-                            "Setup started." + (isDbg ? "\nInfo: Use the SystemTray Icon to view log Information" : ""),
-                            TrayIcon.MessageType.INFO);
-                    String[] setupedValues = new MAppSetupDialog().showAndWait();
-                    if (setupedValues == null) exit(null, 1); // canceled
-                    String from = setupedValues[0];
-                    String to = setupedValues[1];
-                    String pw = setupedValues[2];
-                    String clientSecretPath = setupedValues[3];
-
-                    // Keystore erstellen mit ausgewähltem client_secret.json
-                    store = new MSimpleMailerKeystore(pw, clientSecretPath, keystorePath);
-                    store.getKeyStore().put("fromAddress", from);
-                    store.getKeyStore().put("toAddress", to);
-
-                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup completed.", TrayIcon.MessageType.INFO);
-                    System.out.println("setup completed");
-                } else {
-                    System.out.println("showing password dialog");
-                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Password required.\n", TrayIcon.MessageType.INFO);
-                    String pw = new MAppPwDialog().showAndWait();
-                    pw="testTesttest-123"; //dbg
-                    if(pw == null) exit(null,1);//canceled
-                    store = new MSimpleMailerKeystore(pw,"", keystorePath);
-                    System.out.println("Access-level 1 granted: Application");
-                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
-                }
-            } catch (Exception exc){
-                System.err.println(exc.getMessage());
-                createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
-                exit(exc,1);
-            } catch (MKeystoreException exc) {
-                System.err.println(exc.getMessage());
-                createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
-                exit(exc,1);
-            } catch (MPasswordIntegrityException exc) {
-                System.err.println(exc.getMessage());
-                createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
-                exit(exc,1);
-            } catch (MPasswordComplexityException exc) {
-                System.err.println(exc.getMessage());
-                createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
-                exit(exc,1);
-            } catch (MClientSecretException exc) {
-                System.err.println(exc.getMessage());
-                createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
-                exit(exc,1);
-            }
+            logFrame = new MAppLoggingArea();
+            setupTrayIcon();
+            if (isDbg) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
+            boolean setup = !Files.exists(Paths.get(keystorePath));
+            if (setup) setup(); else checkPassword();
 
         if(store!=null) {
             mailer = new MSimpleMailer(store, "BackupMailer", true) {
@@ -132,7 +138,7 @@ public final class MMain {
 
                         printConfiguration(fromAddress, toAddress, mailFoldersPath, clientAndPathUUID, clientAndPathUUID + "-sent");
                         trayIcon.displayMessage("OAuth Desktop FileSend Folder", "To send mail drag files onto its dolphin icon on the desktop or click it.", TrayIcon.MessageType.INFO);
-                    } catch (Throwable exc) {
+                    } catch (Exception exc) {
                         System.err.println(exc.getMessage());
                         exit(exc, 1);
                     }
@@ -142,15 +148,7 @@ public final class MMain {
                 protected final void onStartOAuth(String oAuthLink, MMutableBoolean continueOAuthOrNot) {
                     System.out.println("Additional authentification needed " + oAuthLink);
                     try {
-                        int option = new MAppRedirectLinkDialog().showAndWait(oAuthLink);// Index 0 = "OK"
-                        if (option == 0) {
-                            continueOAuthOrNot.set(true);
-                            if (Desktop.isDesktopSupported()) {
-                                Desktop.getDesktop().browse(URI.create(oAuthLink));
-                            } else {
-                                System.out.println("Browser can not be startet: Please open url manually: " + oAuthLink);
-                            }
-                        } else continueOAuthOrNot.set(false);
+                       new MAppRedirectLinkDialog().showAndWait(oAuthLink,continueOAuthOrNot);
                     } catch (Exception exc) {
                         System.err.println(exc.getMessage());
                         exit(exc, 1);
@@ -181,44 +179,50 @@ public final class MMain {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private static void setupTrayIcon() throws Exception {
-        PopupMenu traymenu = new PopupMenu();
-
-        MenuItem showLogItem = new MenuItem("Show Log");
-        showLogItem.addActionListener((ActionEvent e) -> {
-            if (!logFrame.getLogFrame().isVisible()) {
-                logFrame.getLogArea().setVisible(true);
-                logFrame.getLogFrame().setState(JFrame.NORMAL);
-                logFrame.getLogFrame().toFront();
-            } else {
-                logFrame.getLogFrame().setVisible(false);
+    private static void setupTrayIcon(){
+        System.out.println("setting up Tray-Icon");
+        try {
+            if (!SystemTray.isSupported()) {
+                throw new Exception("Error: System Tray not supported.");
             }
-        });
-        traymenu.add(showLogItem);
 
-        MenuItem exitItem = new MenuItem("Close Program");
-        exitItem.addActionListener((ActionEvent e) -> {
-            System.out.println("Program closed via Tray-Icon");
-            exit(null,0);
-        });
-        traymenu.add(exitItem);
+            PopupMenu traymenu = new PopupMenu();
 
-        if (!SystemTray.isSupported()) {
-            System.out.println("SystemTray is not supported!");
-            return;
+            MenuItem showLogItem = new MenuItem("Show Log");
+            showLogItem.addActionListener((ActionEvent e) -> {
+                if (!logFrame.getLogFrame().isVisible()) {
+                    logFrame.getLogArea().setVisible(true);
+                    logFrame.getLogFrame().setState(JFrame.NORMAL);
+                    logFrame.getLogFrame().toFront();
+                } else {
+                    logFrame.getLogFrame().setVisible(false);
+                }
+            });
+            traymenu.add(showLogItem);
+
+            MenuItem exitItem = new MenuItem("Close Program");
+            exitItem.addActionListener((ActionEvent e) -> {
+                System.out.println("Program closed via Tray-Icon");
+                exit(null,0);
+            });
+
+            traymenu.add(exitItem);
+            SystemTray tray = SystemTray.getSystemTray();
+            Image image = ImageIO.read(MMain.class.getResourceAsStream(trayIconPathWithinResourcesFolder));
+            trayIcon = new TrayIcon(image, "OAuth Desktop FileSend Folder", traymenu);
+            trayIcon.setImageAutoSize(true);
+            tray.add(trayIcon);
+        } catch (Exception exc) {
+            System.err.println(exc.getMessage());
+            createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
+            exit(exc,1);
         }
-
-        SystemTray tray = SystemTray.getSystemTray();
-        Image image = ImageIO.read(MMain.class.getResourceAsStream(trayIconPathWithinResourcesFolder));
-        trayIcon = new TrayIcon(image, "OAuth Desktop FileSend Folder", traymenu);
-        trayIcon.setImageAutoSize(true);
-        tray.add(trayIcon);
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private static void exit(Throwable exception,int code) {
+    public static void exit(Throwable exception,int code) {
         if(isDbg && exception!=null){exception.printStackTrace();}
         try {
             if(mailer != null && mailer.isInDoNotPersistOAuthTokenMode()) mailer.revokeOAuthTokenFromServer();

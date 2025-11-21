@@ -80,7 +80,7 @@ public abstract class MSimpleMailer {
                             System.out.println("client_secret.json successfully imported and deleted.");
                         }
                     }
-                } catch (Exception | MKeystoreException exc) {
+                } catch (Exception exc) {
                     //System.err.println("Error in initialization."+ exc.getMessage());
                     onOAuthFailure(exc);
                 }
@@ -198,7 +198,7 @@ public abstract class MSimpleMailer {
         try {
             System.out.println("Removing persistet OAuth Token from KeyStore.");
            if(keystore.contains("OAuth")) this.keystore.remove("OAuth"); else System.out.println("OAuth Token not contained. Started in doNotPersistOAuthToken Mode ?)");
-        } catch (Exception | MKeystoreException exc) {
+        } catch (Exception exc) {
             System.err.println("Error removing OAuth token from Keystore. " +
                     "\nPlease delete the keystore file manually and restart the program (you have to setup pw and mail adresses new)." +
                     "\nConsider to use secure OAuthMode Parameter next time."+ exc.getMessage());

@@ -3,7 +3,7 @@ package com.marcoscherzer.msimplekeystore;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MPasswordComplexityException extends Throwable{
+public final class MPasswordComplexityException extends Exception{
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

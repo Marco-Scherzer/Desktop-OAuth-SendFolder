@@ -1,39 +1,59 @@
 package com.marcoscherzer.msimplegoauthmailerapplication;
-
+import com.marcoscherzer.msimplegoauthmailerapplication.util.MMutableBoolean;
 import com.marcoscherzer.msimplegoauthmailerapplication.util.MSimpleDialog;
 import com.marcoscherzer.msimplegoauthmailerapplication.util.MSimpleHtmlTextPanel;
-
 import javax.swing.*;
+import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 
 /**
- * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+ * Copyright Marco Scherzer, All rights reserved
  */
 public final class MAppRedirectLinkDialog {
 
     /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * Copyright Marco Scherzer, All rights reserved
      */
-    public final int showAndWait(String oAuthLink) throws InterruptedException, InvocationTargetException {
-        MSimpleHtmlTextPanel htmlPanel = new MSimpleHtmlTextPanel();
+    public MAppRedirectLinkDialog() {}
 
-        MSimpleDialog dialog = new MSimpleDialog(htmlPanel)
+    /**
+     * Copyright Marco Scherzer, All rights reserved
+     */
+    public void showAndWait(String oAuthLink, MMutableBoolean continueOAuthOrNot) throws InterruptedException, InvocationTargetException {
+        MSimpleHtmlTextPanel htmlPanel = new MSimpleHtmlTextPanel();
+        MSimpleDialog dialog = new MSimpleDialog(htmlPanel, 700, 400)
                 .setTitle("OAuth login")
                 .setMessageType(JOptionPane.INFORMATION_MESSAGE)
-                .setOptionType(JOptionPane.DEFAULT_OPTION)
-                .setOptions(new Object[]{"OK", "Cancel"})
-                .setInitialButtonValue("OK");
+                .setIcon(null)
+                .addButton("OK", e -> {
+                    try {
+                        continueOAuthOrNot.set(true);
+                        if (Desktop.isDesktopSupported()) {
+                            Desktop.getDesktop().browse(URI.create(oAuthLink));
+                        } else {
+                            System.out.println("Browser can not be started: Please open url manually: " + oAuthLink);
+                        }
+                    } catch (Exception exc) {
+                        continueOAuthOrNot.set(false);
+                        MMain.exit(exc, 0);
+                    }
+                }, false) // Dialog bleibt offen
+                .addButton("Cancel", e -> {
+                    continueOAuthOrNot.set(false);
+                    MMain.exit(null, 0);
+                }, true); // Dialog schließt
 
-        htmlPanel.setDialogSize(700, 350)
-                .addText("Additional authentication needed.", "white", 18, "none")
+        htmlPanel.setDialogSize(700, 400)
+                .addText("Additional authentication needed.", "white", 14, "none")
                 .addText("Please open the following address in your browser:", "white", 14, "none")
-                .addHyperlink(oAuthLink, oAuthLink, "yellow", 14, "underline",
-                        e -> { dialog.pressButton(0); }) // Klick auf Link simuliert "OK"
+                .addHyperlink(oAuthLink, oAuthLink, "yellow", 11, "underline",
+                        e -> dialog.pressButton(0)) // Klick auf Link simuliert "OK"
                 .create();
-
-        return dialog.showAndWait();
+        dialog.showAndWait();
     }
 }
+
 
 
 

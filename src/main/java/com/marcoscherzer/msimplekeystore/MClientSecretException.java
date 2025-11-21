@@ -3,7 +3,7 @@ package com.marcoscherzer.msimplekeystore;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MClientSecretException extends Throwable{
+public final class MClientSecretException extends Exception{
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
