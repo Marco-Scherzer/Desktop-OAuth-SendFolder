@@ -2,17 +2,13 @@ package com.marcoscherzer.msimplegoauthmailerapplication;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import javax.swing.plaf.basic.BasicScrollBarUI;
 
 /**
  * Copyright Marco Scherzer, All rights reserved
  */
 public final class MFullscreenOverlay {
     private final JWindow window = new JWindow();
-    private final JScrollBar vbar = new JScrollBar(Adjustable.VERTICAL);
-    private final Timer anim;
-    private int dir = +1;
+    private final JProgressBar progress = new JProgressBar(SwingConstants.VERTICAL);
 
     public MFullscreenOverlay() {
         // Bildschirmgröße bestimmen
@@ -22,16 +18,21 @@ public final class MFullscreenOverlay {
                 .getDefaultConfiguration()
                 .getBounds();
 
-        // Nur 5% der Breite nutzen
+        // 5% der Breite, 1/3 der Höhe
         int overlayWidth = (int)(screen.width * 0.05);
-        window.setBounds(screen.x, screen.y, overlayWidth, screen.height);
+        int overlayHeight = (int)(screen.height * 0.33);
 
+        // Rechts positionieren, vertikal mittig (Start bei 1/3 von oben)
+        int x = screen.x + screen.width - overlayWidth;
+        int y = screen.y + (screen.height - overlayHeight) / 2;
+
+        window.setBounds(x, y, overlayWidth, overlayHeight);
         window.setAlwaysOnTop(true);
-        window.setBackground(new Color(0,0,0,0)); // Transparenz
+        window.setBackground(new Color(0,0,0,0));
         window.setFocusableWindowState(false);
         window.setFocusable(false);
 
-        JPanel root = new JPanel(null) {
+        JPanel root = new JPanel(new BorderLayout()) {
             @Override protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -42,62 +43,26 @@ public final class MFullscreenOverlay {
         };
         root.setOpaque(false);
 
-        // Scrollbar konfigurieren
-        vbar.setMinimum(0);
-        vbar.setMaximum(100);
-        vbar.setValue(0);
-        vbar.setPreferredSize(new Dimension(18, 100));
-        vbar.setEnabled(false);
-        vbar.setOpaque(false);
-        vbar.setBorder(null);
-        vbar.setUI(new BasicScrollBarUI() {
-            @Override protected void configureScrollBarColors() {
-                thumbColor = new Color(70, 130, 180, 200); // steel blue
-                trackColor = new Color(255, 255, 255, 60);
-            }
-            @Override protected JButton createDecreaseButton(int orientation) { return zero(); }
-            @Override protected JButton createIncreaseButton(int orientation) { return zero(); }
-            private JButton zero() {
-                JButton b = new JButton();
-                b.setPreferredSize(new Dimension(0,0));
-                b.setOpaque(false);
-                b.setBorder(BorderFactory.createEmptyBorder());
-                return b;
-            }
-        });
+        // Fortschrittsanzeige konfigurieren
+        progress.setIndeterminate(true); // animiert hin und her
+        progress.setForeground(Color.GREEN); // klassisch grün
+        progress.setBackground(new Color(245,245,245));
+        progress.setBorderPainted(false);
 
-        root.add(vbar);
+        root.add(progress, BorderLayout.CENTER);
         window.setContentPane(root);
-
-        window.addComponentListener(new ComponentAdapter() {
-            @Override public void componentResized(ComponentEvent e) {
-                vbar.setBounds(0, 0, vbar.getPreferredSize().width, window.getHeight());
-            }
-            @Override public void componentShown(ComponentEvent e) {
-                vbar.setBounds(0, 0, vbar.getPreferredSize().width, window.getHeight());
-            }
-        });
-
-        // Animation für Scrollbar
-        anim = new Timer(20, e -> {
-            int v = vbar.getValue() + dir;
-            if (v <= vbar.getMinimum()) { v = vbar.getMinimum(); dir = +1; }
-            if (v >= vbar.getMaximum() - vbar.getVisibleAmount()) { v = vbar.getMaximum() - vbar.getVisibleAmount(); dir = -1; }
-            vbar.setValue(v);
-        });
     }
 
     public void showOverlay() {
-        anim.start();
         window.setVisible(true);
         window.toFront();
     }
 
     public void hideOverlay() {
-        anim.stop();
         window.setVisible(false);
     }
 }
+
 
 
 
