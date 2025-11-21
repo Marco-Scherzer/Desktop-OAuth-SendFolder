@@ -1,11 +1,12 @@
-/*
- * Copyright Marco Scherzer, All rights reserved.
- */
+
 package com.marcoscherzer.msimplegoauthmailerapplication;
 
 import javax.swing.*;
 import java.awt.*;
 
+/*
+ * Copyright Marco Scherzer, All rights reserved.
+ */
 public final class MFullscreenOverlay {
     private final JWindow window = new JWindow();
     private final SpinnerPanel spinner = new SpinnerPanel();
