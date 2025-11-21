@@ -109,6 +109,7 @@ public final class MMain {
             setupTrayIcon();
             if (isDbg) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
             boolean setup = !Files.exists(Paths.get(keystorePath));
+
             if (setup) setup(); else checkPassword();
 
         if(store!=null) {
@@ -149,6 +150,8 @@ public final class MMain {
                     System.out.println("Additional authentification needed " + oAuthLink);
                     try {
                        new MAppRedirectLinkDialog().showAndWait(oAuthLink,continueOAuthOrNot);
+
+
                     } catch (Exception exc) {
                         System.err.println(exc.getMessage());
                         exit(exc, 1);

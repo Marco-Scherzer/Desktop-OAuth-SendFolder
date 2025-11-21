@@ -149,19 +149,6 @@ public final class MSimpleDialog {
             dialog.setLocationRelativeTo(null);
             dialog.setVisible(true);
 
-            Object selectedValue = pane.getValue();
-            if (selectedValue != null) {
-                int index = buttonLabels.indexOf(selectedValue);
-                if (index >= 0 && index < buttonHandlers.size()) {
-                    ActionListener handler = buttonHandlers.get(index);
-                    if (handler != null) {
-                        handler.actionPerformed(null);
-                    }
-                    if (buttonCloseFlags.get(index)) {
-                        dialog.dispose();
-                    }
-                }
-            }
         };
 
         SwingUtilities.invokeAndWait(task);

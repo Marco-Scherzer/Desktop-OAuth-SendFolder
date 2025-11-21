@@ -47,7 +47,7 @@ public final class MAppRedirectLinkDialog {
         htmlPanel.setDialogSize(700, 400)
                 .addText("Additional authentication needed.", "white", 14, "none")
                 .addText("Please open the following address in your browser:", "white", 14, "none")
-                .addHyperlink(oAuthLink, oAuthLink, "yellow", 11, "underline",
+                .addHyperlink(oAuthLink, oAuthLink, "#87CEEB", 11, "underline",
                         e -> dialog.pressButton(0)) // Klick auf Link simuliert "OK"
                 .create();
         dialog.showAndWait();
