@@ -3,7 +3,7 @@ package com.marcoscherzer.msimplegoauthmailerapplication;
 
 import javax.swing.*;
 import java.awt.*;
-/*
+/**
  * Copyright Marco Scherzer, All rights reserved.
  */
 public final class MFullscreenOverlay {
@@ -22,7 +22,7 @@ public final class MFullscreenOverlay {
     private final SpinnerPanel spinner = new SpinnerPanel();
     private final JLabel iconLabel;
     private final Timer anim;
-    /*
+    /**
      * Copyright Marco Scherzer, All rights reserved.
      */
     public MFullscreenOverlay() {
@@ -97,7 +97,7 @@ public final class MFullscreenOverlay {
             spinner.repaint();
         });
     }
-    /*
+    /**
      * Copyright Marco Scherzer, All rights reserved.
      */
     public void showOverlay() {
@@ -105,14 +105,14 @@ public final class MFullscreenOverlay {
         window.setVisible(true);
         window.toFront();
     }
-    /*
+    /**
      * Copyright Marco Scherzer, All rights reserved.
      */
     public void hideOverlay() {
         anim.stop();
         window.setVisible(false);
     }
-    /*
+    /**
      * Copyright Marco Scherzer, All rights reserved.
      */
     private static class SpinnerPanel extends JPanel {

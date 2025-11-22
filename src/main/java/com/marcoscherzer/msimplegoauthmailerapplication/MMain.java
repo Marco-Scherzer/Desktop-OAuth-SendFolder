@@ -90,9 +90,10 @@ public final class MMain {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static final void main(String[] args) throws InterruptedException, InvocationTargetException {
+    public static final void main(String[] args) {
+        try {
         isDbg = (args != null && args.length > 0 && args[0]!=null && args[0].equals("-debug"));
-        isDbg = true; //dbg
+       // isDbg = true; //dbg
 
         /*
             FlatLightLaf.setup(), FlatDarkLaf.setup(), FlatIntelliJLaf.setup(), FlatDarculaLaf.setup(),
@@ -106,6 +107,7 @@ public final class MMain {
             UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
 
             logFrame = new MAppLoggingArea();
+
             setupTrayIcon();
             if (isDbg) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
             boolean setup = !Files.exists(Paths.get(keystorePath));
@@ -151,7 +153,6 @@ public final class MMain {
                     try {
                        new MAppRedirectLinkDialog().showAndWait(oAuthLink,continueOAuthOrNot);
 
-
                     } catch (Exception exc) {
                         System.err.println(exc.getMessage());
                         exit(exc, 1);
@@ -167,6 +168,10 @@ public final class MMain {
 
             };
             mailer.startOAuth();
+          }
+        } catch (Exception exc) {
+            System.err.println(exc.getMessage());
+            exit(exc, 1);
         }
     }
 

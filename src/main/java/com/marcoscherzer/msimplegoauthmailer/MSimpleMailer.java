@@ -147,14 +147,15 @@ public abstract class MSimpleMailer {
                 .set("prompt", doNotPersistOAuthToken ? "login" : "consent");
 
         String url = authUrl.build();
+
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(gglsLocalJettyPort).build();
+        String redirectUri = receiver.getRedirectUri();
         onStartOAuth(url, continueOAuth);
 
         if (continueOAuth.get()) {
-            LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(gglsLocalJettyPort).build();
-            String redirectUri = receiver.getRedirectUri();
-
             // Code abwarten und Tokens tauschen
             String code = receiver.waitForCode();
+
 
             TokenResponse tokenResponse = flow.newTokenRequest(code)
                     .setRedirectUri(redirectUri)
@@ -169,6 +170,7 @@ public abstract class MSimpleMailer {
                     .setApplicationName(applicationName + " [" + clientId + "]")
                     .build();
         }
+        receiver.stop();
     }
 
 
