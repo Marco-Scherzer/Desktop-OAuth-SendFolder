@@ -14,7 +14,7 @@ public final class MSimpleMailerUtil {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public static final String checkMailAddress(String email) throws MMailAdressFormatException {
-        if (email == null || email.isBlank()) {
+        if (email == null || email.equals("")) {
             System.err.println("Error: Sender address must not be empty.");
             throw new MMailAdressFormatException("Sender address must not be empty.");
         }

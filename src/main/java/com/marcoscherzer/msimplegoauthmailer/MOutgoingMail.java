@@ -51,7 +51,7 @@ public final class MOutgoingMail {
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final MOutgoingMail appendMessageText(String text) {
-        if (text != null && !text.isBlank()) {
+        if (text != null && !text.equals("")) {
             messageText.append(text);
         }
         return this;
@@ -61,7 +61,7 @@ public final class MOutgoingMail {
      * @author Marco Scherzer, Author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final MOutgoingMail addAttachment(String file) {
-        if (file != null && !file.isBlank()) {
+        if (file != null && !file.equals("")) {
             attachmentList.add(file);
         }
         return this;

@@ -12,7 +12,7 @@ public class MSimpleKeystoreUtil {
         if (requireDigit) requirements.append("\n- At least one digit");
         if (requireSpecial) requirements.append("\n- At least one special character");
 
-        if (password == null || password.isBlank()) {
+        if (password == null || password.equals("")) {
             System.err.println(requirements.toString());
             throw new MPasswordComplexityException(requirements.toString());
         }

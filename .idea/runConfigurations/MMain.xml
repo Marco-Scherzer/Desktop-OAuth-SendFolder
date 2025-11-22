@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="MMain" type="Application" factoryName="Application" nameIsGenerated="true">
-    <option name="ALTERNATIVE_JRE_PATH" value="graalvm-jdk-21" />
+    <option name="ALTERNATIVE_JRE_PATH" value="ibm-1.8" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="com.marcoscherzer.msimplegoauthmailerapplication.MMain" />
     <module name="MSendBackupMail.main" />

@@ -141,7 +141,7 @@ public final class MSimpleKeystore {
                 } catch (Exception exc) {
                     throw new MKeystoreException("Error in context with keystore while checking key " + key, exc);
                 }
-                if (value == null || value.isBlank()) return false;
+                if (value == null || value.equals("")) return false;
             }
             return true;
         } else throw new MKeystoreException("Error in context with keystore while contains, because keystore was not successfully initialized");

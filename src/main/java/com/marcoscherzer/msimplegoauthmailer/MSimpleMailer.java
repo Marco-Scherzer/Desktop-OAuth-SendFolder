@@ -67,7 +67,7 @@ public abstract class MSimpleMailer {
 
             initThread = new Thread(() -> {
                 try{
-                    if (appName == null || appName.isBlank()) throw new IllegalArgumentException("Application name must not be empty.");
+                    if (appName == null || appName.equals("")) throw new IllegalArgumentException("Application name must not be empty.");
                     String clientId = keystore.get("google-client-id");
                     String clientSecret = keystore.get("google-client-secret");
                     doBrowserOAuthFlow(keystore, doNotPersistOAuthToken, appName, clientId, clientSecret);

@@ -200,7 +200,7 @@ public final class MAppSetupDialog {
             try { checkMailAddress(from); } catch (MMailAdressFormatException e) { errors.add("Sender email invalid: " + e.getMessage()); }
             try { checkMailAddress(to); } catch (MMailAdressFormatException e) { errors.add("Recipient email invalid: " + e.getMessage()); }
             try { checkPasswordComplexity(pw, 15, true, true, true); } catch (MPasswordComplexityException e) { errors.add("Password invalid: " + e.getMessage()); }
-            if (jsonPath.isBlank() || jsonPath.equals("client_secret.json file")) {
+            if (jsonPath.equals("") || jsonPath.equals("client_secret.json file")) {
                 errors.add("client_secret.json file not selected.");
             }
 
