@@ -6,6 +6,7 @@ import com.google.api.services.gmail.Gmail;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthHelper;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthKeystore;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MAppRedirectLinkDialog;
+import com.marcoscherzer.msimplegoauthhelper.swinggui.MSpinnerOverlayFrame;
 import com.marcoscherzer.msimplegoauthmailservice.*;
 import com.marcoscherzer.msimplegoauthmailservice.swinggui.MAppSendGui;
 import com.marcoscherzer.msimplegoauthmailserviceapplication.core.MAttachmentWatcher;
@@ -39,6 +40,7 @@ public final class MMain {
     private static MSimpleOAuthKeystore store;
     private static Gmail mailService;
     private static MAppRedirectLinkDialog appRedirectLinkDialog;
+    private static MSpinnerOverlayFrame loginOverlay;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -129,7 +131,7 @@ public final class MMain {
                 @Override
                 protected final void onOAuthSucceeded(Credential credential, String applicationName) {
                     try {
-                        appRedirectLinkDialog.hide();
+                        loginOverlay.hideOverlay();
                         MMailService mailService = new MMailService(credential, applicationName);
 
                         MSimpleKeystore store = mailer.getKeystore();
@@ -166,6 +168,8 @@ public final class MMain {
                     try {
                         appRedirectLinkDialog = new MAppRedirectLinkDialog();
                         appRedirectLinkDialog.showAndWait(oAuthLink,continueOAuthOrNot);
+                        loginOverlay = new MSpinnerOverlayFrame();
+                        loginOverlay.showOverlay();
 
                     } catch (Exception exc) {
                         System.err.println(exc.getMessage());

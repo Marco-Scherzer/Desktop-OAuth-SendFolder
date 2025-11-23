@@ -40,6 +40,7 @@ public final class MAppRedirectLinkDialog {
                         } else {
                             System.out.println("Browser can not be started: Please open url manually: " + oAuthLink);
                         }
+                        hide();
 
                     } catch (Exception exc) {
                         continueOAuthOrNot.set(false);
@@ -65,7 +66,6 @@ public final class MAppRedirectLinkDialog {
      * unready
      */
     public void hide() {
-        //f.hideOverlay();
         dialog.getUIComponent().setVisible(false);
         dialog.getUIComponent().dispose();
     }
