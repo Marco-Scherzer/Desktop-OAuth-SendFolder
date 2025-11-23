@@ -13,7 +13,7 @@ import java.util.List;
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  * unready
  */
-public final class MFileLinkCollector {
+public final class MPathCollectorClient {
 
     private static Socket socket;
     private static PrintWriter out;
