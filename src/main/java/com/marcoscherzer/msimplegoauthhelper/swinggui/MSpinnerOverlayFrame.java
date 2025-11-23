@@ -2,6 +2,7 @@ package com.marcoscherzer.msimplegoauthhelper.swinggui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseListener;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -9,11 +10,10 @@ import java.awt.*;
 public final class MSpinnerOverlayFrame {
 
     // --- Globale Konstanten ---
-    private static final double WFAC = 0.33;   // Breitenfaktor (33% der Screenbreite)
-    private static final double HFAC = 0.15;   // Höhenfaktor (15% der Screenhöhe)
-
-    private static final double GAPFAC = 0.05;   // Abstand Text–Spinner (5% der Overlay-Höhe)
-    private static final double TOPFAC = 0.08;   // Abstand oben (8% der Overlay-Höhe)
+    private static final double WFAC = 0.33;
+    private static final double HFAC = 0.15;
+    private static final double GAPFAC = 0.05;
+    private static final double TOPFAC = 0.08;
 
     private static final Color OVERLAY_BG_COLOR = new Color(7, 7, 7, 200);
     private static final Color WINDOW_BG_COLOR = new Color(0, 0, 0, 0);
@@ -22,7 +22,7 @@ public final class MSpinnerOverlayFrame {
 
     private final JWindow window = new JWindow();
     private final SpinnerPanel spinner = new SpinnerPanel();
-    private final Timer anim;
+    private Timer anim; // Timer wird erst beim Sichtbarmachen erzeugt
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -82,22 +82,39 @@ public final class MSpinnerOverlayFrame {
 
         root.add(contentPanel, BorderLayout.CENTER);
         window.setContentPane(root);
-
-        anim = new Timer(50, e -> {
-            spinner.rotate();
-            spinner.repaint();
-        });
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public void showOverlay() {
+    public final void showOverlay() {
+        setVisible(true);
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final void setVisible(boolean visible) {
         SwingUtilities.invokeLater(() -> {
-            if (!window.isVisible()) {
-                window.setVisible(true);
-                window.toFront();
-                anim.start();   // Timer startet erst hier
+            if (visible) {
+                if (!window.isVisible()) {
+                    window.setVisible(true);
+                    window.toFront();
+                    // Timer hier erzeugen und starten
+                    anim = new Timer(50, e -> {
+                        spinner.rotate();
+                        spinner.repaint();
+                    });
+                    anim.start();
+                }
+            } else {
+                if (window.isVisible()) {
+                    if (anim != null) {
+                        anim.stop();
+                        anim = null;
+                    }
+                    window.setVisible(false);
+                }
             }
         });
     }
@@ -105,31 +122,47 @@ public final class MSpinnerOverlayFrame {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public void hideOverlay() {
+    public final void dispose() {
         SwingUtilities.invokeLater(() -> {
-            if (window.isVisible()) {
-                anim.stop();    // Timer stoppen, wenn Overlay verschwindet
-                window.setVisible(false);
-                window.dispose();
+            if (anim != null) {
+                anim.stop();
+                anim = null;
             }
+            window.dispose();
         });
     }
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private static class SpinnerPanel extends JPanel {
+    public void setMouseHandler(MouseListener listener) {
+        window.getContentPane().addMouseListener(listener);
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private static final class SpinnerPanel extends JPanel {
         private int angle = 0;
 
-        SpinnerPanel() {
+        /**
+         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
+        private SpinnerPanel() {
             setOpaque(false);
         }
 
-        void rotate() {
+        /**
+         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
+        private final void rotate() {
             angle = (angle + 10) % 360;
         }
 
-        @Override protected void paintComponent(Graphics g) {
+        /**
+         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
+        @Override protected final void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -157,6 +190,8 @@ public final class MSpinnerOverlayFrame {
         }
     }
 }
+
+
 
 
 

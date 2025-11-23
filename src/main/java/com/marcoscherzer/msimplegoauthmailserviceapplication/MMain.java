@@ -16,6 +16,8 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.nio.file.*;
 import java.util.Collections;
 import com.google.api.services.gmail.GmailScopes;
@@ -131,7 +133,9 @@ public final class MMain {
                 @Override
                 protected final void onOAuthSucceeded(Credential credential, String applicationName) {
                     try {
-                        loginOverlay.hideOverlay();
+                        appRedirectLinkDialog.dispose();
+                        loginOverlay.dispose();
+
                         MMailService mailService = new MMailService(credential, applicationName);
 
                         MSimpleKeystore store = mailer.getKeystore();
@@ -168,7 +172,16 @@ public final class MMain {
                     try {
                         appRedirectLinkDialog = new MAppRedirectLinkDialog();
                         appRedirectLinkDialog.showAndWait(oAuthLink,continueOAuthOrNot);
+                        appRedirectLinkDialog.setVisible(false);
                         loginOverlay = new MSpinnerOverlayFrame();
+                        loginOverlay.setMouseHandler(new MouseAdapter() {
+                            @Override
+                            public void mouseClicked(MouseEvent e) {
+                                System.out.println("Overlay clicked at: " + e.getPoint());
+                                loginOverlay.setVisible(true);
+
+                            }
+                        });
                         loginOverlay.showOverlay();
 
                     } catch (Exception exc) {
