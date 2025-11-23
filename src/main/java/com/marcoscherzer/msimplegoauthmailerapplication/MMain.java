@@ -1,6 +1,12 @@
 package com.marcoscherzer.msimplegoauthmailerapplication;
 
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.gmail.Gmail;
 import com.marcoscherzer.msimplegoauthmailer.*;
 import com.marcoscherzer.msimplegoauthmailerapplication.core.MAttachmentWatcher;
 import com.marcoscherzer.msimplegoauthmailerapplication.util.MMutableBoolean;
@@ -9,10 +15,9 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
 import java.nio.file.*;
+import java.util.Collections;
+import com.google.api.services.gmail.GmailScopes;
 
 import static com.marcoscherzer.msimplegoauthmailerapplication.util.MUtil.*;
 
@@ -31,6 +36,7 @@ public final class MMain {
     private static final String mailFoldersPath = userDir + "\\mail";
     private static String trayIconPathWithinResourcesFolder = "/5.png";
     private static MSimpleMailerKeystore store;
+    private static Gmail mailService;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -115,10 +121,13 @@ public final class MMain {
             if (setup) setup(); else checkPassword();
 
         if(store!=null) {
-            mailer = new MSimpleMailer(store, "BackupMailer", true) {
+            mailer = new MSimpleMailer(store, "BackupMailer", Collections.singletonList(GmailScopes.GMAIL_SEND),true) {
                 @Override
-                protected final void onOAuthSucceeded() {
+                protected final void onOAuthSucceeded(Credential credential, String applicationName) {
                     try {
+
+                        MMailService mailService = new MMailService(credential, applicationName);
+
                         MSimpleKeystore store = mailer.getKeystore();
                         String clientAndPathUUID = store.get("clientId");
                         Path sentFolder = createPathIfNotExists(Paths.get(mailFoldersPath, clientAndPathUUID + "-sent"), "Sent folder");
@@ -127,7 +136,7 @@ public final class MMain {
                         String fromAddress = store.get("fromAddress");
                         String toAddress = store.get("toAddress");
 
-                        watcher = new MAttachmentWatcher(sentFolder, unsentFolder, mailer, fromAddress, toAddress, clientAndPathUUID) {
+                        watcher = new MAttachmentWatcher(sentFolder, unsentFolder, mailService, fromAddress, toAddress, clientAndPathUUID) {
                             @Override
                             public final MConsentQuestioner askForConsent(MOutgoingMail mail) {
                                 return new MAppSendGui(mail, 900, 600, 16);
@@ -165,6 +174,7 @@ public final class MMain {
                     System.err.println(exc.getMessage());
                     exit(exc, 1);
                 }
+
 
             };
             mailer.startOAuth();

@@ -45,24 +45,25 @@ import java.util.Properties;
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
 public abstract class MSimpleMailer {
-
-    private final List<String> scopes = Collections.singletonList(GmailScopes.GMAIL_SEND);
+    private final List<String> scopes;
     private final String appName;
     private Thread initThread;
     private Credential credential;
     private boolean doNotPersistOAuthToken;
-    private Gmail service;
+    //private Gmail service;
     private MSimpleKeystore keystore;
     private static String clientSecretDir = System.getProperty("user.dir");
     private File jsonFile = new File(clientSecretDir, "client_secret.json");
 
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         * scopes z.B Collections.singletonList(GmailScopes.GMAIL_SEND)
          */
-        public MSimpleMailer(MSimpleMailerKeystore mailerKeystore,String applicationName, boolean doNotPersistOAuthToken){
+        public MSimpleMailer(MSimpleMailerKeystore mailerKeystore, String applicationName, List<String> scopes, boolean doNotPersistOAuthToken){
 
             this.keystore = mailerKeystore.getKeyStore();
-            this.appName = applicationName ;
+            this.appName = applicationName;
+            this.scopes = scopes;
             this.doNotPersistOAuthToken = doNotPersistOAuthToken;
 
             initThread = new Thread(() -> {
@@ -70,7 +71,7 @@ public abstract class MSimpleMailer {
                     if (appName == null || appName.equals("")) throw new IllegalArgumentException("Application name must not be empty.");
                     String clientId = keystore.get("google-client-id");
                     String clientSecret = keystore.get("google-client-secret");
-                    doBrowserOAuthFlow(keystore, doNotPersistOAuthToken, appName, clientId, clientSecret);
+                    credential = doBrowserOAuthFlow(keystore, appName, scopes, doNotPersistOAuthToken, clientId, clientSecret);
                     //token funktioniert, file löschen
                     if (jsonFile.exists()) {
                         boolean jsonFileDeleted = jsonFile.delete();
@@ -84,7 +85,7 @@ public abstract class MSimpleMailer {
                     //System.err.println("Error in initialization."+ exc.getMessage());
                     onOAuthFailure(exc);
                 }
-                onOAuthSucceeded();
+                onOAuthSucceeded(credential,applicationName);
             }, "MSimpleMailer-Init");
         }
 
@@ -103,9 +104,10 @@ public abstract class MSimpleMailer {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private void doBrowserOAuthFlow(MSimpleKeystore keystore,
-                                    boolean doNotPersistOAuthToken,
+    private Credential doBrowserOAuthFlow(MSimpleKeystore keystore,
                                     String applicationName,
+                                    List<String> scopes,
+                                    boolean doNotPersistOAuthToken,
                                     String clientId,
                                     String clientSecret) throws Exception, MKeystoreException {
 
@@ -156,7 +158,6 @@ public abstract class MSimpleMailer {
             // Code abwarten und Tokens tauschen
             String code = receiver.waitForCode();
 
-
             TokenResponse tokenResponse = flow.newTokenRequest(code)
                     .setRedirectUri(redirectUri)
                     .execute();
@@ -166,18 +167,19 @@ public abstract class MSimpleMailer {
                 throw new IllegalStateException("No OAuth credential obtained.");
             }
 
-            this.service = new Gmail.Builder(httpTransport, jsonFactory, credential)
-                    .setApplicationName(applicationName + " [" + clientId + "]")
-                    .build();
         }
         receiver.stop();
+        httpTransport.shutdown();
+        return credential;
     }
 
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    protected abstract void onOAuthSucceeded();
+/**
+ *    * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+ *    z.B. this.service = new Gmail.Builder(GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
+ *                     .setApplicationName(applicationName + " [" + clientId + "]")
+ *                     .build();
+ */
+    protected abstract void onOAuthSucceeded(Credential credential, String applicationName);
 
 
     /**
@@ -256,51 +258,6 @@ public abstract class MSimpleMailer {
         } catch (Exception exc) {
             System.err.println("Error while revoking OAuth token: " + exc.getMessage());
             throw exc;
-        }
-    }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public final void send(MOutgoingMail mail) throws Exception {
-        try {
-            Properties props = new Properties();
-            Session session = Session.getDefaultInstance(props, null);
-            MimeMessage email = new MimeMessage(session);
-            email.setFrom(new InternetAddress(mail.getFrom()));
-            email.addRecipient(jakarta.mail.Message.RecipientType.TO, new InternetAddress(mail.getTo()));
-            email.setSubject(mail.getSubject());
-
-            MimeBodyPart textPart = new MimeBodyPart();
-            textPart.setText(mail.getMessageText());
-
-            Multipart multipart = new MimeMultipart();
-            multipart.addBodyPart(textPart);
-
-            for (String filePath : mail.getAttachments()) {
-                File file = new File(filePath);
-                MimeBodyPart attachmentPart = new MimeBodyPart();
-                DataSource source = new FileDataSource(file);
-                attachmentPart.setDataHandler(new DataHandler(source));
-                attachmentPart.setFileName(file.getName());
-                multipart.addBodyPart(attachmentPart);
-            }
-
-            email.setContent(multipart);
-
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            email.writeTo(buffer);
-            byte[] rawMessageBytes = buffer.toByteArray();
-            String encodedEmail = Base64.encodeBase64URLSafeString(rawMessageBytes);
-
-            Message message = new Message();
-            message.setRaw(encodedEmail);
-
-            Message sentMessage = service.users().messages().send("me", message).execute();
-            System.out.println("Mail successfully sent. ID: " + sentMessage.getId());
-
-        } catch (Exception exc) {
-            throw new Exception("Error while sending the email.", exc);
         }
     }
 

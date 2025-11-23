@@ -3,6 +3,7 @@ package com.marcoscherzer.msimplegoauthmailerapplication.core;
 import com.marcoscherzer.msimplegoauthmailer.MMailAdressFormatException;
 import com.marcoscherzer.msimplegoauthmailer.MOutgoingMail;
 import com.marcoscherzer.msimplegoauthmailer.MSimpleMailer;
+import com.marcoscherzer.msimplegoauthmailerapplication.MMailService;
 import com.marcoscherzer.msimplegoauthmailerapplication.util.MUtil;
 
 import java.io.BufferedReader;
@@ -32,7 +33,7 @@ public abstract class MAttachmentWatcher {
         private final String clientAndPathUUID;
         private final Path sentFolder;
         private final Path notSentFolder;
-        private final MSimpleMailer mailer;
+        private final MMailService mailer;
         private final List<String> fileLinkList = new ArrayList<>();
         private int attachedFilesCnt;
 
@@ -46,7 +47,7 @@ public abstract class MAttachmentWatcher {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * unready
      */
-        public MAttachmentWatcher(Path sentFolder, Path notSentFolder, MSimpleMailer mailer, String fromAddress, String toAddress, String clientAndPathUUID) {
+        public MAttachmentWatcher(Path sentFolder, Path notSentFolder, MMailService mailer, String fromAddress, String toAddress, String clientAndPathUUID) {
             this.sentFolder = sentFolder;
             this.fromAddress = fromAddress;
             this.toAddress = toAddress;
