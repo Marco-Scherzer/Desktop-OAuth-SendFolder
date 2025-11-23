@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplekeystore;
+package com.marcoscherzer.msimplegoauthhelper;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
