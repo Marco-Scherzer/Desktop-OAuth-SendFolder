@@ -1,8 +1,7 @@
-package com.marcoscherzer.msimplegoauthmailer;
+package com.marcoscherzer.msimplegoauth;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.TokenResponse;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
@@ -12,34 +11,16 @@ import com.google.api.client.http.*;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.MemoryDataStoreFactory;
-import com.google.api.services.gmail.Gmail;
-import com.google.api.services.gmail.GmailScopes;
-import com.google.api.services.gmail.model.Message;
 import com.marcoscherzer.msimplegoauthmailerapplication.util.MMutableBoolean;
 import com.marcoscherzer.msimplekeystore.MKeystoreException;
 import com.marcoscherzer.msimplekeystore.MSimpleKeystore;
-import com.marcoscherzer.msimplegoauthmailer.msimplekeystoredatastoreadapter.MSimpleKeystoreDataStoreFactory;
-import jakarta.mail.Session;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeBodyPart;
-import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.internet.MimeMultipart;
-import jakarta.mail.Multipart;
-import jakarta.activation.DataHandler;
-import jakarta.activation.DataSource;
-import jakarta.activation.FileDataSource;
-import org.apache.commons.codec.binary.Base64;
+import com.marcoscherzer.msimplekeystoredatastoreadapter.MSimpleKeystoreDataStoreFactory;
 
-import java.awt.*;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

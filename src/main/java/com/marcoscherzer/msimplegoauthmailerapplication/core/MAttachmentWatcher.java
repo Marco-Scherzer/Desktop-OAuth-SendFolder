@@ -2,8 +2,7 @@ package com.marcoscherzer.msimplegoauthmailerapplication.core;
 
 import com.marcoscherzer.msimplegoauthmailer.MMailAdressFormatException;
 import com.marcoscherzer.msimplegoauthmailer.MOutgoingMail;
-import com.marcoscherzer.msimplegoauthmailer.MSimpleMailer;
-import com.marcoscherzer.msimplegoauthmailerapplication.MMailService;
+import com.marcoscherzer.msimplegoauthmailer.MMailService;
 import com.marcoscherzer.msimplegoauthmailerapplication.util.MUtil;
 
 import java.io.BufferedReader;

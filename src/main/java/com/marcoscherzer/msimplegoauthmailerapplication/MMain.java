@@ -2,11 +2,9 @@ package com.marcoscherzer.msimplegoauthmailerapplication;
 
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.gmail.Gmail;
+import com.marcoscherzer.msimplegoauth.MSimpleMailer;
+import com.marcoscherzer.msimplegoauth.MSimpleMailerKeystore;
 import com.marcoscherzer.msimplegoauthmailer.*;
 import com.marcoscherzer.msimplegoauthmailerapplication.core.MAttachmentWatcher;
 import com.marcoscherzer.msimplegoauthmailerapplication.util.MMutableBoolean;
