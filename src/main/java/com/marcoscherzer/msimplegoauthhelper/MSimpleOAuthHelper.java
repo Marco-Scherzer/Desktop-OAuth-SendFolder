@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegoauth;
+package com.marcoscherzer.msimplegoauthhelper;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.TokenResponse;
@@ -14,7 +14,6 @@ import com.google.api.client.util.store.MemoryDataStoreFactory;
 import com.marcoscherzer.msimplegoauthmailerapplication.util.MMutableBoolean;
 import com.marcoscherzer.msimplekeystore.MKeystoreException;
 import com.marcoscherzer.msimplekeystore.MSimpleKeystore;
-import com.marcoscherzer.msimplekeystoredatastoreadapter.MSimpleKeystoreDataStoreFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +24,7 @@ import java.util.List;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public abstract class MSimpleMailer {
+public abstract class MSimpleOAuthHelper {
     private final List<String> scopes;
     private final String appName;
     private Thread initThread;
@@ -40,7 +39,7 @@ public abstract class MSimpleMailer {
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          * scopes z.B Collections.singletonList(GmailScopes.GMAIL_SEND)
          */
-        public MSimpleMailer(MSimpleMailerKeystore mailerKeystore, String applicationName, List<String> scopes, boolean doNotPersistOAuthToken){
+        public MSimpleOAuthHelper(MSimpleOAuthKeystore mailerKeystore, String applicationName, List<String> scopes, boolean doNotPersistOAuthToken){
 
             this.keystore = mailerKeystore.getKeyStore();
             this.appName = applicationName;

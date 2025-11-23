@@ -3,8 +3,8 @@ package com.marcoscherzer.msimplegoauthmailerapplication;
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.gmail.Gmail;
-import com.marcoscherzer.msimplegoauth.MSimpleMailer;
-import com.marcoscherzer.msimplegoauth.MSimpleMailerKeystore;
+import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthHelper;
+import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthKeystore;
 import com.marcoscherzer.msimplegoauthmailer.*;
 import com.marcoscherzer.msimplegoauthmailerapplication.core.MAttachmentWatcher;
 import com.marcoscherzer.msimplegoauthmailerapplication.util.MMutableBoolean;
@@ -25,7 +25,7 @@ import static com.marcoscherzer.msimplegoauthmailerapplication.util.MUtil.*;
 public final class MMain {
 
     private static MAttachmentWatcher watcher;
-    private static MSimpleMailer mailer;
+    private static MSimpleOAuthHelper mailer;
     private static MAppLoggingArea logFrame;
     private static boolean isDbg;
     private static TrayIcon trayIcon;
@@ -33,7 +33,7 @@ public final class MMain {
     private static final String keystorePath = userDir+"\\mystore.p12";
     private static final String mailFoldersPath = userDir + "\\mail";
     private static String trayIconPathWithinResourcesFolder = "/5.png";
-    private static MSimpleMailerKeystore store;
+    private static MSimpleOAuthKeystore store;
     private static Gmail mailService;
 
     /**
@@ -53,7 +53,7 @@ public final class MMain {
             String clientSecretPath = setupedValues[3];
 
             // Keystore erstellen mit ausgewähltem client_secret.json
-            store = new MSimpleMailerKeystore(pw, clientSecretPath, keystorePath);
+            store = new MSimpleOAuthKeystore(pw, clientSecretPath, keystorePath);
             store.getKeyStore().put("fromAddress", from);
             store.getKeyStore().put("toAddress", to);
 
@@ -76,7 +76,7 @@ public final class MMain {
              new MAppPwDialog()
                     .setOkHandler(pw -> {
                         try {
-                            store = new MSimpleMailerKeystore(pw, "", keystorePath);
+                            store = new MSimpleOAuthKeystore(pw, "", keystorePath);
                             System.out.println("Access-level 1 granted: Application");
                             trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
                         } catch (Exception exc){
@@ -119,7 +119,7 @@ public final class MMain {
             if (setup) setup(); else checkPassword();
 
         if(store!=null) {
-            mailer = new MSimpleMailer(store, "BackupMailer", Collections.singletonList(GmailScopes.GMAIL_SEND),true) {
+            mailer = new MSimpleOAuthHelper(store, "BackupMailer", Collections.singletonList(GmailScopes.GMAIL_SEND),true) {
                 @Override
                 protected final void onOAuthSucceeded(Credential credential, String applicationName) {
                     try {

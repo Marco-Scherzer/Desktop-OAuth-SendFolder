@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegoauth;
+package com.marcoscherzer.msimplegoauthhelper;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.json.JsonFactory;
@@ -13,14 +13,14 @@ import java.util.UUID;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MSimpleMailerKeystore {
+public final class MSimpleOAuthKeystore {
 
     private MSimpleKeystore keystore;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleMailerKeystore(String keystorePassword, String clientSecretJsonFile, String keystoreFile) throws MKeystoreException, MClientSecretException, MPasswordComplexityException, MPasswordIntegrityException, IOException {
+    public MSimpleOAuthKeystore(String keystorePassword, String clientSecretJsonFile, String keystoreFile) throws MKeystoreException, MClientSecretException, MPasswordComplexityException, MPasswordIntegrityException, IOException {
         File jsonFile = new File(clientSecretJsonFile);
         File keyStoreFile = new File(keystoreFile);
         keystore = new MSimpleKeystore(keyStoreFile, keystorePassword);
