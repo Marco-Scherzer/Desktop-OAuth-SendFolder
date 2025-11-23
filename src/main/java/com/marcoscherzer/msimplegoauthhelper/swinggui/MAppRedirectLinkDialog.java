@@ -10,22 +10,26 @@ import java.net.URI;
 
 /**
  * Copyright Marco Scherzer, All rights reserved
+ * unready
  */
 public final class MAppRedirectLinkDialog {
 
     private MFullscreenOverlay f;
+    private MSimpleDialog dialog;
 
     /**
      * Copyright Marco Scherzer, All rights reserved
+     * unready
      */
     public MAppRedirectLinkDialog() {}
 
     /**
      * Copyright Marco Scherzer, All rights reserved
+     * unready
      */
-    public void showAndWait(String oAuthLink, MMutableBoolean continueOAuthOrNot) throws InterruptedException, InvocationTargetException {
+    public final void showAndWait(String oAuthLink, MMutableBoolean continueOAuthOrNot) throws InterruptedException, InvocationTargetException {
         MSimpleHtmlTextPanel htmlPanel = new MSimpleHtmlTextPanel();
-        MSimpleDialog dialog = new MSimpleDialog(htmlPanel, 700, 400)
+        dialog = new MSimpleDialog(htmlPanel, 700, 400)
                 .setTitle("OAuth login")
                 .setMessageType(JOptionPane.INFORMATION_MESSAGE)
                 .setIcon(null)
@@ -56,6 +60,16 @@ public final class MAppRedirectLinkDialog {
                         e -> dialog.pressButton(0)) // Klick auf Link simuliert "OK"
                 .create();
         dialog.showAndWait();
+    }
+
+    /**
+     * Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
+    public void hide() {
+        f.hideOverlay();
+        dialog.getUIComponent().setVisible(false);
+        dialog.getUIComponent().dispose();
     }
 }
 

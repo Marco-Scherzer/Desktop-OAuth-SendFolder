@@ -51,7 +51,7 @@ public abstract class MSimpleOAuthHelper {
                     if (appName == null || appName.equals("")) throw new IllegalArgumentException("Application name must not be empty.");
                     String clientId = keystore.get("google-client-id");
                     String clientSecret = keystore.get("google-client-secret");
-                    credential = doBrowserOAuthFlow(keystore, appName, scopes, doNotPersistOAuthToken, clientId, clientSecret);
+                    credential = doBrowserOAuthFlow(keystore, scopes, doNotPersistOAuthToken, clientId, clientSecret);
                     //token funktioniert, file löschen
                     if (jsonFile.exists()) {
                         boolean jsonFileDeleted = jsonFile.delete();
@@ -85,7 +85,6 @@ public abstract class MSimpleOAuthHelper {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     private Credential doBrowserOAuthFlow(MSimpleKeystore keystore,
-                                    String applicationName,
                                     List<String> scopes,
                                     boolean doNotPersistOAuthToken,
                                     String clientId,

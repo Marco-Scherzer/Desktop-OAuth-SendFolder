@@ -108,6 +108,7 @@ public final class MFullscreenOverlay {
     public void hideOverlay() {
         anim.stop();
         window.setVisible(false);
+        window.dispose();
     }
 
     private static class SpinnerPanel extends JPanel {

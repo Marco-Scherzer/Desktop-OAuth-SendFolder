@@ -23,6 +23,7 @@ import static com.marcoscherzer.msimplegoauthmailserviceapplication.util.MUtil.*
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+ * uready
  */
 public final class MMain {
 
@@ -37,6 +38,7 @@ public final class MMain {
     private static String trayIconPathWithinResourcesFolder = "/5.png";
     private static MSimpleOAuthKeystore store;
     private static Gmail mailService;
+    private static MAppRedirectLinkDialog appRedirectLinkDialog;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -95,6 +97,7 @@ public final class MMain {
     }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * uready
      */
     public static final void main(String[] args) {
         try {
@@ -122,10 +125,11 @@ public final class MMain {
 
         if(store!=null) {
             mailer = new MSimpleOAuthHelper(store, "BackupMailer", Collections.singletonList(GmailScopes.GMAIL_SEND),true) {
+
                 @Override
                 protected final void onOAuthSucceeded(Credential credential, String applicationName) {
                     try {
-
+                        appRedirectLinkDialog.hide();
                         MMailService mailService = new MMailService(credential, applicationName);
 
                         MSimpleKeystore store = mailer.getKeystore();
@@ -160,7 +164,8 @@ public final class MMain {
                 protected final void onStartOAuth(String oAuthLink, MMutableBoolean continueOAuthOrNot) {
                     System.out.println("Additional authentification needed " + oAuthLink);
                     try {
-                       new MAppRedirectLinkDialog().showAndWait(oAuthLink,continueOAuthOrNot);
+                        appRedirectLinkDialog = new MAppRedirectLinkDialog();
+                        appRedirectLinkDialog.showAndWait(oAuthLink,continueOAuthOrNot);
 
                     } catch (Exception exc) {
                         System.err.println(exc.getMessage());

@@ -2,7 +2,7 @@
   <configuration default="false" name="MMain" type="Application" factoryName="Application" nameIsGenerated="true">
     <option name="ALTERNATIVE_JRE_PATH" value="ibm-11" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-    <option name="MAIN_CLASS_NAME" value="com.marcoscherzer.msimplegoauthmailerapplication.MMain" />
+    <option name="MAIN_CLASS_NAME" value="com.marcoscherzer.msimplegoauthmailserviceapplication.MMain" />
     <module name="MSendBackupMail.main" />
     <option name="PROGRAM_PARAMETERS" value="--scan -Xms32m -Xmx128m -XX:+UseParallelGC " />
     <method v="2">
