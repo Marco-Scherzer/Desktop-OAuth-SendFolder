@@ -6,21 +6,19 @@ import java.awt.*;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MFullscreenOverlay {
+public final class MSpinnerOverlayFrame {
 
     // --- Globale Konstanten ---
     private static final double WFAC = 0.33;   // Breitenfaktor (33% der Screenbreite)
     private static final double HFAC = 0.15;   // Höhenfaktor (15% der Screenhöhe)
 
-    // Abstand zwischen Text und Spinner (prozentual von Overlay-Höhe)
-    private static final double GAPFAC = 0.05;   // 5% der Overlay-Höhe
-    // Abstand oben (prozentual von Overlay-Höhe)
-    private static final double TOPFAC = 0.08;   // 8% der Overlay-Höhe
+    private static final double GAPFAC = 0.05;   // Abstand Text–Spinner (5% der Overlay-Höhe)
+    private static final double TOPFAC = 0.08;   // Abstand oben (8% der Overlay-Höhe)
 
-    private static final Color OVERLAY_BG_COLOR = new Color(7, 7, 7, 200);      // halbtransparentes Overlay
-    private static final Color WINDOW_BG_COLOR = new Color(0, 0, 0, 0);        // komplett transparent
-    private static final Color STATUS_TEXT_COLOR = Color.WHITE;                // Statuslabel-Farbe
-    private static final Color SPINNER_COLOR_BASE = new Color(0, 128, 230);    // Spinner-Grundfarbe
+    private static final Color OVERLAY_BG_COLOR = new Color(7, 7, 7, 200);
+    private static final Color WINDOW_BG_COLOR = new Color(0, 0, 0, 0);
+    private static final Color STATUS_TEXT_COLOR = Color.WHITE;
+    private static final Color SPINNER_COLOR_BASE = new Color(0, 128, 230);
 
     private final JWindow window = new JWindow();
     private final SpinnerPanel spinner = new SpinnerPanel();
@@ -29,7 +27,7 @@ public final class MFullscreenOverlay {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MFullscreenOverlay() {
+    public MSpinnerOverlayFrame() {
         Rectangle screen = GraphicsEnvironment
                 .getLocalGraphicsEnvironment()
                 .getDefaultScreenDevice()
@@ -39,11 +37,11 @@ public final class MFullscreenOverlay {
         int overlayWidth = (int)(screen.width * WFAC);
         int overlayHeight = (int)(screen.height * HFAC);
 
-        int gap = (int)(overlayHeight * GAPFAC);   // Abstand Text–Spinner
-        int topGap = (int)(overlayHeight * TOPFAC); // Abstand oben
+        int gap = (int)(overlayHeight * GAPFAC);
+        int topGap = (int)(overlayHeight * TOPFAC);
 
-        int x = screen.x + (screen.width - overlayWidth) / 2; // mittig horizontal
-        int y = screen.y;                                     // oben am Screen
+        int x = screen.x + (screen.width - overlayWidth) / 2;
+        int y = screen.y;
 
         window.setBounds(x, y, overlayWidth, overlayHeight);
         window.setAlwaysOnTop(true);
@@ -62,29 +60,21 @@ public final class MFullscreenOverlay {
         };
         root.setOpaque(false);
 
-        // --- Schriftgröße kleiner und zentriert ---
-        int fontSize = (int)(overlayHeight * 0.18); // Schrift = 18% der Overlay-Höhe
+        int fontSize = (int)(overlayHeight * 0.18);
         JLabel statusLabel = new JLabel("Waiting for Login");
         statusLabel.setForeground(STATUS_TEXT_COLOR);
         statusLabel.setFont(new Font("SansSerif", Font.PLAIN, fontSize));
         statusLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // --- Panel mit BoxLayout (Y_AXIS) ---
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setOpaque(false);
 
-        // Abstand oben prozentual
         contentPanel.add(Box.createRigidArea(new Dimension(0, topGap)));
-
-        // Text
         contentPanel.add(statusLabel);
-
-        // Abstand zwischen Text und Spinner
         contentPanel.add(Box.createRigidArea(new Dimension(0, gap)));
 
-        // Spinnergröße abhängig von Overlay-Höhe
-        int spinnerSize = (int)(overlayHeight * 0.55); // Spinner = 55% der Overlay-Höhe
+        int spinnerSize = (int)(overlayHeight * 0.55);
         spinner.setPreferredSize(new Dimension(spinnerSize, spinnerSize));
         spinner.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -99,18 +89,35 @@ public final class MFullscreenOverlay {
         });
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public void showOverlay() {
-        anim.start();
-        window.setVisible(true);
-        window.toFront();
+        SwingUtilities.invokeLater(() -> {
+            if (!window.isVisible()) {
+                window.setVisible(true);
+                window.toFront();
+                anim.start();   // Timer startet erst hier
+            }
+        });
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public void hideOverlay() {
-        anim.stop();
-        window.setVisible(false);
-        window.dispose();
+        SwingUtilities.invokeLater(() -> {
+            if (window.isVisible()) {
+                anim.stop();    // Timer stoppen, wenn Overlay verschwindet
+                window.setVisible(false);
+                window.dispose();
+            }
+        });
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     private static class SpinnerPanel extends JPanel {
         private int angle = 0;
 
@@ -127,9 +134,8 @@ public final class MFullscreenOverlay {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            // Radius abhängig von Panel-Höhe
-            int radius = (int)(getHeight() * 0.4); // 40% der Höhe als Radius
-            int dotSize = (int)(getHeight() * 0.1); // Punkte = 10% der Höhe
+            int radius = (int)(getHeight() * 0.4);
+            int dotSize = (int)(getHeight() * 0.1);
             int cx = getWidth() / 2;
             int cy = getHeight() / 2;
 
@@ -151,6 +157,7 @@ public final class MFullscreenOverlay {
         }
     }
 }
+
 
 
 

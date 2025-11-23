@@ -102,7 +102,7 @@ public final class MMain {
     public static final void main(String[] args) {
         try {
         isDbg = (args != null && args.length > 0 && args[0]!=null && args[0].equals("-debug"));
-       // isDbg = true; //dbg
+        isDbg = true; //dbg
 
         /*
             FlatLightLaf.setup(), FlatDarkLaf.setup(), FlatIntelliJLaf.setup(), FlatDarculaLaf.setup(),

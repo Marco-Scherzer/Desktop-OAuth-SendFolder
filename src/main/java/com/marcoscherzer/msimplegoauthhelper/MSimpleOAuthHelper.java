@@ -49,9 +49,7 @@ public abstract class MSimpleOAuthHelper {
             initThread = new Thread(() -> {
                 try{
                     if (appName == null || appName.equals("")) throw new IllegalArgumentException("Application name must not be empty.");
-                    String clientId = keystore.get("google-client-id");
-                    String clientSecret = keystore.get("google-client-secret");
-                    credential = doBrowserOAuthFlow(keystore, scopes, doNotPersistOAuthToken, clientId, clientSecret);
+                    credential = doBrowserOAuthFlow(keystore, scopes, doNotPersistOAuthToken);
                     //token funktioniert, file löschen
                     if (jsonFile.exists()) {
                         boolean jsonFileDeleted = jsonFile.delete();
@@ -84,11 +82,9 @@ public abstract class MSimpleOAuthHelper {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private Credential doBrowserOAuthFlow(MSimpleKeystore keystore,
-                                    List<String> scopes,
-                                    boolean doNotPersistOAuthToken,
-                                    String clientId,
-                                    String clientSecret) throws Exception, MKeystoreException {
+    private Credential doBrowserOAuthFlow(MSimpleKeystore keystore, List<String> scopes, boolean doNotPersistOAuthToken) throws Exception, MKeystoreException {
+        String clientId = keystore.get("google-client-id");
+        String clientSecret = keystore.get("google-client-secret");
 
         JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
@@ -132,8 +128,11 @@ public abstract class MSimpleOAuthHelper {
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(gglsLocalJettyPort).build();
         String redirectUri = receiver.getRedirectUri();
         onStartOAuth(url, continueOAuth);
-
+        System.out.println("continue oauth "+continueOAuth.get());
         if (continueOAuth.get()) {
+
+            System.out.println("continue oauth "+continueOAuth.get());
+
             // Code abwarten und Tokens tauschen
             String code = receiver.waitForCode();
 

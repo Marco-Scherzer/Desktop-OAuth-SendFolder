@@ -14,7 +14,6 @@ import java.net.URI;
  */
 public final class MAppRedirectLinkDialog {
 
-    private MFullscreenOverlay f;
     private MSimpleDialog dialog;
 
     /**
@@ -41,8 +40,7 @@ public final class MAppRedirectLinkDialog {
                         } else {
                             System.out.println("Browser can not be started: Please open url manually: " + oAuthLink);
                         }
-                        f = new MFullscreenOverlay();
-                        f.showOverlay();
+
                     } catch (Exception exc) {
                         continueOAuthOrNot.set(false);
                         MMain.exit(exc, 0);
@@ -67,7 +65,7 @@ public final class MAppRedirectLinkDialog {
      * unready
      */
     public void hide() {
-        f.hideOverlay();
+        //f.hideOverlay();
         dialog.getUIComponent().setVisible(false);
         dialog.getUIComponent().dispose();
     }
