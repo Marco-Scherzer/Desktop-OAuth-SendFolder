@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegoauthmailer;
+package com.marcoscherzer.msimplegoauthmailservice;
 
 import java.util.regex.Pattern;
 

@@ -1,13 +1,15 @@
-package com.marcoscherzer.msimplegoauthmailerapplication;
+package com.marcoscherzer.msimplegoauthmailserviceapplication;
 
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.gmail.Gmail;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthHelper;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthKeystore;
-import com.marcoscherzer.msimplegoauthmailer.*;
-import com.marcoscherzer.msimplegoauthmailerapplication.core.MAttachmentWatcher;
-import com.marcoscherzer.msimplegoauthmailerapplication.util.MMutableBoolean;
+import com.marcoscherzer.msimplegoauthhelper.swinggui.MAppRedirectLinkDialog;
+import com.marcoscherzer.msimplegoauthmailservice.*;
+import com.marcoscherzer.msimplegoauthmailservice.swinggui.MAppSendGui;
+import com.marcoscherzer.msimplegoauthmailserviceapplication.core.MAttachmentWatcher;
+import com.marcoscherzer.msimplegoauthmailserviceapplication.util.MMutableBoolean;
 import com.marcoscherzer.msimplekeystore.*;
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -17,7 +19,7 @@ import java.nio.file.*;
 import java.util.Collections;
 import com.google.api.services.gmail.GmailScopes;
 
-import static com.marcoscherzer.msimplegoauthmailerapplication.util.MUtil.*;
+import static com.marcoscherzer.msimplegoauthmailserviceapplication.util.MUtil.*;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

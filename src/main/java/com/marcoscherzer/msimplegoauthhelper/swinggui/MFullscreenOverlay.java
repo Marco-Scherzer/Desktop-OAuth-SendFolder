@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegoauthmailerapplication;
+package com.marcoscherzer.msimplegoauthhelper.swinggui;
 
 import javax.swing.*;
 import java.awt.*;

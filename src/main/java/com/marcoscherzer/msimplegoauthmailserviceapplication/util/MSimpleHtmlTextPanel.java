@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegoauthmailerapplication.util;
+package com.marcoscherzer.msimplegoauthmailserviceapplication.util;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;

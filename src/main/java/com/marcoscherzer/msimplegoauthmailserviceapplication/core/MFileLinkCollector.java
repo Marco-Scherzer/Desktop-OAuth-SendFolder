@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegoauthmailerapplication.core;
+package com.marcoscherzer.msimplegoauthmailserviceapplication.core;
 import java.io.File;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;

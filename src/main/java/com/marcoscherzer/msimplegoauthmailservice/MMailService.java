@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplegoauthmailer;
+package com.marcoscherzer.msimplegoauthmailservice;
 
 
 import com.google.api.client.auth.oauth2.Credential;

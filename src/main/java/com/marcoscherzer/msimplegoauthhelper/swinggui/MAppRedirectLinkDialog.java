@@ -1,7 +1,8 @@
-package com.marcoscherzer.msimplegoauthmailerapplication;
-import com.marcoscherzer.msimplegoauthmailerapplication.util.MMutableBoolean;
-import com.marcoscherzer.msimplegoauthmailerapplication.util.MSimpleDialog;
-import com.marcoscherzer.msimplegoauthmailerapplication.util.MSimpleHtmlTextPanel;
+package com.marcoscherzer.msimplegoauthhelper.swinggui;
+import com.marcoscherzer.msimplegoauthmailserviceapplication.MMain;
+import com.marcoscherzer.msimplegoauthmailserviceapplication.util.MMutableBoolean;
+import com.marcoscherzer.msimplegoauthmailserviceapplication.util.MSimpleDialog;
+import com.marcoscherzer.msimplegoauthmailserviceapplication.util.MSimpleHtmlTextPanel;
 import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;

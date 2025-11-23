@@ -1,6 +1,6 @@
-package com.marcoscherzer.msimplegoauthmailerapplication;
+package com.marcoscherzer.msimplegoauthmailserviceapplication;
 
-import com.marcoscherzer.msimplegoauthmailerapplication.util.MSimpleDialog;
+import com.marcoscherzer.msimplegoauthmailserviceapplication.util.MSimpleDialog;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;

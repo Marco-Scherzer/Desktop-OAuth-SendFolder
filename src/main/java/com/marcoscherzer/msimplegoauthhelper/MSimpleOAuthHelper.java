@@ -11,7 +11,7 @@ import com.google.api.client.http.*;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.MemoryDataStoreFactory;
-import com.marcoscherzer.msimplegoauthmailerapplication.util.MMutableBoolean;
+import com.marcoscherzer.msimplegoauthmailserviceapplication.util.MMutableBoolean;
 import com.marcoscherzer.msimplekeystore.MKeystoreException;
 import com.marcoscherzer.msimplekeystore.MSimpleKeystore;
 
