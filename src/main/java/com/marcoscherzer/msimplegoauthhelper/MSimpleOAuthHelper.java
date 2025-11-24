@@ -77,7 +77,7 @@ public abstract class MSimpleOAuthHelper {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    protected abstract void onOAuthFailure(Throwable exc);
+    protected abstract void onOAuthFailure(Exception exc);
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

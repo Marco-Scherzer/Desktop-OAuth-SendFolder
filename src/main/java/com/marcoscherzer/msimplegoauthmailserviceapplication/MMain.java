@@ -2,26 +2,27 @@ package com.marcoscherzer.msimplegoauthmailserviceapplication;
 
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.services.gmail.GmailScopes;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthHelper;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthKeystore;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MAppRedirectLinkDialog;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MSpinnerOverlayFrame;
-import com.marcoscherzer.msimplegoauthmailservice.*;
+import com.marcoscherzer.msimplegoauthmailservice.MMailService;
+import com.marcoscherzer.msimplegoauthmailservice.MOutgoingMail;
 import com.marcoscherzer.msimplegoauthmailservice.swinggui.MAppSendGui;
 import com.marcoscherzer.msimplegoauthmailserviceapplication.core.MAttachmentWatcher;
-import com.marcoscherzer.msimplegoauthmailserviceapplication.util.MMutableBoolean;
-import com.marcoscherzer.msimplekeystore.*;
+import com.marcoscherzer.msimplekeystore.MSimpleKeystore;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.nio.file.*;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
 import java.util.Collections;
-import com.google.api.services.gmail.GmailScopes;
-
-import static com.marcoscherzer.msimplegoauthmailserviceapplication.util.MUtil.*;
+import static com.marcoscherzer.msimplegoauthmailserviceapplication.util.MUtil.createFolderDesktopLink;
+import static com.marcoscherzer.msimplegoauthmailserviceapplication.util.MUtil.createPathIfNotExists;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -30,7 +31,7 @@ import static com.marcoscherzer.msimplegoauthmailserviceapplication.util.MUtil.*
 public final class MMain {
 
     private static MAttachmentWatcher watcher;
-    private static MSimpleOAuthHelper mailer;
+    private static MSimpleOAuthHelper oAuthHelper;
     private static MAppLoggingArea logFrame;
     private static boolean isDbg;
     private static TrayIcon trayIcon;
@@ -42,67 +43,13 @@ public final class MMain {
     private static MAppRedirectLinkDialog appRedirectLinkDialog;
     private static MSpinnerOverlayFrame loginOverlay;
 
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    private static final void setup(){
-        try {
-            System.out.println("showing setup dialog");
-            trayIcon.displayMessage("OAuth Desktop FileSend Folder",
-                    "Setup started." + (isDbg ? "\nInfo: Use the SystemTray Icon to view log Information" : ""),
-                    TrayIcon.MessageType.INFO);
-            String[] setupedValues = new MAppSetupDialog().showAndWait();
-            if (setupedValues == null) exit(null, 1); // canceled
-            String from = setupedValues[0];
-            String to = setupedValues[1];
-            String pw = setupedValues[2];
-            String clientSecretPath = setupedValues[3];
 
-            // Keystore erstellen mit ausgewähltem client_secret.json
-            store = new MSimpleOAuthKeystore(pw, clientSecretPath, keystorePath);
-            store.getKeyStore().put("fromAddress", from);
-            store.getKeyStore().put("toAddress", to);
-
-            trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup completed.", TrayIcon.MessageType.INFO);
-            System.out.println("setup completed");
-        } catch (Exception exc){
-            System.err.println(exc.getMessage());
-            createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
-            exit(exc,1);
-        }
-    }
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    private static final void checkPassword(){
-        try {
-            System.out.println("showing password dialog");
-            trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Password required.\n", TrayIcon.MessageType.INFO);
-
-             new MAppPwDialog()
-                    .setOkHandler(pw -> {
-                        try {
-                            store = new MSimpleOAuthKeystore(pw, "", keystorePath);
-                            System.out.println("Access-level 1 granted: Application");
-                            trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
-                        } catch (Exception exc){
-                            System.err.println(exc.getMessage());
-                            createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
-                            exit(exc,1);
-                        }
-                    }).showAndWait();
-            } catch (Exception exc){
-                System.err.println(exc.getMessage());
-                createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
-                exit(exc,1);
-            }
-    }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * uready
      */
     public static final void main(String[] args) {
-        try {
+   try{
         isDbg = (args != null && args.length > 0 && args[0]!=null && args[0].equals("-debug"));
         //isDbg = true; //dbg
 
@@ -121,98 +68,48 @@ public final class MMain {
 
             setupTrayIcon();
             if (isDbg) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
-            boolean setup = !Files.exists(Paths.get(keystorePath));
 
-            if (setup) setup(); else checkPassword();
+       trayIcon.displayMessage("OAuth Desktop FileSend Folder",
+               "Setup started." + (isDbg ? "\nInfo: Use the SystemTray Icon to view log Information" : ""),
+               TrayIcon.MessageType.INFO);
 
-        if(store!=null) {
-            mailer = new MSimpleOAuthHelper(store, "BackupMailer", Collections.singletonList(GmailScopes.GMAIL_SEND),true) {
+       MAuthFlow_SwingGui flow = new MAuthFlow_SwingGui(){
 
-                @Override
-                protected final void onOAuthSucceeded(Credential credential, String applicationName) {
-                    try {
-                        appRedirectLinkDialog.dispose();
-                        loginOverlay.dispose();
+           @Override
+           protected void initializeServices(Credential credential, String applicationName) throws Exception {
+               MMailService mailService = new MMailService(credential, applicationName);
 
-                        MMailService mailService = new MMailService(credential, applicationName);
+               MSimpleKeystore store = oAuthHelper.getKeystore();
+               String clientAndPathUUID = store.get("clientId");
+               Path sentFolder = createPathIfNotExists(Paths.get(mailFoldersPath, clientAndPathUUID + "-sent"), "Sent folder");
+               Path unsentFolder = createPathIfNotExists(Paths.get(mailFoldersPath, clientAndPathUUID + "-notSent"), "NotSent folder");
 
-                        MSimpleKeystore store = mailer.getKeystore();
-                        String clientAndPathUUID = store.get("clientId");
-                        Path sentFolder = createPathIfNotExists(Paths.get(mailFoldersPath, clientAndPathUUID + "-sent"), "Sent folder");
-                        Path unsentFolder = createPathIfNotExists(Paths.get(mailFoldersPath, clientAndPathUUID + "-notSent"), "NotSent folder");
+               String fromAddress = store.get("fromAddress");
+               String toAddress = store.get("toAddress");
 
-                        String fromAddress = store.get("fromAddress");
-                        String toAddress = store.get("toAddress");
+               watcher = new MAttachmentWatcher(sentFolder, unsentFolder, mailService, fromAddress, toAddress, clientAndPathUUID) {
+                   @Override
+                   public final MConsentQuestioner askForConsent(MOutgoingMail mail) {
+                       return new MAppSendGui(mail, 900, 600, 16);
+                   }
+               }.startServer();
 
-                        watcher = new MAttachmentWatcher(sentFolder, unsentFolder, mailService, fromAddress, toAddress, clientAndPathUUID) {
-                            @Override
-                            public final MConsentQuestioner askForConsent(MOutgoingMail mail) {
-                                return new MAppSendGui(mail, 900, 600, 16);
-                            }
-                        }.startServer();
+               Path linkPath = createFolderDesktopLink(sentFolder.toString(), "Sent Things");
+               if (linkPath == null) {System.out.println("Desktop link for '" + linkPath + " could not be created. Please create it manually.");};
+               linkPath = createFolderDesktopLink(unsentFolder.toString(), "Unsent Things");
+               if (linkPath == null) {System.out.println("Desktop link for '" + linkPath + " could not be created. Please create it manually.");};
 
-                        Path linkPath = createFolderDesktopLink(sentFolder.toString(), "Sent Things");
-                        if (linkPath == null) {System.out.println("Desktop link for '" + linkPath + " could not be created. Please create it manually.");};
-                             linkPath = createFolderDesktopLink(unsentFolder.toString(), "Unsent Things");
-                        if (linkPath == null) {System.out.println("Desktop link for '" + linkPath + " could not be created. Please create it manually.");};
+               printConfiguration(fromAddress, toAddress, mailFoldersPath, clientAndPathUUID, clientAndPathUUID + "-sent");
+               trayIcon.displayMessage("OAuth Desktop FileSend Folder", "To send mail drag files onto its dolphin icon on the desktop or click it.", TrayIcon.MessageType.INFO);
+           }
+       };
 
-                        printConfiguration(fromAddress, toAddress, mailFoldersPath, clientAndPathUUID, clientAndPathUUID + "-sent");
-                        trayIcon.displayMessage("OAuth Desktop FileSend Folder", "To send mail drag files onto its dolphin icon on the desktop or click it.", TrayIcon.MessageType.INFO);
-                    } catch (Exception exc) {
-                        System.err.println(exc.getMessage());
-                        exit(exc, 1);
-                    }
-                }
+       flow.swingGuiAuthFlow(Collections.singletonList(GmailScopes.GMAIL_SEND),true);
 
-                /**
-                 * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-                 */
-                @Override
-                protected final void onStartOAuth(String oAuthLink, MMutableBoolean continueOAuthOrNot) {
-                    System.out.println("Additional authentification needed " + oAuthLink);
-                    try {
-                        appRedirectLinkDialog = new MAppRedirectLinkDialog();
-                        appRedirectLinkDialog.showAndWait(oAuthLink,continueOAuthOrNot);
-                        appRedirectLinkDialog.setVisible(false);
-                        loginOverlay = new MSpinnerOverlayFrame();
-                        loginOverlay.setMouseHandler(new MouseAdapter() {
-                            @Override
-                            public void mouseClicked(MouseEvent e) {
-                                System.out.println("Overlay clicked at: " + e.getPoint());
-                                loginOverlay.setVisible(true);
-                            }
-                        });
-                        loginOverlay.showOverlay();
-
-                    } catch (Exception exc) {
-                        System.err.println(exc.getMessage());
-                        exit(exc, 1);
-                    }
-                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Additional authentification needed\n", TrayIcon.MessageType.INFO);
-                }
-
-                @Override
-                protected final void onOAuthFailure(Throwable exc) {
-                    System.err.println(exc.getMessage());
-                    exit(exc, 1);
-                }
-
-
-            };
-            mailer.startOAuth();
-          }
-        } catch (Exception exc) {
-            System.err.println(exc.getMessage());
-            exit(exc, 1);
-        }
+    } catch (Exception exc) {
+        System.err.println(exc.getMessage());
+        exit(exc, 1);
     }
-
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    private static void createMessageDialogAndWait(String message, String title){
-        JOptionPane.showMessageDialog(null,message, title, JOptionPane.ERROR_MESSAGE);
     }
 
 
@@ -265,7 +162,7 @@ public final class MMain {
     public static void exit(Throwable exception,int code) {
         if(isDbg && exception!=null){exception.printStackTrace();}
         try {
-            if(mailer != null && mailer.isInDoNotPersistOAuthTokenMode()) mailer.revokeOAuthTokenFromServer();
+            if(oAuthHelper != null && oAuthHelper.isInDoNotPersistOAuthTokenMode()) oAuthHelper.revokeOAuthTokenFromServer();
             if (watcher != null) watcher.shutdown();
         } catch (Exception exc) {
             System.err.println(exception.getMessage());
