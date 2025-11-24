@@ -1,13 +1,10 @@
 package com.marcoscherzer.msimplegoauthmailserviceapplication;
-
-import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.gmail.GmailScopes;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthHelper;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthKeystore;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MAppRedirectLinkDialog;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MSpinnerOverlayFrame;
-import com.marcoscherzer.msimplegoauthmailserviceapplication.core.MAttachmentWatcher;
 import com.marcoscherzer.msimplegoauthmailserviceapplication.util.MMutableBoolean;
 import javax.swing.*;
 import java.awt.*;
@@ -18,27 +15,43 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import static com.marcoscherzer.msimplegoauthmailserviceapplication.MMain.exit;
-
+/**
+ * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+ */
 public abstract class MAuthFlow_SwingGui {
 
-    private static MAttachmentWatcher watcher;
-    private static MSimpleOAuthHelper oAuthHelper;
-    private static final String userDir = System.getProperty("user.dir");
-    private static final String keystorePath = userDir+"\\mystore.p12";
+    private MSimpleOAuthHelper oAuthHelper;
     private static MSimpleOAuthKeystore store;
-    private static MAppRedirectLinkDialog appRedirectLinkDialog;
-    private static MSpinnerOverlayFrame loginOverlay;
+    private MAppRedirectLinkDialog appRedirectLinkDialog;
+    private MSpinnerOverlayFrame loginOverlay;
+    private String keystorePath;
 
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     *   userDir = dir;
+     *         keystorePath = userDir + "\\" + keystoreFileName;
+     */
+    public MAuthFlow_SwingGui(String keystoreFilePathName) {
+        keystorePath = keystoreFilePathName;
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     */
+    public final MSimpleOAuthKeystore  getKeystore() {
+        return store;
+    }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final void createMessageDialogAndWait(String message, String title){
+    public static final void createMessageDialogAndWait(String message, String title){
         JOptionPane.showMessageDialog(null,message, title, JOptionPane.ERROR_MESSAGE);
     }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private final void setup(){
+    private void setup(){
         try {
             System.out.println("showing setup dialog");
 
@@ -54,7 +67,7 @@ public abstract class MAuthFlow_SwingGui {
             store.getKeyStore().put("fromAddress", from);
             store.getKeyStore().put("toAddress", to);
 
-            trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup completed.", TrayIcon.MessageType.INFO);
+            statusMsg("Setup completed.");
             System.out.println("setup completed");
         } catch (Exception exc){
             System.err.println(exc.getMessage());
@@ -65,17 +78,17 @@ public abstract class MAuthFlow_SwingGui {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private final void checkPassword(){
+    private void checkPassword(){
         try {
             System.out.println("showing password dialog");
-            trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Password required.\n", TrayIcon.MessageType.INFO);
+            statusMsg("Password required.\n");
 
             new MAppPwDialog()
                     .setOkHandler(pw -> {
                         try {
                             store = new MSimpleOAuthKeystore(pw, "", keystorePath);
                             System.out.println("Access-level 1 granted: Application");
-                            trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Access-level 1 granted: Application\n", TrayIcon.MessageType.INFO);
+                            statusMsg("Access-level 1 granted: Application\n");
                         } catch (Exception exc){
                             System.err.println(exc.getMessage());
                             createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
@@ -138,7 +151,7 @@ public abstract class MAuthFlow_SwingGui {
                         System.err.println(exc.getMessage());
                         exit(exc, 1);
                     }
-                    trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Additional authentification needed\n", TrayIcon.MessageType.INFO);
+                    statusMsg("Additional authentification needed\n");
                 }
 
                 @Override
@@ -150,6 +163,11 @@ public abstract class MAuthFlow_SwingGui {
             oAuthHelper.startOAuth();
         }
     }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    protected abstract void statusMsg(String message);
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

@@ -21,6 +21,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
+
+import static com.marcoscherzer.msimplegoauthmailserviceapplication.MAuthFlow_SwingGui.createMessageDialogAndWait;
 import static com.marcoscherzer.msimplegoauthmailserviceapplication.util.MUtil.createFolderDesktopLink;
 import static com.marcoscherzer.msimplegoauthmailserviceapplication.util.MUtil.createPathIfNotExists;
 
@@ -73,7 +75,12 @@ public final class MMain {
                "Setup started." + (isDbg ? "\nInfo: Use the SystemTray Icon to view log Information" : ""),
                TrayIcon.MessageType.INFO);
 
-       MAuthFlow_SwingGui flow = new MAuthFlow_SwingGui(){
+       MAuthFlow_SwingGui flow = new MAuthFlow_SwingGui(keystorePath){
+
+           @Override
+           protected void statusMsg(String message) {
+               trayIcon.displayMessage("OAuth Desktop FileSend Folder", message,TrayIcon.MessageType.INFO);
+           }
 
            @Override
            protected void initializeServices(Credential credential, String applicationName) throws Exception {
@@ -103,7 +110,6 @@ public final class MMain {
                trayIcon.displayMessage("OAuth Desktop FileSend Folder", "To send mail drag files onto its dolphin icon on the desktop or click it.", TrayIcon.MessageType.INFO);
            }
        };
-
        flow.swingGuiAuthFlow(Collections.singletonList(GmailScopes.GMAIL_SEND),true);
 
     } catch (Exception exc) {
