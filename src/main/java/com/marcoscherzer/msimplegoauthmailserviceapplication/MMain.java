@@ -16,10 +16,8 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.GeneralSecurityException;
 import java.util.Collections;
 
 import static com.marcoscherzer.msimplegoauthmailserviceapplication.MAuthFlow_SwingGui.createMessageDialogAndWait;
@@ -51,7 +49,7 @@ public final class MMain {
      * uready
      */
     public static final void main(String[] args) {
-   try{
+
         isDbg = (args != null && args.length > 0 && args[0]!=null && args[0].equals("-debug"));
         //isDbg = true; //dbg
 
@@ -65,17 +63,20 @@ public final class MMain {
         */
             FlatCarbonIJTheme.setup();
             UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
-
-            logFrame = new MAppLoggingArea();
+            try{logFrame = new MAppLoggingArea();} catch (Exception exc) { System.err.println(exc.getMessage());exit(exc, 1);}
 
             setupTrayIcon();
             if (isDbg) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
 
-       trayIcon.displayMessage("OAuth Desktop FileSend Folder",
-               "Setup started." + (isDbg ? "\nInfo: Use the SystemTray Icon to view log Information" : ""),
+       trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup started." + (isDbg ? "\nInfo: Use the SystemTray Icon to view log Information" : ""),
                TrayIcon.MessageType.INFO);
 
        MAuthFlow_SwingGui flow = new MAuthFlow_SwingGui(keystorePath){
+
+           @Override
+           protected void onException(Exception exc) {
+               exit(exc,1);
+           }
 
            @Override
            protected void statusMsg(String message) {
@@ -112,10 +113,6 @@ public final class MMain {
        };
        flow.swingGuiAuthFlow(Collections.singletonList(GmailScopes.GMAIL_SEND),true);
 
-    } catch (Exception exc) {
-        System.err.println(exc.getMessage());
-        exit(exc, 1);
-    }
     }
 
 

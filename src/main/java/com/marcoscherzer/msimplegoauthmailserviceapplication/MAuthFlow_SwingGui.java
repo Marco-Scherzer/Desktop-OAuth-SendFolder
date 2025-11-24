@@ -7,21 +7,19 @@ import com.marcoscherzer.msimplegoauthhelper.swinggui.MAppRedirectLinkDialog;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MSpinnerOverlayFrame;
 import com.marcoscherzer.msimplegoauthmailserviceapplication.util.MMutableBoolean;
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
-import static com.marcoscherzer.msimplegoauthmailserviceapplication.MMain.exit;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
 public abstract class MAuthFlow_SwingGui {
 
     private MSimpleOAuthHelper oAuthHelper;
-    private static MSimpleOAuthKeystore store;
+    private MSimpleOAuthKeystore store;
     private MAppRedirectLinkDialog appRedirectLinkDialog;
     private MSpinnerOverlayFrame loginOverlay;
     private String keystorePath;
@@ -56,7 +54,7 @@ public abstract class MAuthFlow_SwingGui {
             System.out.println("showing setup dialog");
 
             String[] setupedValues = new MAppSetupDialog().showAndWait();
-            if (setupedValues == null) exit(null, 1); // canceled
+            if (setupedValues == null) onException(null); // canceled
             String from = setupedValues[0];
             String to = setupedValues[1];
             String pw = setupedValues[2];
@@ -72,7 +70,7 @@ public abstract class MAuthFlow_SwingGui {
         } catch (Exception exc){
             System.err.println(exc.getMessage());
             createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
-            exit(exc,1);
+            onException(exc);
         }
     }
     /**
@@ -92,13 +90,13 @@ public abstract class MAuthFlow_SwingGui {
                         } catch (Exception exc){
                             System.err.println(exc.getMessage());
                             createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
-                            exit(exc,1);
+                            onException(exc);
                         }
                     }).showAndWait();
         } catch (Exception exc){
             System.err.println(exc.getMessage());
             createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
-            exit(exc,1);
+            onException(exc);
         }
     }
 
@@ -123,7 +121,7 @@ public abstract class MAuthFlow_SwingGui {
 
                     } catch (Exception exc) {
                         System.err.println(exc.getMessage());
-                        exit(exc, 1);
+                        onException(exc);
                     }
                 }
 
@@ -149,7 +147,7 @@ public abstract class MAuthFlow_SwingGui {
 
                     } catch (Exception exc) {
                         System.err.println(exc.getMessage());
-                        exit(exc, 1);
+                        onException(exc);
                     }
                     statusMsg("Additional authentification needed\n");
                 }
@@ -157,13 +155,17 @@ public abstract class MAuthFlow_SwingGui {
                 @Override
                 protected final void onOAuthFailure(Exception exc) {
                     System.err.println(exc.getMessage());
-                    exit(exc, 1);
+                    onException(exc);
                 }
             };
             oAuthHelper.startOAuth();
         }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    protected abstract void onException(Exception exc);
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
