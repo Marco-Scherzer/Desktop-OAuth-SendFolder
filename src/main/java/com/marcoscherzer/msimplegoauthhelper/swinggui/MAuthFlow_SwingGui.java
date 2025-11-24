@@ -103,7 +103,7 @@ public abstract class MAuthFlow_SwingGui {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * uready
      */
-    public final void swingGuiAuthFlow(List scopes, boolean persistOAuthToken) {
+    public final void createAuthFlow(List scopes, boolean persistOAuthToken) {
         boolean setup = !Files.exists(Paths.get(keystorePath));
         if (setup) setup(); else checkPassword();
         if(store!=null) {

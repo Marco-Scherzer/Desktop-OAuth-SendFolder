@@ -3,6 +3,7 @@ package com.marcoscherzer.msimplegoauthmailserviceapplication;
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.gmail.GmailScopes;
+import com.marcoscherzer.msimplegoauthhelper.MGoAuthScopes;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthHelper;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthKeystore;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MAppRedirectLinkDialog;
@@ -112,7 +113,8 @@ public final class MMain {
                trayIcon.displayMessage("OAuth Desktop FileSend Folder", "To send mail drag files onto its dolphin icon on the desktop or click it.", TrayIcon.MessageType.INFO);
            }
        };
-       flow.swingGuiAuthFlow(Collections.singletonList(GmailScopes.GMAIL_SEND),true);
+
+       flow.createAuthFlow(Collections.singletonList(GmailScopes.GMAIL_SEND),true);
 
     }
 
