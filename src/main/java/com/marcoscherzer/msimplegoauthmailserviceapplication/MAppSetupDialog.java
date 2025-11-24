@@ -35,13 +35,19 @@ public final class MAppSetupDialog {
                 capturedException = e;
             }
         };
+
+        if (SwingUtilities.isEventDispatchThread()) {
+            task.run();
+        } else {
             SwingUtilities.invokeAndWait(task);
-            if (capturedException != null) {
-                throw capturedException;
-            }
-            return result;
+        }
+
+        if (capturedException != null) {
+            throw capturedException;
+        }
+        return result;
     }
-    
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -217,27 +223,9 @@ public final class MAppSetupDialog {
         }
     }
 
-
-
-
-
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private JLabel createFormLabel(String text, int width) {
-        JLabel label = new JLabel(text, SwingConstants.RIGHT);
-        label.setPreferredSize(new Dimension(width, label.getPreferredSize().height));
-        Font baseFont = label.getFont();
-        label.setFont(baseFont.deriveFont(Font.BOLD, 14));
-
-        return label;
-    }
-
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-
     private void addPlaceholderBehavior(final JTextComponent field, final String placeholder) {
         field.setForeground(Color.GRAY);
         field.setText(placeholder);
@@ -316,27 +304,6 @@ public final class MAppSetupDialog {
                 validate();
             }
         });
-    }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    private final JPanel createTwoPartLabel(String mainText, String hintText, float mainFontSize, float hintFontSize) {
-        JPanel labelPanel = new JPanel();
-        labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
-
-        JLabel labelMain = new JLabel(mainText);
-        labelMain.setFont(labelMain.getFont().deriveFont(Font.BOLD, mainFontSize));
-        labelMain.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JLabel labelHint = new JLabel(hintText);
-        labelHint.setFont(labelHint.getFont().deriveFont(Font.PLAIN, hintFontSize));
-        labelHint.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        labelPanel.add(labelMain);
-        labelPanel.add(labelHint);
-
-        return labelPanel;
     }
 
 }

@@ -24,8 +24,9 @@ public final class MAppSendGui implements MAttachmentWatcher.MConsentQuestioner 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
+
     public MAppSendGui(MOutgoingMail mail, int windowWidth, int windowHeight, int fontSize) {
-        SwingUtilities.invokeLater(() -> {
+        Runnable task = () -> {
             consentFrame = new JFrame("OAuthFileSendFolder for Gmail (Prototype, preAlpha 0.1) - Send Mail");
             consentFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             consentFrame.setAlwaysOnTop(true);
@@ -98,10 +99,13 @@ public final class MAppSendGui implements MAttachmentWatcher.MConsentQuestioner 
                 mail.setSubject(subjectField.getText());
                 mail.appendMessageText(messageArea.getText());
                 consentFrame.dispose();
-                result=true;
+                result = true;
             });
 
-            cancelButton.addActionListener(e -> {consentFrame.dispose();result=false;});
+            cancelButton.addActionListener(e -> {
+                consentFrame.dispose();
+                result = false;
+            });
 
             JPanel bottomRow = new JPanel(new GridLayout(1, 3, 10, 0));
             bottomRow.add(counterLabel);
@@ -122,7 +126,7 @@ public final class MAppSendGui implements MAttachmentWatcher.MConsentQuestioner 
             JMenuBar menuBar = new JMenuBar();
             JMenu preferencesMenu = new JMenu();
             preferencesMenu.setToolTipText("Preferences");
-            preferencesMenu.setIcon(new FlatSVGIcon("gear.svg"));
+            preferencesMenu.setIcon(new com.formdev.flatlaf.extras.FlatSVGIcon("gear.svg"));
 
             preferencesMenu.addMouseListener(new java.awt.event.MouseAdapter() {
                 @Override
@@ -139,18 +143,16 @@ public final class MAppSendGui implements MAttachmentWatcher.MConsentQuestioner 
 
             menuBar.add(preferencesMenu);
             consentFrame.setJMenuBar(menuBar);
-
             consentFrame.add(basePanel);
-
-            // Fenstergröße aus Parametern
             consentFrame.setSize(windowWidth, windowHeight);
-
-            // Fenster mittig auf dem Bildschirm platzieren
             consentFrame.setLocationRelativeTo(null);
-
             consentFrame.setVisible(true);
-        });
-
+        };
+        if (SwingUtilities.isEventDispatchThread()) {
+            task.run();
+        } else {
+            SwingUtilities.invokeLater(task);
+        }
     }
 
 

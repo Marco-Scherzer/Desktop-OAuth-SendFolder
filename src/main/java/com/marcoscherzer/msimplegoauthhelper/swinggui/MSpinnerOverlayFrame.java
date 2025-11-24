@@ -22,7 +22,7 @@ public final class MSpinnerOverlayFrame {
 
     private final JWindow window = new JWindow();
     private final SpinnerPanel spinner = new SpinnerPanel();
-    private Timer anim; // Timer wird erst beim Sichtbarmachen erzeugt
+    private Timer anim;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -43,6 +43,16 @@ public final class MSpinnerOverlayFrame {
         int x = screen.x + (screen.width - overlayWidth) / 2;
         int y = screen.y;
 
+        if (SwingUtilities.isEventDispatchThread()) {
+            initWindow(x, y, overlayWidth, overlayHeight, gap, topGap);
+        } else {
+            SwingUtilities.invokeLater(() -> initWindow(x, y, overlayWidth, overlayHeight, gap, topGap));
+        }
+    }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private void initWindow(int x, int y, int overlayWidth, int overlayHeight, int gap, int topGap) {
         window.setBounds(x, y, overlayWidth, overlayHeight);
         window.setAlwaysOnTop(true);
         window.setBackground(WINDOW_BG_COLOR);
@@ -83,24 +93,21 @@ public final class MSpinnerOverlayFrame {
         root.add(contentPanel, BorderLayout.CENTER);
         window.setContentPane(root);
     }
-
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final void showOverlay() {
         setVisible(true);
     }
-
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final void setVisible(boolean visible) {
-        SwingUtilities.invokeLater(() -> {
+        Runnable task = () -> {
             if (visible) {
                 if (!window.isVisible()) {
                     window.setVisible(true);
                     window.toFront();
-                    // Timer hier erzeugen und starten
                     anim = new Timer(50, e -> {
                         spinner.rotate();
                         spinner.repaint();
@@ -116,49 +123,61 @@ public final class MSpinnerOverlayFrame {
                     window.setVisible(false);
                 }
             }
-        });
-    }
+        };
 
+        if (SwingUtilities.isEventDispatchThread()) {
+            task.run();
+        } else {
+            SwingUtilities.invokeLater(task);
+        }
+    }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final void dispose() {
-        SwingUtilities.invokeLater(() -> {
+        Runnable task = () -> {
             if (anim != null) {
                 anim.stop();
                 anim = null;
             }
             window.dispose();
-        });
-    }
+        };
 
+        if (SwingUtilities.isEventDispatchThread()) {
+            task.run();
+        } else {
+            SwingUtilities.invokeLater(task);
+        }
+    }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public void setMouseHandler(MouseListener listener) {
-        window.getContentPane().addMouseListener(listener);
-    }
+        Runnable task = () -> window.getContentPane().addMouseListener(listener);
 
+        if (SwingUtilities.isEventDispatchThread()) {
+            task.run();
+        } else {
+            SwingUtilities.invokeLater(task);
+        }
+    }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     private static final class SpinnerPanel extends JPanel {
         private int angle = 0;
-
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
         private SpinnerPanel() {
             setOpaque(false);
         }
-
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
         private final void rotate() {
             angle = (angle + 10) % 360;
         }
-
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
@@ -190,6 +209,7 @@ public final class MSpinnerOverlayFrame {
         }
     }
 }
+
 
 
 

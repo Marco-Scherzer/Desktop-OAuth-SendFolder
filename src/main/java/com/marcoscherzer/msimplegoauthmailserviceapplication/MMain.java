@@ -2,7 +2,6 @@ package com.marcoscherzer.msimplegoauthmailserviceapplication;
 
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.services.gmail.Gmail;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthHelper;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthKeystore;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MAppRedirectLinkDialog;
@@ -40,7 +39,6 @@ public final class MMain {
     private static final String mailFoldersPath = userDir + "\\mail";
     private static String trayIconPathWithinResourcesFolder = "/5.png";
     private static MSimpleOAuthKeystore store;
-    private static Gmail mailService;
     private static MAppRedirectLinkDialog appRedirectLinkDialog;
     private static MSpinnerOverlayFrame loginOverlay;
 
@@ -106,7 +104,7 @@ public final class MMain {
     public static final void main(String[] args) {
         try {
         isDbg = (args != null && args.length > 0 && args[0]!=null && args[0].equals("-debug"));
-        isDbg = true; //dbg
+        //isDbg = true; //dbg
 
         /*
             FlatLightLaf.setup(), FlatDarkLaf.setup(), FlatIntelliJLaf.setup(), FlatDarculaLaf.setup(),
@@ -166,6 +164,9 @@ public final class MMain {
                     }
                 }
 
+                /**
+                 * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+                 */
                 @Override
                 protected final void onStartOAuth(String oAuthLink, MMutableBoolean continueOAuthOrNot) {
                     System.out.println("Additional authentification needed " + oAuthLink);
@@ -179,7 +180,6 @@ public final class MMain {
                             public void mouseClicked(MouseEvent e) {
                                 System.out.println("Overlay clicked at: " + e.getPoint());
                                 loginOverlay.setVisible(true);
-
                             }
                         });
                         loginOverlay.showOverlay();

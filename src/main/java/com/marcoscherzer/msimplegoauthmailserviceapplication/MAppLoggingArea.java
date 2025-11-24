@@ -12,7 +12,8 @@ public final class MAppLoggingArea {
 
     private JTextArea logArea;
     private JFrame logFrame;
-    private static PrintStream originalOut=System.out;
+    private static PrintStream originalOut = System.out;
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -48,15 +49,21 @@ public final class MAppLoggingArea {
             System.setErr(ps);
         };
 
-
-        SwingUtilities.invokeAndWait(task);
+        // Abfrage: läuft bereits auf dem Swing-Thread?
+        if (SwingUtilities.isEventDispatchThread()) {
+            task.run();
+        } else {
+            SwingUtilities.invokeAndWait(task);
+        }
     }
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final JTextArea getLogArea() {
         return logArea;
     }
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -64,4 +71,3 @@ public final class MAppLoggingArea {
         return logFrame;
     }
 }
-

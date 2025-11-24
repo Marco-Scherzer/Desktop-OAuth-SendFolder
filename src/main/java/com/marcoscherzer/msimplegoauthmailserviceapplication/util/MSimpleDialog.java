@@ -23,6 +23,7 @@ public final class MSimpleDialog {
     private JDialog dialog;
     private final int width;
     private final int height;
+
     /**
      * Copyright Marco Scherzer, All rights reserved
      */
@@ -31,39 +32,29 @@ public final class MSimpleDialog {
         this.width = width;
         this.height = height;
     }
-    /**
-     * Copyright Marco Scherzer, All rights reserved
-     */
+
     public MSimpleDialog setTitle(String title) {
         this.title = title;
         return this;
     }
-    /**
-     * Copyright Marco Scherzer, All rights reserved
-     */
+
     public MSimpleDialog setMessageType(int messageType) {
         this.messageType = messageType;
         return this;
     }
-    /**
-     * Copyright Marco Scherzer, All rights reserved
-     */
+
     public MSimpleDialog setIcon(Icon icon) {
         this.icon = icon;
         return this;
     }
-    /**
-     * Copyright Marco Scherzer, All rights reserved
-     */
+
     public MSimpleDialog addButton(String label, ActionListener handler, boolean close) {
         buttonLabels.add(label);
         buttonHandlers.add(handler);
         buttonCloseFlags.add(close);
         return this;
     }
-    /**
-     * Copyright Marco Scherzer, All rights reserved
-     */
+
     public void pressButton(int index) {
         if (pane != null && dialog != null && index >= 0 && index < buttonLabels.size()) {
             pane.setValue(buttonLabels.get(index));
@@ -76,6 +67,7 @@ public final class MSimpleDialog {
             }
         }
     }
+
     /**
      * Copyright Marco Scherzer, All rights reserved
      */
@@ -115,7 +107,6 @@ public final class MSimpleDialog {
             // Content mittig mit zusätzlichem Abstand links/rechts
             JPanel contentPanel = new JPanel(new BorderLayout());
             contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-            // oben/unten 10px, links/rechts 20px
             contentPanel.add(content, BorderLayout.CENTER);
             panel.add(contentPanel, BorderLayout.CENTER);
 
@@ -148,14 +139,16 @@ public final class MSimpleDialog {
             dialog.setSize(width, height);
             dialog.setLocationRelativeTo(null);
             dialog.setVisible(true);
-
         };
 
-        SwingUtilities.invokeAndWait(task);
+        // Abfrage: läuft bereits auf dem Swing-Thread?
+        if (SwingUtilities.isEventDispatchThread()) {
+            task.run();
+        } else {
+            SwingUtilities.invokeAndWait(task);
+        }
     }
-    /**
-     * Copyright Marco Scherzer, All rights reserved
-     */
+
     public JDialog getUIComponent() {
         return dialog;
     }
