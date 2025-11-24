@@ -6,6 +6,7 @@ import com.google.api.services.gmail.GmailScopes;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthHelper;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthKeystore;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MAppRedirectLinkDialog;
+import com.marcoscherzer.msimplegoauthhelper.swinggui.MAuthFlow_SwingGui;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MSpinnerOverlayFrame;
 import com.marcoscherzer.msimplegoauthmailservice.MMailService;
 import com.marcoscherzer.msimplegoauthmailservice.MOutgoingMail;
@@ -20,7 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 
-import static com.marcoscherzer.msimplegoauthmailserviceapplication.MAuthFlow_SwingGui.createMessageDialogAndWait;
+import static com.marcoscherzer.msimplegoauthhelper.swinggui.MAuthFlow_SwingGui.createMessageDialogAndWait;
 import static com.marcoscherzer.msimplegoauthmailserviceapplication.util.MUtil.createFolderDesktopLink;
 import static com.marcoscherzer.msimplegoauthmailserviceapplication.util.MUtil.createPathIfNotExists;
 

@@ -1,6 +1,5 @@
 package com.marcoscherzer.msimplegoauthhelper.swinggui;
 import com.marcoscherzer.msimplegoauthmailserviceapplication.MMain;
-import com.marcoscherzer.msimplegoauthmailserviceapplication.util.MMutableBoolean;
 import com.marcoscherzer.msimplegoauthmailserviceapplication.util.MSimpleDialog;
 import com.marcoscherzer.msimplegoauthmailserviceapplication.util.MSimpleHtmlTextPanel;
 import javax.swing.*;
