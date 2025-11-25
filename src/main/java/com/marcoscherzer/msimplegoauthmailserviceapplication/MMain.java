@@ -2,6 +2,7 @@ package com.marcoscherzer.msimplegoauthmailserviceapplication;
 
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.google.api.client.auth.oauth2.Credential;
+import com.marcoscherzer.msimplegoauthhelper.MGWebApis;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MAuthFlow_SwingGui;
 import com.marcoscherzer.msimplegoauthmailservice.MMailService;
 import com.marcoscherzer.msimplegoauthmailservice.MOutgoingMail;
@@ -82,7 +83,7 @@ public final class MMain {
                Path unsentFolder = createPathIfNotExists(Paths.get(mailFoldersPath, clientAndPathUUID + "-notSent"), "NotSent folder");
 
                String fromAddress = store.get("fromAddress");
-               String toAddress = store.get("toAddress");
+               String toAddress = ""; //store.get("toAddress");
 
                watcher = new MAttachmentWatcher(sentFolder, unsentFolder, mailService, fromAddress, toAddress, clientAndPathUUID) {
                    @Override
@@ -101,7 +102,7 @@ public final class MMain {
            }
        };
 
-       flow.createAuthFlow(true,GMAIL_SEND.get());
+       flow.createAuthFlow(true,GMAIL_SEND.get(), MGWebApis.Fitness.FITNESS_LOCATION_READ.get());
 
     }
 

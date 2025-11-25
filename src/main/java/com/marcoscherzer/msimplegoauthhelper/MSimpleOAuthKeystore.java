@@ -20,9 +20,9 @@ public final class MSimpleOAuthKeystore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleOAuthKeystore(String keystorePassword, String clientSecretJsonFile, String keystoreFile) throws MKeystoreException, MClientSecretException, MPasswordComplexityException, MPasswordIntegrityException, IOException {
+    public MSimpleOAuthKeystore(String keystorePassword, String clientSecretJsonFile, String keystoreFilePath) throws MKeystoreException, MClientSecretException, MPasswordComplexityException, MPasswordIntegrityException, IOException {
         File jsonFile = new File(clientSecretJsonFile);
-        File keyStoreFile = new File(keystoreFile);
+        File keyStoreFile = new File(keystoreFilePath);
         keystore = new MSimpleKeystore(keyStoreFile, keystorePassword);
         if (!keyStoreFile.exists() && !jsonFile.exists()) throw new MClientSecretException("client_secret.json must be placed in the directory \"" + jsonFile.getPath() + "\" before first launch.");
         if(keyStoreFile.exists()) keystore.loadKeystore(); else{ keystore.createKeystore();}

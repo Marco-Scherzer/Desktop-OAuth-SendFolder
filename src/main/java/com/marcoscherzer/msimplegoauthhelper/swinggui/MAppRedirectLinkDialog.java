@@ -4,6 +4,8 @@ import com.marcoscherzer.msimplegoauthmailserviceapplication.util.MSimpleDialog;
 import com.marcoscherzer.msimplegoauthmailserviceapplication.util.MSimpleHtmlTextPanel;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 
@@ -11,15 +13,11 @@ import java.net.URI;
  * Copyright Marco Scherzer, All rights reserved
  * unready
  */
-public final class MAppRedirectLinkDialog {
+public abstract class MAppRedirectLinkDialog {
 
     private MSimpleDialog dialog;
+    private MSpinnerOverlayFrame loginOverlay;
 
-    /**
-     * Copyright Marco Scherzer, All rights reserved
-     * unready
-     */
-    public MAppRedirectLinkDialog() {}
 
     /**
      * Copyright Marco Scherzer, All rights reserved
@@ -39,16 +37,18 @@ public final class MAppRedirectLinkDialog {
                         } else {
                             System.out.println("Browser can not be started: Please open url manually: " + oAuthLink);
                         }
-                        dispose();
+                        //dispose();
+                        dialog.getUIComponent().setVisible(false);
 
                     } catch (Exception exc) {
                         continueOAuthOrNot.set(false);
-                        MMain.exit(exc, 0);
+                        onException(exc);
                     }
                 }, false) // Dialog bleibt offen
                 .addButton("Cancel", e -> {
                     continueOAuthOrNot.set(false);
-                    MMain.exit(null, 0);
+                    dispose();
+                    onCanceled();
                 }, true); // Dialog schließt
 
         htmlPanel.setDialogSize(700, 400)
@@ -58,24 +58,46 @@ public final class MAppRedirectLinkDialog {
                         e -> dialog.pressButton(0)) // Klick auf Link simuliert "OK"
                 .create();
         dialog.showAndWait();
+        dialog.getUIComponent().setVisible(false);
+
+
+        loginOverlay = new MSpinnerOverlayFrame();
+        loginOverlay.setMouseHandler(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                dialog.getUIComponent().setVisible(true);
+            }
+        });
+        loginOverlay.setVisible(true);
     }
 
     /**
      * Copyright Marco Scherzer, All rights reserved
      * unready
      */
-    public void dispose() {
+    public final void dispose() {
         dialog.getUIComponent().setVisible(false);
         dialog.getUIComponent().dispose();
+        loginOverlay.dispose();
     }
 
     /**
      * Copyright Marco Scherzer, All rights reserved
      * unready
      */
-    public void setVisible(boolean visible) {
+    public final void setVisible(boolean visible) {
         dialog.getUIComponent().setVisible(visible);
     }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    protected abstract void onException(Exception exc);
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    protected abstract void onCanceled();
 
 }
 

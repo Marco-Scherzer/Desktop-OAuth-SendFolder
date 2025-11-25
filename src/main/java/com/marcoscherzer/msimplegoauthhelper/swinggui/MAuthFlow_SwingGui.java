@@ -2,7 +2,6 @@ package com.marcoscherzer.msimplegoauthhelper.swinggui;
 import com.google.api.client.auth.oauth2.Credential;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthHelper;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthKeystore;
-import com.marcoscherzer.msimplegoauthmailserviceapplication.MAppSetupDialog;
 import com.marcoscherzer.msimplekeystore.MSimpleKeystore;
 
 import javax.swing.*;
@@ -12,6 +11,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+
+import static com.marcoscherzer.msimplegoauthmailserviceapplication.MMain.exit;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -58,7 +59,7 @@ public abstract class MAuthFlow_SwingGui {
             // Keystore erstellen mit ausgewähltem client_secret.json
             store = new MSimpleOAuthKeystore(pw, clientSecretPath, keystorePath);
             store.getKeystore().put("fromAddress", from);
-            store.getKeystore().put("toAddress", to);//unready
+            //store.getKeystore().put("toAddress", to);//unready
 
             statusMsg("Setup completed.");
             System.out.println("setup completed");
@@ -104,16 +105,29 @@ public abstract class MAuthFlow_SwingGui {
         if (setup) setup(); else checkPassword();
         if(store!=null) {
             oAuthHelper = new MSimpleOAuthHelper(store, "BackupMailer", persistOAuthToken,scopes) {
+
+
                 /**
                  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
                  */
                 @Override
-                protected final void onOAuthSucceeded(Credential credential, String applicationName) {
+                protected final void onStartOAuth(String oAuthLink, MMutableBoolean continueOAuthOrNot) {
+                    System.out.println("Additional authentification required" + oAuthLink);
+                    statusMsg("Additional authentification required\n");
                     try {
-                        appRedirectLinkDialog.dispose();
-                        loginOverlay.dispose();
-                        System.out.println("intializing services...");
-                        initializeServices(new MAuthManager(oAuthHelper), credential, applicationName);
+                        appRedirectLinkDialog = new MAppRedirectLinkDialog() {
+                            @Override
+                            protected void onException(Exception exc) {
+                                onException_(exc);
+                            }
+
+                            @Override
+                            protected void onCanceled() {
+                               exit(null,0);//unready
+                            }
+                        };
+                        appRedirectLinkDialog.showAndWait(oAuthLink,continueOAuthOrNot);
+
                     } catch (Exception exc) {
                         System.err.println(exc.getMessage());
                         onException_(exc);
@@ -124,22 +138,12 @@ public abstract class MAuthFlow_SwingGui {
                  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
                  */
                 @Override
-                protected final void onStartOAuth(String oAuthLink, MMutableBoolean continueOAuthOrNot) {
-                    System.out.println("Additional authentification required" + oAuthLink);
-                    statusMsg("Additional authentification required\n");
+                protected final void onOAuthSucceeded(Credential credential, String applicationName) {
                     try {
-                        appRedirectLinkDialog = new MAppRedirectLinkDialog();
-                        appRedirectLinkDialog.showAndWait(oAuthLink,continueOAuthOrNot);
-                        appRedirectLinkDialog.setVisible(false);
-                        loginOverlay = new MSpinnerOverlayFrame();
-                        loginOverlay.setMouseHandler(new MouseAdapter() {
-                            @Override
-                            public void mouseClicked(MouseEvent e) {
-                                appRedirectLinkDialog.setVisible(true);
-                            }
-                        });
-                        loginOverlay.setVisible(true);
-
+                        appRedirectLinkDialog.dispose();
+                        //loginOverlay.dispose();
+                        System.out.println("intializing services...");
+                        initializeServices(new MAuthManager(oAuthHelper), credential, applicationName);
                     } catch (Exception exc) {
                         System.err.println(exc.getMessage());
                         onException_(exc);
@@ -173,9 +177,9 @@ public abstract class MAuthFlow_SwingGui {
      */
     public static final class MAuthManager{
         private final MSimpleOAuthHelper oAuthHelper;
-        MAuthManager(MSimpleOAuthHelper oAuthHelper){ this.oAuthHelper = oAuthHelper;}
-        public boolean isInDoNotPersistOAuthTokenMode() throws Exception { return oAuthHelper.isInDoNotPersistOAuthTokenMode(); }
-        public void revokeOAuthTokenFromServer() throws GeneralSecurityException, IOException { oAuthHelper.revokeOAuthTokenFromServer();}
+        private MAuthManager(MSimpleOAuthHelper oAuthHelper){ this.oAuthHelper = oAuthHelper;}
+        public final boolean isInDoNotPersistOAuthTokenMode() throws Exception { return oAuthHelper.isInDoNotPersistOAuthTokenMode(); }
+        public final void revokeOAuthTokenFromServer() throws GeneralSecurityException, IOException { oAuthHelper.revokeOAuthTokenFromServer();}
         public final void removePersistetOAuthToken() throws GeneralSecurityException, IOException { oAuthHelper.revokeOAuthTokenFromServer();}
         public final MSimpleKeystore getKeystore(){ return oAuthHelper.getKeystore(); }
     }
