@@ -5,8 +5,6 @@ import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthKeystore;
 import com.marcoscherzer.msimplekeystore.MSimpleKeystore;
 
 import javax.swing.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -22,7 +20,6 @@ public abstract class MAuthFlow_SwingGui {
     private MSimpleOAuthHelper oAuthHelper;
     private MSimpleOAuthKeystore store;
     private MAppRedirectLinkDialog appRedirectLinkDialog;
-    private MSpinnerOverlayFrame loginOverlay;
     private String keystorePath;
 
 
@@ -45,14 +42,14 @@ public abstract class MAuthFlow_SwingGui {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      *  unready
      */
-    private void setup(){
+    private void createSetupDialog(){
         try {
             System.out.println("showing setup dialog");
             statusMsg("Setup started." + "\nInfo: Use the SystemTray Icon to view log Information");
             String[] setupedValues = new MAppSetupDialog().showAndWait();
             if (setupedValues == null) onException_(null); // canceled
             String from = setupedValues[0];
-            String to = setupedValues[1];
+            //String to = setupedValues[1];
             String pw = setupedValues[2];
             String clientSecretPath = setupedValues[3];
 
@@ -72,7 +69,7 @@ public abstract class MAuthFlow_SwingGui {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private void checkPassword(){
+    private void createPasswordDialog(){
         try {
             System.out.println("showing password dialog");
             //statusMsg("Password required.\n");
@@ -102,10 +99,9 @@ public abstract class MAuthFlow_SwingGui {
      */
     public final void createAuthFlow(boolean persistOAuthToken,String... scopes) {
         boolean setup = !Files.exists(Paths.get(keystorePath));
-        if (setup) setup(); else checkPassword();
+        if (setup) createSetupDialog(); else createPasswordDialog();
         if(store!=null) {
             oAuthHelper = new MSimpleOAuthHelper(store, "BackupMailer", persistOAuthToken,scopes) {
-
 
                 /**
                  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -141,7 +137,6 @@ public abstract class MAuthFlow_SwingGui {
                 protected final void onOAuthSucceeded(Credential credential, String applicationName) {
                     try {
                         appRedirectLinkDialog.dispose();
-                        //loginOverlay.dispose();
                         System.out.println("intializing services...");
                         initializeServices(new MAuthManager(oAuthHelper), credential, applicationName);
                     } catch (Exception exc) {

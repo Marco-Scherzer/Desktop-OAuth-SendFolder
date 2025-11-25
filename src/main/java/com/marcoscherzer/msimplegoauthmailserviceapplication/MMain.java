@@ -102,7 +102,7 @@ public final class MMain {
            }
        };
 
-       flow.createAuthFlow(true,GMAIL_SEND.get(), MGWebApis.Fitness.FITNESS_LOCATION_READ.get());
+       flow.createAuthFlow(true,GMAIL_SEND.get(), MGWebApis.Fitness.FITNESS_ACTIVITY_READ.get());
 
     }
 
