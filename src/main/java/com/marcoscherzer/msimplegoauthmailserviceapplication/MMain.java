@@ -18,7 +18,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 
 import static com.marcoscherzer.msimplegoauthhelper.MGoWebApis.Gmail.GMAIL_SEND;
 import static com.marcoscherzer.msimplegoauthhelper.swinggui.MAuthFlow_SwingGui.createMessageDialogAndWait;
@@ -86,6 +85,7 @@ public final class MMain {
 
            @Override
            protected void initializeServices(Credential credential, String applicationName) throws Exception {
+               System.out.println("intializing services");
                MMailService mailService = new MMailService(credential, applicationName);
 
                MSimpleKeystore store = oAuthHelper.getKeystore();
@@ -113,7 +113,7 @@ public final class MMain {
            }
        };
 
-       flow.createAuthFlow(Collections.singletonList(GMAIL_SEND.getScope()),true);
+       flow.createAuthFlow(true,GMAIL_SEND.get());
 
     }
 

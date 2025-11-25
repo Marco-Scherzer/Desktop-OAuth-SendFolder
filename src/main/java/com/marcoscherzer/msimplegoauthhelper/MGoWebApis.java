@@ -32,7 +32,6 @@ import com.google.api.services.cloudresourcemanager.v3.CloudResourceManagerScope
 import com.google.api.services.bigquery.BigqueryScopes;
 import com.google.api.services.storage.StorageScopes;
 
-
 // Ads / Monetarisierung
 import com.google.api.services.adsense.v2.AdsenseScopes;
 import com.google.api.services.adexchangebuyer.AdExchangeBuyerScopes;
@@ -73,7 +72,6 @@ import com.google.api.services.dialogflow.v3.DialogflowScopes;
 import com.google.api.services.apigee.v1.ApigeeScopes;
 import com.google.api.services.cloudbilling.CloudbillingScopes;
 import com.google.api.services.playcustomapp.PlaycustomappScopes;
-
 import java.util.*;
 
 /**
@@ -224,9 +222,9 @@ public enum MGoWebApis {
      */
     //Interface für alle Scope-Enums
     public static interface MScopeEnum {
-        MScope getScope();
-        //default String getUrl() { return getInfo().getUrl(); }
-        //default EnumSet<MSupportedLogins> getLoginTypes() { return getInfo().getLoginTypes(); }
+        public String get();
+        @Override public String toString();
+        public EnumSet<MSupportedLogins> getLoginTypes();
     }
 
     // --- Basis / Identity ---
@@ -237,7 +235,9 @@ public enum MGoWebApis {
         USERINFO_PROFILE(new MScope(Oauth2Scopes.USERINFO_PROFILE, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Identity(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Gmail ---
@@ -249,7 +249,9 @@ public enum MGoWebApis {
         GMAIL_LABELS(new MScope(GmailScopes.GMAIL_LABELS, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Gmail(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Drive ---
@@ -262,7 +264,9 @@ public enum MGoWebApis {
         DRIVE_SCRIPTS(new MScope(DriveScopes.DRIVE_SCRIPTS, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Drive(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Calendar ---
@@ -271,7 +275,9 @@ public enum MGoWebApis {
         CALENDAR(new MScope(CalendarScopes.CALENDAR, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Calendar(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- People / Contacts ---
@@ -282,7 +288,9 @@ public enum MGoWebApis {
         USERINFO_PROFILE(new MScope(PeopleServiceScopes.USERINFO_PROFILE, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         People(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Tasks ---
@@ -291,7 +299,9 @@ public enum MGoWebApis {
         TASKS_READONLY(new MScope(TasksScopes.TASKS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Tasks(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Classroom ---
@@ -301,7 +311,9 @@ public enum MGoWebApis {
         CLASSROOM_ANNOUNCEMENTS(new MScope(ClassroomScopes.CLASSROOM_ANNOUNCEMENTS, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Classroom(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- YouTube ---
@@ -314,7 +326,9 @@ public enum MGoWebApis {
         YOUTUBEPARTNER_CHANNEL_AUDIT(new MScope(YouTubeScopes.YOUTUBEPARTNER_CHANNEL_AUDIT, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         YouTube(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- YouTube Analytics ---
@@ -323,7 +337,9 @@ public enum MGoWebApis {
         YT_ANALYTICS_MONETARY_READONLY(new MScope(YouTubeAnalyticsScopes.YT_ANALYTICS_MONETARY_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         YouTubeAnalytics(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Photos ---
@@ -332,7 +348,9 @@ public enum MGoWebApis {
         PHOTOSLIBRARY_READONLY(new MScope(PhotosLibraryScopes.PHOTOSLIBRARY_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Photos(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Analytics ---
@@ -341,7 +359,9 @@ public enum MGoWebApis {
         ANALYTICS_READONLY(new MScope(AnalyticsScopes.ANALYTICS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Analytics(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Cloud Platform ---
@@ -355,8 +375,9 @@ public enum MGoWebApis {
         DEVSTORAGE_READ_ONLY(new MScope(StorageScopes.DEVSTORAGE_READ_ONLY, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
         Cloud(MScope info) { this.info = info;}
-        @Override
-        public final MScope getScope() {return info;}
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Ads / Monetarisierung ---
@@ -373,7 +394,9 @@ public enum MGoWebApis {
         ANDROID_PUBLISHER(new MScope(AndroidPublisherScopes.ANDROIDPUBLISHER, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Ads(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Admin ---
@@ -382,7 +405,9 @@ public enum MGoWebApis {
         ADMIN_REPORTS_USAGE_READONLY(new MScope(ReportsScopes.ADMIN_REPORTS_USAGE_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Admin(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Play ---
@@ -390,7 +415,9 @@ public enum MGoWebApis {
         PLAYDEVELOPERREPORTING(new MScope(PlaydeveloperreportingScopes.PLAYDEVELOPERREPORTING, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Play(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Fitness ---
@@ -403,7 +430,9 @@ public enum MGoWebApis {
         FITNESS_LOCATION_WRITE(new MScope(FitnessScopes.FITNESS_LOCATION_WRITE, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Fitness(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Tag Manager ---
@@ -415,7 +444,9 @@ public enum MGoWebApis {
         TAGMANAGER_MANAGE_USERS(new MScope(TagManagerScopes.TAGMANAGER_MANAGE_USERS, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         TagManager(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Webmasters ---
@@ -424,7 +455,9 @@ public enum MGoWebApis {
         WEBMASTERS_READONLY(new MScope(WebmastersScopes.WEBMASTERS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Webmasters(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Produktivität ---
@@ -433,7 +466,9 @@ public enum MGoWebApis {
         DOCUMENTS_READONLY(new MScope(DocsScopes.DOCUMENTS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Docs(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum Sheets implements MScopeEnum {
@@ -441,7 +476,9 @@ public enum MGoWebApis {
         SPREADSHEETS_READONLY(new MScope(SheetsScopes.SPREADSHEETS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Sheets(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum Slides implements MScopeEnum {
@@ -449,7 +486,9 @@ public enum MGoWebApis {
         PRESENTATIONS_READONLY(new MScope(SlidesScopes.PRESENTATIONS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Slides(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum Keep implements MScopeEnum {
@@ -457,7 +496,9 @@ public enum MGoWebApis {
         KEEP_READONLY(new MScope(KeepScopes.KEEP_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Keep(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- KI / Vision / Übersetzung ---
@@ -465,14 +506,18 @@ public enum MGoWebApis {
         CLOUD_PLATFORM(new MScope(VisionScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Vision(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum Translate implements MScopeEnum {
         CLOUD_TRANSLATION(new MScope(TranslateScopes.CLOUD_TRANSLATION, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Translate(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Cloud Platform ---
@@ -481,28 +526,36 @@ public enum MGoWebApis {
         CLOUD_PLATFORM(new MScope(PubsubScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
         Pubsub(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum Spanner implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(SpannerScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
         Spanner(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum SQLAdmin implements MScopeEnum {
         SQLSERVICE_ADMIN(new MScope(SQLAdminScopes.SQLSERVICE_ADMIN, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
         SQLAdmin(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum Firestore implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(FirestoreScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
         Firestore(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum Logging implements MScopeEnum {
@@ -510,7 +563,9 @@ public enum MGoWebApis {
         LOGGING_READ(new MScope(LoggingScopes.LOGGING_READ, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
         Logging(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum Monitoring implements MScopeEnum {
@@ -518,57 +573,72 @@ public enum MGoWebApis {
         MONITORING_READ(new MScope(MonitoringScopes.MONITORING_READ, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
         Monitoring(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum CloudKMS implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(CloudKMSScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
         CloudKMS(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum CloudIot implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(CloudIotScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
         CloudIot(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum CloudFunctions implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(CloudFunctionsScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
         CloudFunctions(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum CloudRun implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(CloudRunScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
         CloudRun(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum Container implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(ContainerScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
         Container(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum DeploymentManager implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(DeploymentManagerScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
         DeploymentManager(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum ServiceNetworking implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(ServiceNetworkingScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
-
         private final MScope info;
         ServiceNetworking(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum CloudIdentity implements MScopeEnum {
@@ -577,35 +647,45 @@ public enum MGoWebApis {
         CLOUD_IDENTITY_CLOUD_PLATFORM(new MScope(CloudIdentityScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         CloudIdentity(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum Iam implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(IamScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
         Iam(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum CloudML implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(CloudMachineLearningEngineScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
         CloudML(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum Dialogflow implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(DialogflowScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
         Dialogflow(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     public enum Apigee implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(ApigeeScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
         Apigee(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Cloud Platform / Billing ---
@@ -614,7 +694,9 @@ public enum MGoWebApis {
 
         private final MScope info;
         Cloudbilling(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
     // --- Play Custom App ---
@@ -622,7 +704,9 @@ public enum MGoWebApis {
         ANDROIDPUBLISHER(new MScope(PlaycustomappScopes.ANDROIDPUBLISHER, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
         Playcustomapp(MScope info) { this.info = info; }
-        @Override public final MScope getScope() { return info; }
+        public final String get() { return info.getUrl(); }
+        @Override public final String toString() { return info.getUrl(); }
+        public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
 

@@ -93,12 +93,7 @@ public final class MSpinnerOverlayFrame {
         root.add(contentPanel, BorderLayout.CENTER);
         window.setContentPane(root);
     }
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public final void showOverlay() {
-        setVisible(true);
-    }
+
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */

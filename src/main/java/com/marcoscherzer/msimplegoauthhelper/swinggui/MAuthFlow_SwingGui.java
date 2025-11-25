@@ -103,11 +103,11 @@ public abstract class MAuthFlow_SwingGui {
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * uready
      */
-    public final void createAuthFlow(List scopes, boolean persistOAuthToken) {
+    public final void createAuthFlow(boolean persistOAuthToken,String... scopes) {
         boolean setup = !Files.exists(Paths.get(keystorePath));
         if (setup) setup(); else checkPassword();
         if(store!=null) {
-            oAuthHelper = new MSimpleOAuthHelper(store, "BackupMailer", Collections.singletonList(GmailScopes.GMAIL_SEND), persistOAuthToken) {
+            oAuthHelper = new MSimpleOAuthHelper(store, "BackupMailer", persistOAuthToken,scopes) {
                 /**
                  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
                  */
@@ -139,10 +139,10 @@ public abstract class MAuthFlow_SwingGui {
                             @Override
                             public void mouseClicked(MouseEvent e) {
                                 System.out.println("Overlay clicked at: " + e.getPoint());
-                                loginOverlay.setVisible(true);
+                                appRedirectLinkDialog.setVisible(true);
                             }
                         });
-                        loginOverlay.showOverlay();
+                        loginOverlay.setVisible(true);
 
                     } catch (Exception exc) {
                         System.err.println(exc.getMessage());

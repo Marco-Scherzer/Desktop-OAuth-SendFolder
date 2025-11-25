@@ -19,7 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -30,7 +30,6 @@ public abstract class MSimpleOAuthHelper {
     private Thread initThread;
     private Credential credential;
     private boolean doNotPersistOAuthToken;
-    //private Gmail service;
     private MSimpleKeystore keystore;
     private static String clientSecretDir = System.getProperty("user.dir");
     private File jsonFile = new File(clientSecretDir, "client_secret.json");
@@ -39,17 +38,16 @@ public abstract class MSimpleOAuthHelper {
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          * scopes z.B Collections.singletonList(GmailScopes.GMAIL_SEND)
          */
-        public MSimpleOAuthHelper(MSimpleOAuthKeystore mailerKeystore, String applicationName, List<String> scopes, boolean doNotPersistOAuthToken){
-
-            this.keystore = mailerKeystore.getKeyStore();
+        public MSimpleOAuthHelper(MSimpleOAuthKeystore keystore, String applicationName, boolean doNotPersistOAuthToken,String... scopes){
+            this.scopes = new ArrayList<>(new LinkedHashSet<>(Arrays.asList(scopes)));
+            this.keystore = keystore.getKeyStore();
             this.appName = applicationName;
-            this.scopes = scopes;
             this.doNotPersistOAuthToken = doNotPersistOAuthToken;
 
             initThread = new Thread(() -> {
                 try{
                     if (appName == null || appName.equals("")) throw new IllegalArgumentException("Application name must not be empty.");
-                    credential = doBrowserOAuthFlow(keystore, scopes, doNotPersistOAuthToken);
+                    credential = doBrowserOAuthFlow(this.keystore, doNotPersistOAuthToken, this.scopes);
                     //token funktioniert, file löschen
                     if (jsonFile.exists()) {
                         boolean jsonFileDeleted = jsonFile.delete();
@@ -82,7 +80,7 @@ public abstract class MSimpleOAuthHelper {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private Credential doBrowserOAuthFlow(MSimpleKeystore keystore, List<String> scopes, boolean doNotPersistOAuthToken) throws Exception, MKeystoreException {
+    private Credential doBrowserOAuthFlow(MSimpleKeystore keystore, boolean doNotPersistOAuthToken,List<String> scopes) throws Exception, MKeystoreException {
         String clientId = keystore.get("google-client-id");
         String clientSecret = keystore.get("google-client-secret");
 
