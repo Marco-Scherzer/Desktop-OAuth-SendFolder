@@ -35,6 +35,7 @@ public final class MMain {
     private static final String mailFoldersPath = userDir + "\\mail";
     private static String trayIconPathWithinResourcesFolder = "/5.png";
     private static MAuthFlow_SwingGui flow;
+    private static MAuthFlow_SwingGui.MAuthManager mauthManager;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -72,10 +73,10 @@ public final class MMain {
            }
 
            @Override
-           protected void initializeServices(Credential credential, String applicationName) throws Exception {
+           protected void initializeServices(MAuthManager authManager, Credential credential, String applicationName) throws Exception {
                MMailService mailService = new MMailService(credential, applicationName);
-
-               MSimpleKeystore store = flow.getKeystore();
+               mauthManager = authManager;
+               MSimpleKeystore store = mauthManager.getKeystore();
                String clientAndPathUUID = store.get("clientId");
                Path sentFolder = createPathIfNotExists(Paths.get(mailFoldersPath, clientAndPathUUID + "-sent"), "Sent folder");
                Path unsentFolder = createPathIfNotExists(Paths.get(mailFoldersPath, clientAndPathUUID + "-notSent"), "NotSent folder");
@@ -103,6 +104,23 @@ public final class MMain {
        flow.createAuthFlow(true,GMAIL_SEND.get());
 
     }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public static void exit(Throwable exception,int code) {
+        if(isDbg && exception!=null){exception.printStackTrace();}
+        try {
+            mauthManager.revokeOAuthTokenFromServer();
+            if (watcher != null) watcher.shutdown();
+        } catch (Exception exc) {
+            System.err.println(exception.getMessage());
+            if(isDbg) exc.printStackTrace();
+        }
+        System.out.println("Exiting program with code " + code);
+        System.exit(code);
+    }
+
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -146,22 +164,6 @@ public final class MMain {
             exit(exc,1);
         }
     }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public static void exit(Throwable exception,int code) {
-        if(isDbg && exception!=null){exception.printStackTrace();}
-        try {
-            if (watcher != null) watcher.shutdown();
-        } catch (Exception exc) {
-            System.err.println(exception.getMessage());
-            if(isDbg) exc.printStackTrace();
-        }
-        System.out.println("Exiting program with code " + code);
-        System.exit(code);
-    }
-
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved

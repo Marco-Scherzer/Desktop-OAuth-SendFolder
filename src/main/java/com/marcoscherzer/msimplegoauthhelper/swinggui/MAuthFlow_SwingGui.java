@@ -8,8 +8,10 @@ import com.marcoscherzer.msimplekeystore.MSimpleKeystore;
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -32,12 +34,6 @@ public abstract class MAuthFlow_SwingGui {
         keystorePath = keystoreFilePathName;
     }
 
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer
-     */
-    public final MSimpleKeystore getKeystore() {
-        return store.getKeystore();
-    }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -117,7 +113,7 @@ public abstract class MAuthFlow_SwingGui {
                         appRedirectLinkDialog.dispose();
                         loginOverlay.dispose();
                         System.out.println("intializing services...");
-                        initializeServices(credential, applicationName);
+                        initializeServices(new MAuthManager(oAuthHelper), credential, applicationName);
                     } catch (Exception exc) {
                         System.err.println(exc.getMessage());
                         onException_(exc);
@@ -165,11 +161,23 @@ public abstract class MAuthFlow_SwingGui {
      */
     private void onException_(Exception exc){
         try {
-            if (oAuthHelper != null && oAuthHelper.isInDoNotPersistOAuthTokenMode())  oAuthHelper.revokeOAuthTokenFromServer();
+            if (oAuthHelper != null)  oAuthHelper.revokeOAuthTokenFromServer();
         }catch (Exception exc2) {
                 System.err.println(exc2.getMessage());
         }
         onException(exc);
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public static final class MAuthManager{
+        private final MSimpleOAuthHelper oAuthHelper;
+        MAuthManager(MSimpleOAuthHelper oAuthHelper){ this.oAuthHelper = oAuthHelper;}
+        public boolean isInDoNotPersistOAuthTokenMode() throws Exception { return oAuthHelper.isInDoNotPersistOAuthTokenMode(); }
+        public void revokeOAuthTokenFromServer() throws GeneralSecurityException, IOException { oAuthHelper.revokeOAuthTokenFromServer();}
+        public final void removePersistetOAuthToken() throws GeneralSecurityException, IOException { oAuthHelper.revokeOAuthTokenFromServer();}
+        public final MSimpleKeystore getKeystore(){ return oAuthHelper.getKeystore(); }
     }
 
     /**
@@ -185,5 +193,5 @@ public abstract class MAuthFlow_SwingGui {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    protected abstract void initializeServices(Credential credential, String applicationName) throws Exception;
+    protected abstract void initializeServices(MAuthManager oAuthManager, Credential credential, String applicationName) throws Exception;
 }
