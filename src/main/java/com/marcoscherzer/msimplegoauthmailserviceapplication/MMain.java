@@ -3,7 +3,6 @@ package com.marcoscherzer.msimplegoauthmailserviceapplication;
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.gmail.GmailScopes;
-import com.marcoscherzer.msimplegoauthhelper.MGoAuthScopes;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthHelper;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthKeystore;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MAppRedirectLinkDialog;

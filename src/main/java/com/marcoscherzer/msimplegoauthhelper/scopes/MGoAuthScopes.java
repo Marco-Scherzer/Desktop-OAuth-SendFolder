@@ -2,7 +2,7 @@
  * @author Marco Scherzer, Copyright Marco Scherzer
  * Web-API Scopes
  */
-package com.marcoscherzer.msimplegoauthhelper;
+package com.marcoscherzer.msimplegoauthhelper.scopes;
 
 // Basis / Identity
 import com.google.api.services.oauth2.Oauth2Scopes;
