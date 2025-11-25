@@ -2,9 +2,9 @@ package com.marcoscherzer.msimplegoauthmailserviceapplication;
 
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.services.gmail.GmailScopes;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthHelper;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthKeystore;
+import com.marcoscherzer.msimplegoauthhelper.MGoAuthScopes;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MAppRedirectLinkDialog;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MAuthFlow_SwingGui;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MSpinnerOverlayFrame;
@@ -113,7 +113,7 @@ public final class MMain {
            }
        };
 
-       flow.createAuthFlow(Collections.singletonList(GmailScopes.GMAIL_SEND),true);
+       flow.createAuthFlow(Collections.singletonList(MGoAuthScopes.Gmail.GMAIL_SEND.getUrl()),true);
 
     }
 

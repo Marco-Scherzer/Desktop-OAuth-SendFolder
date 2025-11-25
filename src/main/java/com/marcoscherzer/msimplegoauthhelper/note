@@ -1,0 +1,31 @@
+/**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     fehlende enums
+     */
+
+import com.google.api.services.docs.v1.DocsScopes;
+import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.slides.v1.SlidesScopes;
+import com.google.api.services.keep.v1.KeepScopes;
+import com.google.api.services.vision.v1.VisionScopes;
+import com.google.api.services.translate.v3.TranslateScopes;
+import com.google.api.services.pubsub.PubsubScopes;
+import com.google.api.services.spanner.v1.SpannerScopes;
+import com.google.api.services.sqladmin.SQLAdminScopes;
+import com.google.api.services.firestore.v1.FirestoreScopes;
+import com.google.api.services.logging.v2.LoggingScopes;
+import com.google.api.services.monitoring.v3.MonitoringScopes;
+import com.google.api.services.cloudkms.v1.CloudKMSScopes;
+import com.google.api.services.cloudiot.v1.CloudIotScopes;
+import com.google.api.services.cloudfunctions.v2.CloudFunctionsScopes;
+import com.google.api.services.run.v2.CloudRunScopes;
+import com.google.api.services.container.ContainerScopes;
+import com.google.api.services.deploymentmanager.DeploymentManagerScopes;
+import com.google.api.services.servicenetworking.v1.ServiceNetworkingScopes;
+import com.google.api.services.cloudidentity.v1.CloudIdentityScopes;
+import com.google.api.services.iam.v2.IamScopes;
+import com.google.api.services.ml.v1.CloudMachineLearningEngineScopes;
+import com.google.api.services.dialogflow.v3.DialogflowScopes;
+import com.google.api.services.apigee.v1.ApigeeScopes;
+import com.google.api.services.cloudbilling.CloudbillingScopes;
+import com.google.api.services.playcustomapp.PlaycustomappScopes;
