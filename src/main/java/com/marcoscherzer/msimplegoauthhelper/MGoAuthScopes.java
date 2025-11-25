@@ -1,6 +1,7 @@
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer
  * G. Web-API Scopes
+ * unready
  */
 package com.marcoscherzer.msimplegoauthhelper;
 
@@ -46,11 +47,38 @@ import com.google.api.services.playdeveloperreporting.v1beta1.Playdeveloperrepor
 import com.google.api.services.fitness.FitnessScopes;
 import com.google.api.services.tagmanager.TagManagerScopes;
 import com.google.api.services.webmasters.WebmastersScopes;
+import com.google.api.services.docs.v1.DocsScopes;
+import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.slides.v1.SlidesScopes;
+import com.google.api.services.keep.v1.KeepScopes;
+import com.google.api.services.vision.v1.VisionScopes;
+import com.google.api.services.translate.v3.TranslateScopes;
+import com.google.api.services.pubsub.PubsubScopes;
+import com.google.api.services.spanner.v1.SpannerScopes;
+import com.google.api.services.sqladmin.SQLAdminScopes;
+import com.google.api.services.firestore.v1.FirestoreScopes;
+import com.google.api.services.logging.v2.LoggingScopes;
+import com.google.api.services.monitoring.v3.MonitoringScopes;
+import com.google.api.services.cloudkms.v1.CloudKMSScopes;
+import com.google.api.services.cloudiot.v1.CloudIotScopes;
+import com.google.api.services.cloudfunctions.v2.CloudFunctionsScopes;
+import com.google.api.services.run.v2.CloudRunScopes;
+import com.google.api.services.container.ContainerScopes;
+import com.google.api.services.deploymentmanager.DeploymentManagerScopes;
+import com.google.api.services.servicenetworking.v1.ServiceNetworkingScopes;
+import com.google.api.services.cloudidentity.v1.CloudIdentityScopes;
+import com.google.api.services.iam.v2.IamScopes;
+import com.google.api.services.ml.v1.CloudMachineLearningEngineScopes;
+import com.google.api.services.dialogflow.v3.DialogflowScopes;
+import com.google.api.services.apigee.v1.ApigeeScopes;
+import com.google.api.services.cloudbilling.CloudbillingScopes;
+import com.google.api.services.playcustomapp.PlaycustomappScopes;
 
 import java.util.EnumSet;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer
  * G. Web-API Scopes
+ * unready
  */
 public final class MGoAuthScopes {
 
@@ -59,6 +87,7 @@ public final class MGoAuthScopes {
     /**
      * Login-Arten für Google Service APIs
      * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
      */
     public static enum MSupportedLogins {
         OAUTHUSER,
@@ -77,24 +106,34 @@ public final class MGoAuthScopes {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer
      * Web-API Scopes
+     * unready
      */
-    public static final class MScopeInfo {
+    public static final class MScope {
         private final String url;
-
-        public MScopeInfo(String scope, EnumSet<MSupportedLogins> loginTypes) {
-            this.url = scope;
+        private final EnumSet<MSupportedLogins> loginTypes;
+        /**
+         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         * unready
+         */
+        public MScope(String goscope, EnumSet<MSupportedLogins> loginTypes) {
+            this.url = goscope;
             this.loginTypes = loginTypes;
         }
-
-        private final EnumSet<MSupportedLogins> loginTypes;
+        /**
+         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
         public String getUrl() {
             return url;
         }
-
+        /**
+         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
         public final EnumSet<MSupportedLogins> getLoginTypes() {
             return loginTypes;
         }
-
+        /**
+         * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
         @Override
         public final String toString() {
             return url;
@@ -103,235 +142,395 @@ public final class MGoAuthScopes {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer
      * Web-API Scopes
+     * unready
      */
     //Interface für alle Scope-Enums
     public static interface MScopeEnum {
-        MScopeInfo getInfo();
-        default String getUrl() { return getInfo().getUrl(); }
-        default EnumSet<MSupportedLogins> getLoginTypes() { return getInfo().getLoginTypes(); }
+        MScope getScope();
+        //default String getUrl() { return getInfo().getUrl(); }
+        //default EnumSet<MSupportedLogins> getLoginTypes() { return getInfo().getLoginTypes(); }
     }
 
     // --- Basis / Identity ---
     public enum Identity implements MScopeEnum {
-        PLUS_ME(new MScopeInfo(Oauth2Scopes.PLUS_ME, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        PLUS_LOGIN(new MScopeInfo(Oauth2Scopes.PLUS_LOGIN, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        USERINFO_EMAIL(new MScopeInfo(Oauth2Scopes.USERINFO_EMAIL, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        USERINFO_PROFILE(new MScopeInfo(Oauth2Scopes.USERINFO_PROFILE, EnumSet.of(MSupportedLogins.OAUTHUSER)));
-
-        private final MScopeInfo info;
-        Identity(MScopeInfo info) { this.info = info; }
-        @Override public MScopeInfo getInfo() { return info; }
+        PLUS_ME(new MScope(Oauth2Scopes.PLUS_ME, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        PLUS_LOGIN(new MScope(Oauth2Scopes.PLUS_LOGIN, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        USERINFO_EMAIL(new MScope(Oauth2Scopes.USERINFO_EMAIL, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        USERINFO_PROFILE(new MScope(Oauth2Scopes.USERINFO_PROFILE, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Identity(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
     }
 
     // --- Gmail ---
     public enum Gmail implements MScopeEnum {
-        GMAIL_SEND(new MScopeInfo(GmailScopes.GMAIL_SEND, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        GMAIL_READONLY(new MScopeInfo(GmailScopes.GMAIL_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        GMAIL_COMPOSE(new MScopeInfo(GmailScopes.GMAIL_COMPOSE, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        GMAIL_MODIFY(new MScopeInfo(GmailScopes.GMAIL_MODIFY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        GMAIL_LABELS(new MScopeInfo(GmailScopes.GMAIL_LABELS, EnumSet.of(MSupportedLogins.OAUTHUSER)));
-
-        private final MScopeInfo info;
-        Gmail(MScopeInfo info) { this.info = info; }
-        @Override public MScopeInfo getInfo() { return info; }
+        GMAIL_SEND(new MScope(GmailScopes.GMAIL_SEND, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        GMAIL_READONLY(new MScope(GmailScopes.GMAIL_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        GMAIL_COMPOSE(new MScope(GmailScopes.GMAIL_COMPOSE, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        GMAIL_MODIFY(new MScope(GmailScopes.GMAIL_MODIFY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        GMAIL_LABELS(new MScope(GmailScopes.GMAIL_LABELS, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Gmail(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
     }
 
     // --- Drive ---
     public enum Drive implements MScopeEnum {
-        DRIVE(new MScopeInfo(DriveScopes.DRIVE, EnumSet.of(MSupportedLogins.OAUTHUSER, MSupportedLogins.OAUTHSERVICEACCOUNT))),
-        DRIVE_FILE(new MScopeInfo(DriveScopes.DRIVE_FILE, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        DRIVE_READONLY(new MScopeInfo(DriveScopes.DRIVE_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        DRIVE_METADATA_READONLY(new MScopeInfo(DriveScopes.DRIVE_METADATA_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        DRIVE_APPDATA(new MScopeInfo(DriveScopes.DRIVE_APPDATA, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        DRIVE_SCRIPTS(new MScopeInfo(DriveScopes.DRIVE_SCRIPTS, EnumSet.of(MSupportedLogins.OAUTHUSER)));
-
-        private final MScopeInfo info;
-        Drive(MScopeInfo info) { this.info = info; }
-        @Override public MScopeInfo getInfo() { return info; }
+        DRIVE(new MScope(DriveScopes.DRIVE, EnumSet.of(MSupportedLogins.OAUTHUSER, MSupportedLogins.OAUTHSERVICEACCOUNT))),
+        DRIVE_FILE(new MScope(DriveScopes.DRIVE_FILE, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        DRIVE_READONLY(new MScope(DriveScopes.DRIVE_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        DRIVE_METADATA_READONLY(new MScope(DriveScopes.DRIVE_METADATA_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        DRIVE_APPDATA(new MScope(DriveScopes.DRIVE_APPDATA, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        DRIVE_SCRIPTS(new MScope(DriveScopes.DRIVE_SCRIPTS, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Drive(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
     }
 
     // --- Calendar ---
     public enum Calendar implements MScopeEnum {
-        CALENDAR_READONLY(new MScopeInfo(CalendarScopes.CALENDAR_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        CALENDAR(new MScopeInfo(CalendarScopes.CALENDAR, EnumSet.of(MSupportedLogins.OAUTHUSER)));
-
-        private final MScopeInfo info;
-        Calendar(MScopeInfo info) { this.info = info; }
-        @Override public MScopeInfo getInfo() { return info; }
+        CALENDAR_READONLY(new MScope(CalendarScopes.CALENDAR_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        CALENDAR(new MScope(CalendarScopes.CALENDAR, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Calendar(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
     }
 
     // --- People / Contacts ---
     public enum People implements MScopeEnum {
-        CONTACTS(new MScopeInfo(PeopleServiceScopes.CONTACTS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        CONTACTS_READONLY(new MScopeInfo(PeopleServiceScopes.CONTACTS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        USERINFO_EMAIL(new MScopeInfo(PeopleServiceScopes.USERINFO_EMAIL, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        USERINFO_PROFILE(new MScopeInfo(PeopleServiceScopes.USERINFO_PROFILE, EnumSet.of(MSupportedLogins.OAUTHUSER)));
-
-        private final MScopeInfo info;
-        People(MScopeInfo info) { this.info = info; }
-        @Override public MScopeInfo getInfo() { return info; }
+        CONTACTS(new MScope(PeopleServiceScopes.CONTACTS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        CONTACTS_READONLY(new MScope(PeopleServiceScopes.CONTACTS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        USERINFO_EMAIL(new MScope(PeopleServiceScopes.USERINFO_EMAIL, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        USERINFO_PROFILE(new MScope(PeopleServiceScopes.USERINFO_PROFILE, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        People(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
     }
 
     // --- Tasks ---
     public enum Tasks implements MScopeEnum {
-        TASKS(new MScopeInfo(TasksScopes.TASKS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        TASKS_READONLY(new MScopeInfo(TasksScopes.TASKS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
-
-        private final MScopeInfo info;
-        Tasks(MScopeInfo info) { this.info = info; }
-        @Override public MScopeInfo getInfo() { return info; }
+        TASKS(new MScope(TasksScopes.TASKS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        TASKS_READONLY(new MScope(TasksScopes.TASKS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Tasks(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
     }
 
     // --- Classroom ---
     public enum Classroom implements MScopeEnum {
-        CLASSROOM_COURSES(new MScopeInfo(ClassroomScopes.CLASSROOM_COURSES, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        CLASSROOM_ROSTERS(new MScopeInfo(ClassroomScopes.CLASSROOM_ROSTERS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        CLASSROOM_ANNOUNCEMENTS(new MScopeInfo(ClassroomScopes.CLASSROOM_ANNOUNCEMENTS, EnumSet.of(MSupportedLogins.OAUTHUSER)));
-
-        private final MScopeInfo info;
-        Classroom(MScopeInfo info) { this.info = info; }
-        @Override public MScopeInfo getInfo() { return info; }
+        CLASSROOM_COURSES(new MScope(ClassroomScopes.CLASSROOM_COURSES, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        CLASSROOM_ROSTERS(new MScope(ClassroomScopes.CLASSROOM_ROSTERS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        CLASSROOM_ANNOUNCEMENTS(new MScope(ClassroomScopes.CLASSROOM_ANNOUNCEMENTS, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Classroom(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
     }
 
     // --- YouTube ---
     public enum YouTube implements MScopeEnum {
-        YOUTUBE(new MScopeInfo(YouTubeScopes.YOUTUBE, EnumSet.of(MSupportedLogins.OAUTHUSER, MSupportedLogins.APIKEY))),
-        YOUTUBE_READONLY(new MScopeInfo(YouTubeScopes.YOUTUBE_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER, MSupportedLogins.APIKEY))),
-        YOUTUBE_UPLOAD(new MScopeInfo(YouTubeScopes.YOUTUBE_UPLOAD, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        YOUTUBE_FORCE_SSL(new MScopeInfo(YouTubeScopes.YOUTUBE_FORCE_SSL, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        YOUTUBEPARTNER(new MScopeInfo(YouTubeScopes.YOUTUBEPARTNER, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        YOUTUBEPARTNER_CHANNEL_AUDIT(new MScopeInfo(YouTubeScopes.YOUTUBEPARTNER_CHANNEL_AUDIT, EnumSet.of(MSupportedLogins.OAUTHUSER)));
-
-        private final MScopeInfo info;
-        YouTube(MScopeInfo info) { this.info = info; }
-        @Override public MScopeInfo getInfo() { return info; }
+        YOUTUBE(new MScope(YouTubeScopes.YOUTUBE, EnumSet.of(MSupportedLogins.OAUTHUSER, MSupportedLogins.APIKEY))),
+        YOUTUBE_READONLY(new MScope(YouTubeScopes.YOUTUBE_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER, MSupportedLogins.APIKEY))),
+        YOUTUBE_UPLOAD(new MScope(YouTubeScopes.YOUTUBE_UPLOAD, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        YOUTUBE_FORCE_SSL(new MScope(YouTubeScopes.YOUTUBE_FORCE_SSL, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        YOUTUBEPARTNER(new MScope(YouTubeScopes.YOUTUBEPARTNER, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        YOUTUBEPARTNER_CHANNEL_AUDIT(new MScope(YouTubeScopes.YOUTUBEPARTNER_CHANNEL_AUDIT, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        YouTube(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
     }
 
     // --- YouTube Analytics ---
     public enum YouTubeAnalytics implements MScopeEnum {
-        YT_ANALYTICS_READONLY(new MScopeInfo(YouTubeAnalyticsScopes.YT_ANALYTICS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        YT_ANALYTICS_MONETARY_READONLY(new MScopeInfo(YouTubeAnalyticsScopes.YT_ANALYTICS_MONETARY_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
-
-        private final MScopeInfo info;
-        YouTubeAnalytics(MScopeInfo info) { this.info = info; }
-        @Override public MScopeInfo getInfo() { return info; }
+        YT_ANALYTICS_READONLY(new MScope(YouTubeAnalyticsScopes.YT_ANALYTICS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        YT_ANALYTICS_MONETARY_READONLY(new MScope(YouTubeAnalyticsScopes.YT_ANALYTICS_MONETARY_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        YouTubeAnalytics(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
     }
 
     // --- Photos ---
     public enum Photos implements MScopeEnum {
-        PHOTOSLIBRARY(new MScopeInfo(PhotosLibraryScopes.PHOTOSLIBRARY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        PHOTOSLIBRARY_READONLY(new MScopeInfo(PhotosLibraryScopes.PHOTOSLIBRARY_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
-
-        private final MScopeInfo info;
-        Photos(MScopeInfo info) { this.info = info; }
-        @Override public MScopeInfo getInfo() { return info; }
+        PHOTOSLIBRARY(new MScope(PhotosLibraryScopes.PHOTOSLIBRARY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        PHOTOSLIBRARY_READONLY(new MScope(PhotosLibraryScopes.PHOTOSLIBRARY_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Photos(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
     }
 
     // --- Analytics ---
     public enum Analytics implements MScopeEnum {
-        ANALYTICS(new MScopeInfo(AnalyticsScopes.ANALYTICS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        ANALYTICS_READONLY(new MScopeInfo(AnalyticsScopes.ANALYTICS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
-
-        private final MScopeInfo info;
-        Analytics(MScopeInfo info) { this.info = info; }
-        @Override public MScopeInfo getInfo() { return info; }
+        ANALYTICS(new MScope(AnalyticsScopes.ANALYTICS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        ANALYTICS_READONLY(new MScope(AnalyticsScopes.ANALYTICS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Analytics(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
     }
 
     // --- Cloud Platform ---
     // --- Cloud Platform ---
     public enum Cloud implements MScopeEnum {
-        CLOUD_PLATFORM(new MScopeInfo(CloudResourceManagerScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHUSER, MSupportedLogins.OAUTHSERVICEACCOUNT))),
-        BIGQUERY(new MScopeInfo(BigqueryScopes.BIGQUERY, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT))),
-        BIGQUERY_READONLY(new MScopeInfo(BigqueryScopes.BIGQUERY_READONLY, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT))),
-        DEVSTORAGE_FULL_CONTROL(new MScopeInfo(StorageScopes.DEVSTORAGE_FULL_CONTROL, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT))),
-        DEVSTORAGE_READ_WRITE(new MScopeInfo(StorageScopes.DEVSTORAGE_READ_WRITE, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT))),
-        DEVSTORAGE_READ_ONLY(new MScopeInfo(StorageScopes.DEVSTORAGE_READ_ONLY, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
-
-        private final MScopeInfo info;
-
-        Cloud(MScopeInfo info) {
-            this.info = info;
-        }
-
+        CLOUD_PLATFORM(new MScope(CloudResourceManagerScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHUSER, MSupportedLogins.OAUTHSERVICEACCOUNT))),
+        BIGQUERY(new MScope(BigqueryScopes.BIGQUERY, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT))),
+        BIGQUERY_READONLY(new MScope(BigqueryScopes.BIGQUERY_READONLY, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT))),
+        DEVSTORAGE_FULL_CONTROL(new MScope(StorageScopes.DEVSTORAGE_FULL_CONTROL, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT))),
+        DEVSTORAGE_READ_WRITE(new MScope(StorageScopes.DEVSTORAGE_READ_WRITE, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT))),
+        DEVSTORAGE_READ_ONLY(new MScope(StorageScopes.DEVSTORAGE_READ_ONLY, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+        private final MScope info;
+        Cloud(MScope info) { this.info = info;}
         @Override
-        public MScopeInfo getInfo() {
-            return info;
-        }
+        public final MScope getScope() {return info;}
     }
 
     // --- Ads / Monetarisierung ---
     public enum Ads implements MScopeEnum {
-        ADSENSE(new MScopeInfo(AdsenseScopes.ADSENSE, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        ADSENSE_READONLY(new MScopeInfo(AdsenseScopes.ADSENSE_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        AD_EXCHANGE_BUYER(new MScopeInfo(AdExchangeBuyerScopes.ADEXCHANGE_BUYER, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        AD_EXCHANGE_SELLER(new MScopeInfo(AdExchangeSellerScopes.ADEXCHANGE_SELLER, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        AD_EXCHANGE_SELLER_READONLY(new MScopeInfo(AdExchangeSellerScopes.ADEXCHANGE_SELLER_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        DISPLAY_VIDEO(new MScopeInfo(DisplayVideoScopes.DISPLAY_VIDEO, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        DISPLAY_VIDEO_MEDIAPLANNING(new MScopeInfo(DisplayVideoScopes.DISPLAY_VIDEO_MEDIAPLANNING, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        DISPLAY_VIDEO_USER_MANAGEMENT(new MScopeInfo(DisplayVideoScopes.DISPLAY_VIDEO_USER_MANAGEMENT, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        DOUBLECLICKBIDMANAGER(new MScopeInfo(DisplayVideoScopes.DOUBLECLICKBIDMANAGER, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        ANDROID_PUBLISHER(new MScopeInfo(AndroidPublisherScopes.ANDROIDPUBLISHER, EnumSet.of(MSupportedLogins.OAUTHUSER)));
-
-        private final MScopeInfo info;
-        Ads(MScopeInfo info) { this.info = info; }
-        @Override public MScopeInfo getInfo() { return info; }
+        ADSENSE(new MScope(AdsenseScopes.ADSENSE, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        ADSENSE_READONLY(new MScope(AdsenseScopes.ADSENSE_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        AD_EXCHANGE_BUYER(new MScope(AdExchangeBuyerScopes.ADEXCHANGE_BUYER, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        AD_EXCHANGE_SELLER(new MScope(AdExchangeSellerScopes.ADEXCHANGE_SELLER, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        AD_EXCHANGE_SELLER_READONLY(new MScope(AdExchangeSellerScopes.ADEXCHANGE_SELLER_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        DISPLAY_VIDEO(new MScope(DisplayVideoScopes.DISPLAY_VIDEO, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        DISPLAY_VIDEO_MEDIAPLANNING(new MScope(DisplayVideoScopes.DISPLAY_VIDEO_MEDIAPLANNING, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        DISPLAY_VIDEO_USER_MANAGEMENT(new MScope(DisplayVideoScopes.DISPLAY_VIDEO_USER_MANAGEMENT, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        DOUBLECLICKBIDMANAGER(new MScope(DisplayVideoScopes.DOUBLECLICKBIDMANAGER, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        ANDROID_PUBLISHER(new MScope(AndroidPublisherScopes.ANDROIDPUBLISHER, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Ads(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
     }
 
     // --- Admin ---
     public enum Admin implements MScopeEnum {
-        ADMIN_DIRECTORY_USER(new MScopeInfo(DirectoryScopes.ADMIN_DIRECTORY_USER, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        ADMIN_REPORTS_USAGE_READONLY(new MScopeInfo(ReportsScopes.ADMIN_REPORTS_USAGE_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
-
-        private final MScopeInfo info;
-        Admin(MScopeInfo info) { this.info = info; }
-        @Override public MScopeInfo getInfo() { return info; }
+        ADMIN_DIRECTORY_USER(new MScope(DirectoryScopes.ADMIN_DIRECTORY_USER, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        ADMIN_REPORTS_USAGE_READONLY(new MScope(ReportsScopes.ADMIN_REPORTS_USAGE_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Admin(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
     }
 
     // --- Play ---
     public enum Play implements MScopeEnum {
-        PLAYDEVELOPERREPORTING(new MScopeInfo(PlaydeveloperreportingScopes.PLAYDEVELOPERREPORTING, EnumSet.of(MSupportedLogins.OAUTHUSER)));
-
-        private final MScopeInfo info;
-        Play(MScopeInfo info) { this.info = info; }
-        @Override public MScopeInfo getInfo() { return info; }
+        PLAYDEVELOPERREPORTING(new MScope(PlaydeveloperreportingScopes.PLAYDEVELOPERREPORTING, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Play(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
     }
 
     // --- Fitness ---
     public enum Fitness implements MScopeEnum {
-        FITNESS_ACTIVITY_READ(new MScopeInfo(FitnessScopes.FITNESS_ACTIVITY_READ, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        FITNESS_ACTIVITY_WRITE(new MScopeInfo(FitnessScopes.FITNESS_ACTIVITY_WRITE, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        FITNESS_BODY_READ(new MScopeInfo(FitnessScopes.FITNESS_BODY_READ, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        FITNESS_BODY_WRITE(new MScopeInfo(FitnessScopes.FITNESS_BODY_WRITE, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        FITNESS_LOCATION_READ(new MScopeInfo(FitnessScopes.FITNESS_LOCATION_READ, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        FITNESS_LOCATION_WRITE(new MScopeInfo(FitnessScopes.FITNESS_LOCATION_WRITE, EnumSet.of(MSupportedLogins.OAUTHUSER)));
-
-        private final MScopeInfo info;
-        Fitness(MScopeInfo info) { this.info = info; }
-        @Override public MScopeInfo getInfo() { return info; }
+        FITNESS_ACTIVITY_READ(new MScope(FitnessScopes.FITNESS_ACTIVITY_READ, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        FITNESS_ACTIVITY_WRITE(new MScope(FitnessScopes.FITNESS_ACTIVITY_WRITE, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        FITNESS_BODY_READ(new MScope(FitnessScopes.FITNESS_BODY_READ, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        FITNESS_BODY_WRITE(new MScope(FitnessScopes.FITNESS_BODY_WRITE, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        FITNESS_LOCATION_READ(new MScope(FitnessScopes.FITNESS_LOCATION_READ, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        FITNESS_LOCATION_WRITE(new MScope(FitnessScopes.FITNESS_LOCATION_WRITE, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Fitness(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
     }
 
     // --- Tag Manager ---
     public enum TagManager implements MScopeEnum {
-        TAGMANAGER_EDIT_CONTAINERS(new MScopeInfo(TagManagerScopes.TAGMANAGER_EDIT_CONTAINERS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        TAGMANAGER_READONLY(new MScopeInfo(TagManagerScopes.TAGMANAGER_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        TAGMANAGER_PUBLISH(new MScopeInfo(TagManagerScopes.TAGMANAGER_PUBLISH, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        TAGMANAGER_MANAGE_ACCOUNTS(new MScopeInfo(TagManagerScopes.TAGMANAGER_MANAGE_ACCOUNTS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        TAGMANAGER_MANAGE_USERS(new MScopeInfo(TagManagerScopes.TAGMANAGER_MANAGE_USERS, EnumSet.of(MSupportedLogins.OAUTHUSER)));
-
-        private final MScopeInfo info;
-        TagManager(MScopeInfo info) { this.info = info; }
-        @Override public MScopeInfo getInfo() { return info; }
+        TAGMANAGER_EDIT_CONTAINERS(new MScope(TagManagerScopes.TAGMANAGER_EDIT_CONTAINERS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        TAGMANAGER_READONLY(new MScope(TagManagerScopes.TAGMANAGER_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        TAGMANAGER_PUBLISH(new MScope(TagManagerScopes.TAGMANAGER_PUBLISH, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        TAGMANAGER_MANAGE_ACCOUNTS(new MScope(TagManagerScopes.TAGMANAGER_MANAGE_ACCOUNTS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        TAGMANAGER_MANAGE_USERS(new MScope(TagManagerScopes.TAGMANAGER_MANAGE_USERS, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        TagManager(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
     }
 
     // --- Webmasters ---
     public enum Webmasters implements MScopeEnum {
-        WEBMASTERS(new MScopeInfo(WebmastersScopes.WEBMASTERS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
-        WEBMASTERS_READONLY(new MScopeInfo(WebmastersScopes.WEBMASTERS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
-
-        private final MScopeInfo info;
-        Webmasters(MScopeInfo info) { this.info = info; }
-        @Override public MScopeInfo getInfo() { return info; }
+        WEBMASTERS(new MScope(WebmastersScopes.WEBMASTERS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        WEBMASTERS_READONLY(new MScope(WebmastersScopes.WEBMASTERS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Webmasters(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
     }
+
+    // --- Produktivität ---
+    public enum Docs implements MScopeEnum {
+        DOCUMENTS(new MScope(DocsScopes.DOCUMENTS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        DOCUMENTS_READONLY(new MScope(DocsScopes.DOCUMENTS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Docs(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum Sheets implements MScopeEnum {
+        SPREADSHEETS(new MScope(SheetsScopes.SPREADSHEETS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        SPREADSHEETS_READONLY(new MScope(SheetsScopes.SPREADSHEETS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Sheets(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum Slides implements MScopeEnum {
+        PRESENTATIONS(new MScope(SlidesScopes.PRESENTATIONS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        PRESENTATIONS_READONLY(new MScope(SlidesScopes.PRESENTATIONS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Slides(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum Keep implements MScopeEnum {
+        KEEP(new MScope(KeepScopes.KEEP, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        KEEP_READONLY(new MScope(KeepScopes.KEEP_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Keep(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    // --- KI / Vision / Übersetzung ---
+    public enum Vision implements MScopeEnum {
+        CLOUD_PLATFORM(new MScope(VisionScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Vision(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum Translate implements MScopeEnum {
+        CLOUD_TRANSLATION(new MScope(TranslateScopes.CLOUD_TRANSLATION, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        Translate(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    // --- Cloud Platform ---
+    public enum Pubsub implements MScopeEnum {
+        PUBSUB(new MScope(PubsubScopes.PUBSUB, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT))),
+        CLOUD_PLATFORM(new MScope(PubsubScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+        private final MScope info;
+        Pubsub(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum Spanner implements MScopeEnum {
+        CLOUD_PLATFORM(new MScope(SpannerScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+        private final MScope info;
+        Spanner(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum SQLAdmin implements MScopeEnum {
+        SQLSERVICE_ADMIN(new MScope(SQLAdminScopes.SQLSERVICE_ADMIN, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+        private final MScope info;
+        SQLAdmin(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum Firestore implements MScopeEnum {
+        CLOUD_PLATFORM(new MScope(FirestoreScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+        private final MScope info;
+        Firestore(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum Logging implements MScopeEnum {
+        LOGGING_ADMIN(new MScope(LoggingScopes.LOGGING_ADMIN, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT))),
+        LOGGING_READ(new MScope(LoggingScopes.LOGGING_READ, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+        private final MScope info;
+        Logging(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum Monitoring implements MScopeEnum {
+        MONITORING(new MScope(MonitoringScopes.MONITORING, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT))),
+        MONITORING_READ(new MScope(MonitoringScopes.MONITORING_READ, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+        private final MScope info;
+        Monitoring(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum CloudKMS implements MScopeEnum {
+        CLOUD_PLATFORM(new MScope(CloudKMSScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+        private final MScope info;
+        CloudKMS(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum CloudIot implements MScopeEnum {
+        CLOUD_PLATFORM(new MScope(CloudIotScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+        private final MScope info;
+        CloudIot(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum CloudFunctions implements MScopeEnum {
+        CLOUD_PLATFORM(new MScope(CloudFunctionsScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+        private final MScope info;
+        CloudFunctions(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum CloudRun implements MScopeEnum {
+        CLOUD_PLATFORM(new MScope(CloudRunScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+        private final MScope info;
+        CloudRun(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum Container implements MScopeEnum {
+        CLOUD_PLATFORM(new MScope(ContainerScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+        private final MScope info;
+        Container(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum DeploymentManager implements MScopeEnum {
+        CLOUD_PLATFORM(new MScope(DeploymentManagerScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+        private final MScope info;
+        DeploymentManager(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum ServiceNetworking implements MScopeEnum {
+        CLOUD_PLATFORM(new MScope(ServiceNetworkingScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+
+        private final MScope info;
+        ServiceNetworking(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum CloudIdentity implements MScopeEnum {
+        CLOUD_IDENTITY_GROUPS(new MScope(CloudIdentityScopes.CLOUD_IDENTITY_GROUPS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        CLOUD_IDENTITY_GROUPS_READONLY(new MScope(CloudIdentityScopes.CLOUD_IDENTITY_GROUPS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
+        CLOUD_IDENTITY_CLOUD_PLATFORM(new MScope(CloudIdentityScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHUSER)));
+        private final MScope info;
+        CloudIdentity(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum Iam implements MScopeEnum {
+        CLOUD_PLATFORM(new MScope(IamScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+        private final MScope info;
+        Iam(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum CloudML implements MScopeEnum {
+        CLOUD_PLATFORM(new MScope(CloudMachineLearningEngineScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+        private final MScope info;
+        CloudML(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum Dialogflow implements MScopeEnum {
+        CLOUD_PLATFORM(new MScope(DialogflowScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+        private final MScope info;
+        Dialogflow(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+    public enum Apigee implements MScopeEnum {
+        CLOUD_PLATFORM(new MScope(ApigeeScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
+        private final MScope info;
+        Apigee(MScope info) { this.info = info; }
+        @Override public final MScope getScope() { return info; }
+    }
+
+
 
 
 }

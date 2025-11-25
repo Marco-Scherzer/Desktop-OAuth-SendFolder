@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 
+import static com.marcoscherzer.msimplegoauthhelper.MGoAuthScopes.Gmail.GMAIL_SEND;
 import static com.marcoscherzer.msimplegoauthhelper.swinggui.MAuthFlow_SwingGui.createMessageDialogAndWait;
 import static com.marcoscherzer.msimplegoauthmailserviceapplication.util.MUtil.createFolderDesktopLink;
 import static com.marcoscherzer.msimplegoauthmailserviceapplication.util.MUtil.createPathIfNotExists;
@@ -113,10 +114,9 @@ public final class MMain {
            }
        };
 
-       flow.createAuthFlow(Collections.singletonList(MGoAuthScopes.Gmail.GMAIL_SEND.getUrl()),true);
+       flow.createAuthFlow(Collections.singletonList(GMAIL_SEND.getScope()),true);
 
     }
-
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
