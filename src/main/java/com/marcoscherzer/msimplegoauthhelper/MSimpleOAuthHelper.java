@@ -36,11 +36,10 @@ public abstract class MSimpleOAuthHelper {
 
         /**
          * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-         * scopes z.B Collections.singletonList(GmailScopes.GMAIL_SEND)
          */
         public MSimpleOAuthHelper(MSimpleOAuthKeystore keystore, String applicationName, boolean doNotPersistOAuthToken,String... scopes){
             this.scopes = new ArrayList<>(new LinkedHashSet<>(Arrays.asList(scopes)));
-            this.keystore = keystore.getKeyStore();
+            this.keystore = keystore.getKeystore();
             this.appName = applicationName;
             this.doNotPersistOAuthToken = doNotPersistOAuthToken;
 

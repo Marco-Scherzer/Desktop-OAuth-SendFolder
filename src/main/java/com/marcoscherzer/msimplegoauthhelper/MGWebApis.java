@@ -79,9 +79,9 @@ import java.util.*;
  * G. Web-API Scopes
  * unready
  */
-public enum MGoWebApis {
+public enum MGWebApis {
 ;
-    private MGoWebApis() {}
+    private MGWebApis() {}
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer

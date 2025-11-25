@@ -26,6 +26,7 @@ public final class MAppSetupDialog {
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     *   * uready
      */
     public final String[] showAndWait() throws InterruptedException, InvocationTargetException, Exception {
         Runnable task = () -> {

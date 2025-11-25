@@ -33,7 +33,7 @@ public final class MSimpleOAuthKeystore {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final MSimpleKeystore getKeyStore(){
+    public final MSimpleKeystore getKeystore(){
           return keystore;
     }
 

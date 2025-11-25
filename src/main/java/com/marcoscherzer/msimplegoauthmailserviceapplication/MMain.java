@@ -2,11 +2,7 @@ package com.marcoscherzer.msimplegoauthmailserviceapplication;
 
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.google.api.client.auth.oauth2.Credential;
-import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthHelper;
-import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthKeystore;
-import com.marcoscherzer.msimplegoauthhelper.swinggui.MAppRedirectLinkDialog;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MAuthFlow_SwingGui;
-import com.marcoscherzer.msimplegoauthhelper.swinggui.MSpinnerOverlayFrame;
 import com.marcoscherzer.msimplegoauthmailservice.MMailService;
 import com.marcoscherzer.msimplegoauthmailservice.MOutgoingMail;
 import com.marcoscherzer.msimplegoauthmailservice.swinggui.MAppSendGui;
@@ -19,7 +15,7 @@ import java.awt.event.ActionEvent;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static com.marcoscherzer.msimplegoauthhelper.MGoWebApis.Gmail.GMAIL_SEND;
+import static com.marcoscherzer.msimplegoauthhelper.MGWebApis.Gmail.GMAIL_SEND;
 import static com.marcoscherzer.msimplegoauthhelper.swinggui.MAuthFlow_SwingGui.createMessageDialogAndWait;
 import static com.marcoscherzer.msimplegoauthmailserviceapplication.util.MUtil.createFolderDesktopLink;
 import static com.marcoscherzer.msimplegoauthmailserviceapplication.util.MUtil.createPathIfNotExists;
@@ -31,7 +27,6 @@ import static com.marcoscherzer.msimplegoauthmailserviceapplication.util.MUtil.c
 public final class MMain {
 
     private static MAttachmentWatcher watcher;
-    private static MSimpleOAuthHelper oAuthHelper;
     private static MAppLoggingArea logFrame;
     private static boolean isDbg;
     private static TrayIcon trayIcon;
@@ -39,10 +34,7 @@ public final class MMain {
     private static final String keystorePath = userDir+"\\mystore.p12";
     private static final String mailFoldersPath = userDir + "\\mail";
     private static String trayIconPathWithinResourcesFolder = "/5.png";
-    private static MSimpleOAuthKeystore store;
-    private static MAppRedirectLinkDialog appRedirectLinkDialog;
-    private static MSpinnerOverlayFrame loginOverlay;
-
+    private static MAuthFlow_SwingGui flow;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -68,11 +60,7 @@ public final class MMain {
             setupTrayIcon();
             if (isDbg) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
 
-       trayIcon.displayMessage("OAuth Desktop FileSend Folder", "Setup started." + (isDbg ? "\nInfo: Use the SystemTray Icon to view log Information" : ""),
-               TrayIcon.MessageType.INFO);
-
-       MAuthFlow_SwingGui flow = new MAuthFlow_SwingGui(keystorePath){
-
+       flow = new MAuthFlow_SwingGui(keystorePath){
            @Override
            protected void onException(Exception exc) {
                exit(exc,1);
@@ -85,10 +73,9 @@ public final class MMain {
 
            @Override
            protected void initializeServices(Credential credential, String applicationName) throws Exception {
-               System.out.println("intializing services");
                MMailService mailService = new MMailService(credential, applicationName);
 
-               MSimpleKeystore store = oAuthHelper.getKeystore();
+               MSimpleKeystore store = flow.getKeystore();
                String clientAndPathUUID = store.get("clientId");
                Path sentFolder = createPathIfNotExists(Paths.get(mailFoldersPath, clientAndPathUUID + "-sent"), "Sent folder");
                Path unsentFolder = createPathIfNotExists(Paths.get(mailFoldersPath, clientAndPathUUID + "-notSent"), "NotSent folder");
@@ -166,7 +153,6 @@ public final class MMain {
     public static void exit(Throwable exception,int code) {
         if(isDbg && exception!=null){exception.printStackTrace();}
         try {
-            if(oAuthHelper != null && oAuthHelper.isInDoNotPersistOAuthTokenMode()) oAuthHelper.revokeOAuthTokenFromServer();
             if (watcher != null) watcher.shutdown();
         } catch (Exception exc) {
             System.err.println(exception.getMessage());
