@@ -46,7 +46,7 @@ public abstract class MAuthFlow_SwingGui {
     }
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     *   * uready
+     *  unready
      */
     private void setup(){
         try {
@@ -62,7 +62,7 @@ public abstract class MAuthFlow_SwingGui {
             // Keystore erstellen mit ausgewähltem client_secret.json
             store = new MSimpleOAuthKeystore(pw, clientSecretPath, keystorePath);
             store.getKeystore().put("fromAddress", from);
-            store.getKeystore().put("toAddress", to);
+            store.getKeystore().put("toAddress", to);//unready
 
             statusMsg("Setup completed.");
             System.out.println("setup completed");
@@ -163,7 +163,7 @@ public abstract class MAuthFlow_SwingGui {
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private final void onException_(Exception exc){
+    private void onException_(Exception exc){
         try {
             if (oAuthHelper != null && oAuthHelper.isInDoNotPersistOAuthTokenMode())  oAuthHelper.revokeOAuthTokenFromServer();
         }catch (Exception exc2) {
