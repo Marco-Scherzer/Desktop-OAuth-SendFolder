@@ -35,11 +35,11 @@ public final class MButtonOverviewDialog {
         java.util.List<JToggleButton> toggleButtons = new ArrayList<>();
 
         // Prozentuale Berechnung der Buttongröße
-        int buttonWidth = (int) (dialogWidth * 0.12);
-        int buttonHeight = (int) (dialogHeight * 0.07);
+        int buttonWidth = (int) (dialogWidth * 0.12 *0.9);
+        int buttonHeight = (int) (dialogHeight * 0.07 *0.9);
         Dimension buttonSize = new Dimension(buttonWidth, buttonHeight);
 
-        int fontSize = (int) (buttonHeight * 0.4);
+        int fontSize = (int) (buttonHeight * 0.4 * 0.9);
         Font buttonFont = new Font(Font.SANS_SERIF, Font.PLAIN, fontSize);
 
         // Liste für ausgewählte Elemente (rechts)
@@ -49,6 +49,7 @@ public final class MButtonOverviewDialog {
         JScrollPane selectionScroll = new JScrollPane(selectionList,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        //selectionScroll.setMinimumSize(new Dimension(100,1000));
 
         // Alle Zeilen vorbereiten
         java.util.List<JPanel> rowPanels = new ArrayList<>();
