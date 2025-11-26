@@ -12,21 +12,25 @@ import java.util.List;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+ * unready
  */
 public final class MButtonOverviewDialog {
 
     private final String title;
     private final String[] options;
     private final Set<String> selected = new HashSet<>();
-
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
     public MButtonOverviewDialog(String title, String... options) {
         this.title = title;
         this.options = options;
     }
 
     /**
-     * Öffnet den Dialog und erlaubt Mehrfachauswahl.
-     * @return Set der ausgewählten Optionen oder null bei Cancel
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * unready
      */
     public Set<String> showAndWait() throws InterruptedException, InvocationTargetException {
         JPanel contentPanel = new JPanel();
@@ -66,20 +70,18 @@ public final class MButtonOverviewDialog {
     }
 
     /**
-     * Test-Main: erzeugt 50 Buttons und zeigt den Dialog.
+     * Test-Main
+     * unready
      */
     public static void main(String[] args) throws Exception {
-        // 50 Dummy-Optionen erzeugen
         String[] testOptions = new String[50];
         for (int i = 0; i < 50; i++) {
             testOptions[i] = "Option " + (i + 1);
         }
 
-        // Dialog starten
         MButtonOverviewDialog dlg = new MButtonOverviewDialog("Test 50 Buttons", testOptions);
         Set<String> chosen = dlg.showAndWait();
 
-        // Ergebnis ausgeben
         if (chosen != null) {
             System.out.println("Ausgewählt: " + chosen);
         } else {
@@ -87,5 +89,6 @@ public final class MButtonOverviewDialog {
         }
     }
 }
+
 
 
