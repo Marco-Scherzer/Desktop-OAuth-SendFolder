@@ -4,15 +4,13 @@ import com.marcoscherzer.msimplegoauthmailserviceapplication.MMain;
 import com.marcoscherzer.msimplegoauthmailserviceapplication.util.MSimpleDialog;
 
 import javax.swing.*;
+import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
- * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- * impl start
+ * @author Marco Scherzer
+ * Copyright Marco Scherzer, All rights reserved
  * unready
  */
 public final class MButtonOverviewDialog {
@@ -21,7 +19,8 @@ public final class MButtonOverviewDialog {
     private final String[] options;
     private final Set<String> selected = new HashSet<>();
     /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * @author Marco Scherzer
+     * Copyright Marco Scherzer, All rights reserved
      * unready
      */
     public MButtonOverviewDialog(String title, String... options) {
@@ -30,26 +29,44 @@ public final class MButtonOverviewDialog {
     }
 
     /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * @author Marco Scherzer
+     * Copyright Marco Scherzer, All rights reserved
      * unready
      */
     public Set<String> showAndWait() throws InterruptedException, InvocationTargetException {
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        // Anzahl Spalten (z. B. 5)
+        int columns = 5;
+        JPanel contentPanel = new JPanel(new GridLayout(0, columns, 10, 10));
 
-        // Toggle-Buttons für jede Option
-        List<JToggleButton> toggleButtons = new ArrayList<>();
+        // Toggle-Buttons erzeugen und größte Textbreite ermitteln
+        java.util.List<JToggleButton> toggleButtons = new ArrayList<>();
+        FontMetrics fm = new JButton().getFontMetrics(new JButton().getFont());
+        int maxWidth = 0;
+        int maxHeight = 0;
+
         for (String opt : options) {
             JToggleButton toggle = new JToggleButton(opt);
+            Dimension d = toggle.getPreferredSize();
+
+            // Textbreite exakt messen, plus etwas Padding
+            int textWidth = fm.stringWidth(opt) + 20;
+            maxWidth = Math.max(maxWidth, textWidth);
+            maxHeight = Math.max(maxHeight, d.height);
+
             toggleButtons.add(toggle);
-            contentPanel.add(toggle);
         }
 
-        MSimpleDialog dialog = new MSimpleDialog(contentPanel, 400, 600)
+        // Einheitliche Größe setzen (alle Buttons gleich breit wie längster Text)
+        Dimension uniformSize = new Dimension(maxWidth, maxHeight);
+        for (JToggleButton btn : toggleButtons) {
+            btn.setPreferredSize(uniformSize);
+            contentPanel.add(btn);
+        }
+
+        MSimpleDialog dialog = new MSimpleDialog(contentPanel, 900, 600)
                 .setTitle(title)
                 .setIcon(UIManager.getIcon("OptionPane.informationIcon"));
 
-        // OK-Button: sammelt alle ausgewählten Optionen
         dialog.addButton("OK", e -> {
             selected.clear();
             for (JToggleButton btn : toggleButtons) {
@@ -59,7 +76,6 @@ public final class MButtonOverviewDialog {
             }
         }, true);
 
-        // Cancel-Button: beendet ohne Auswahl
         dialog.addButton("Cancel", e -> {
             selected.clear();
             MMain.exit(null, 0);
@@ -71,18 +87,24 @@ public final class MButtonOverviewDialog {
     }
 
     /**
-     * Test-Main
+     * @author Marco Scherzer
+     * Copyright Marco Scherzer, All rights reserved
+     * Test Main
      * unready
      */
     public static void main(String[] args) throws Exception {
+        // 50 Dummy-Optionen erzeugen
         String[] testOptions = new String[50];
-        for (int i = 0; i < 50; i++) {
+        testOptions[0] = "DeploymentManager"; // längster Text zum Testen
+        for (int i = 1; i < 50; i++) {
             testOptions[i] = "Option " + (i + 1);
         }
 
+        // Dialog starten
         MButtonOverviewDialog dlg = new MButtonOverviewDialog("Test 50 Buttons", testOptions);
         Set<String> chosen = dlg.showAndWait();
 
+        // Ergebnis ausgeben
         if (chosen != null) {
             System.out.println("Ausgewählt: " + chosen);
         } else {
@@ -90,6 +112,7 @@ public final class MButtonOverviewDialog {
         }
     }
 }
+
 
 
 
