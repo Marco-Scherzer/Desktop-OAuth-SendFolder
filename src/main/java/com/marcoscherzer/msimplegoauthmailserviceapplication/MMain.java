@@ -61,7 +61,7 @@ public final class MMain {
 
             setupTrayIcon();
             if (isDbg) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
-
+       // MAppSetupDialog
        flow = new MAuthDialogsFlow(keystorePath){
            @Override
            protected void onException(Exception exc) {
