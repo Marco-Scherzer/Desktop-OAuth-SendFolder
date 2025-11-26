@@ -1,8 +1,6 @@
 package com.marcoscherzer.msimplegoauthmailserviceapplication;
 
 import com.marcoscherzer.msimplegoauthmailservice.MMailAdressFormatException;
-import com.marcoscherzer.msimplekeystore.MPasswordComplexityException;
-
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -19,20 +17,13 @@ import static com.marcoscherzer.msimplegoauthmailservice.MSimpleMailerUtil.check
 public final class MAppSetupDialog {
 
     private String[] result;
-    private Exception capturedException;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      *   * uready
      */
-    public final String[] showAndWait() throws InterruptedException, InvocationTargetException, Exception {
-        Runnable task = () -> {
-            try {
-                result = buildAndShowDialog();
-            } catch (Exception e) {
-                capturedException = e;
-            }
-        };
+    public final String[] showAndWait() throws InterruptedException, InvocationTargetException {
+        Runnable task = () -> { result = buildAndShowDialog(); };
 
         if (SwingUtilities.isEventDispatchThread()) {
             task.run();
@@ -40,9 +31,6 @@ public final class MAppSetupDialog {
             SwingUtilities.invokeAndWait(task);
         }
 
-        if (capturedException != null) {
-            throw capturedException;
-        }
         return result;
     }
 

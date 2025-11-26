@@ -116,6 +116,11 @@ public abstract class MAuthDialogsFlow {
                             protected void onCanceled() {
                                exit(null,0);//unready
                             }
+
+                            @Override
+                            protected void onDontShowAgainSelected() {
+                                //unready
+                            }
                         };
                         appRedirectLinkDialog.showAndWait(oAuthLink,continueOAuthOrNot);
 

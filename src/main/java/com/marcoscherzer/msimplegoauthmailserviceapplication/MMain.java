@@ -116,7 +116,7 @@ public final class MMain {
     private static void setup(MSimpleKeystore store){
         try {
             System.out.println("showing setup dialog");
-            trayIcon.displayMessage("OAuth Desktop FileSend Folder","OAuth Desktop FileSend Folder Setup started." + "\nInfo: Use the SystemTray Icon to view log Information", TrayIcon.MessageType.INFO);
+            trayIcon.displayMessage("OAuth Desktop FileSend Folder","Setup started." + "\nInfo: Use the SystemTray Icon to view log Information", TrayIcon.MessageType.INFO);
             String[] setupedValues = new MAppSetupDialog().showAndWait();
             if (setupedValues == null) exit(null,0); // canceled
             String from = setupedValues[0];
