@@ -1,5 +1,6 @@
 package com.marcoscherzer.msimplegoauthhelper.swinggui;
 
+import com.marcoscherzer.msimplegoauthhelper.MGWebApis;
 import com.marcoscherzer.msimplegoauthmailservice.MMailAdressFormatException;
 import com.marcoscherzer.msimplekeystore.MPasswordComplexityException;
 
@@ -12,6 +13,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static com.marcoscherzer.msimplegoauthmailservice.MSimpleMailerUtil.checkMailAddress;
 import static com.marcoscherzer.msimplekeystore.MSimpleKeystoreUtil.checkPasswordComplexity;
@@ -153,6 +155,23 @@ public final class MAppSetupDialog {
         recipientLabelRow.add(webApiScopesAddButton, l3);
         rowsPanel.add(recipientLabelRow, rp);
         rp.gridy++;
+
+        webApiScopesAddButton.addActionListener(e -> {
+            Set<String> apiNames = MGWebApis.getAllWebApiNames();
+            MButtonOverviewDialog dlg = new MButtonOverviewDialog("Web-API Scopes",
+                    apiNames.toArray(new String[0]));
+            try {
+                Set<String> chosen = dlg.showAndWait();
+                if (chosen != null) {
+                    System.out.println("Ausgewählt: " + chosen);//unready
+                } else {
+                    System.out.println("Abgebrochen");
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+
 
         // Row 3: Recipient Field
         JPanel recipientRow = new JPanel(new GridBagLayout());
