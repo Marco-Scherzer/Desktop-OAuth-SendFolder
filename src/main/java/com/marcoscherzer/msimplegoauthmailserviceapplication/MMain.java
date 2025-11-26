@@ -3,6 +3,7 @@ package com.marcoscherzer.msimplegoauthmailserviceapplication;
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.google.api.client.auth.oauth2.Credential;
 import com.marcoscherzer.msimplegoauthhelper.MGWebApis;
+import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthKeystore;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MAuthDialogsFlow;
 import com.marcoscherzer.msimplegoauthmailservice.MMailService;
 import com.marcoscherzer.msimplegoauthmailservice.MOutgoingMail;
@@ -13,6 +14,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -62,6 +64,7 @@ public final class MMain {
             setupTrayIcon();
             if (isDbg) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
        // MAppSetupDialog
+
        flow = new MAuthDialogsFlow(keystorePath){
            @Override
            protected void onException(Exception exc) {
@@ -82,8 +85,9 @@ public final class MMain {
                Path sentFolder = createPathIfNotExists(Paths.get(mailFoldersPath, clientAndPathUUID + "-sent"), "Sent folder");
                Path unsentFolder = createPathIfNotExists(Paths.get(mailFoldersPath, clientAndPathUUID + "-notSent"), "NotSent folder");
 
+               if (!store.containsAllNonNullKeys("fromAddress","toAddress")) setup(store);
                String fromAddress = store.get("fromAddress");
-               String toAddress = ""; //store.get("toAddress");
+               String toAddress = store.get("toAddress");
 
                watcher = new MAttachmentWatcher(sentFolder, unsentFolder, mailService, fromAddress, toAddress, clientAndPathUUID) {
                    @Override
@@ -101,9 +105,31 @@ public final class MMain {
                trayIcon.displayMessage("OAuth Desktop FileSend Folder", "To send mail drag files onto its dolphin icon on the desktop or click it.", TrayIcon.MessageType.INFO);
            }
        };
-
        flow.createAuthFlow(true,GMAIL_SEND.get(), MGWebApis.Fitness.FITNESS_ACTIVITY_READ.get());
 
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     *  unready
+     */
+    private static void setup(MSimpleKeystore store){
+        try {
+            System.out.println("showing setup dialog");
+            trayIcon.displayMessage("OAuth Desktop FileSend Folder","OAuth Desktop FileSend Folder Setup started." + "\nInfo: Use the SystemTray Icon to view log Information", TrayIcon.MessageType.INFO);
+            String[] setupedValues = new MAppSetupDialog().showAndWait();
+            if (setupedValues == null) exit(null,0); // canceled
+            String from = setupedValues[0];
+            String to = setupedValues[1];
+            store.put("fromAddress", from);
+            store.put("toAddress", to);//unready
+            trayIcon.displayMessage("OAuth Desktop FileSend Folder","Setup completed", TrayIcon.MessageType.INFO);
+            System.out.println("setup completed");
+        } catch (Exception exc){
+            System.err.println(exc.getMessage());
+            createMessageDialogAndWait("Error:\n" + exc.getMessage(),"Error");
+            exit(exc,1);
+        }
     }
 
     /**

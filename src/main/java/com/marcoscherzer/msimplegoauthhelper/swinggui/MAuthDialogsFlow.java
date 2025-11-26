@@ -49,16 +49,10 @@ public abstract class MAuthDialogsFlow {
             statusMsg("Setup started." + "\nInfo: Use the SystemTray Icon to view log Information");
             String[] setupedValues = new MClientSecretKeystoreSetupDialog().showAndWait();
             if (setupedValues == null) onException_(null); // canceled
-            String from = setupedValues[0];
-            //String to = setupedValues[1];
-            String pw = setupedValues[1];
-            String clientSecretPath = setupedValues[2];
-
+            String pw = setupedValues[0];
+            String clientSecretPath = setupedValues[1];
             // Keystore erstellen mit ausgewähltem client_secret.json
             store = new MSimpleOAuthKeystore(pw, clientSecretPath, keystorePath);
-            store.getKeystore().put("fromAddress", from);
-            //store.getKeystore().put("toAddress", to);//unready
-
             statusMsg("Setup completed.");
             System.out.println("setup completed");
         } catch (Exception exc){
