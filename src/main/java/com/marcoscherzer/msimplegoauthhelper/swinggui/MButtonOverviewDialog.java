@@ -20,15 +20,15 @@ public final class MButtonOverviewDialog {
     private int currentPage = 0;
 
     // Basisgröße
-    private final int dialogWidth = 900;
-    private final int dialogHeight = 600;
+    private final int dialogWidth = 1200;
+    private final int dialogHeight = 768;
 
     // Prozentuale Layout-Konstanten
     private final float leftColumnPercent = 0.9f;
     private final float rightColumnPercent = 0.1f;
-    private final float topRowPercent = 0.1f;
-    private final float middleRowPercent = 0.8f;
-    private final float bottomRowPercent = 0.1f;
+    private final float topRowPercent = 0.05f;
+    private final float middleRowPercent = 0.9f;
+    private final float bottomRowPercent = 0.05f;
 
     // Buttons pro Seite
     private final int btnLineCnt = 5;
@@ -55,6 +55,18 @@ public final class MButtonOverviewDialog {
         // CardPanel mit Seiten
         JPanel cardPanel = new JPanel(new CardLayout());
 
+        // Windows-8 Kachel-Farbpalette (kräftige RGB-Farben)
+        Color[] tileColors = {
+                new Color(0, 174, 239),   // Hellblau
+                new Color(0, 153, 68),    // Grün
+                new Color(255, 185, 0),   // Orange
+                new Color(229, 20, 0),    // Rot
+                new Color(142, 140, 216), // Lila
+                new Color(240, 163, 10),  // Gelb-Orange
+                new Color(0, 120, 215),   // Blau
+                new Color(255, 105, 180)  // Pink
+        };
+
         int totalPages = (int) Math.ceil((double) options.length / (btnLineCnt * btnHeightCnt));
         for (int p = 0; p < totalPages; p++) {
             MGridBuilder pageBuilder = new MGridBuilder();
@@ -68,6 +80,15 @@ public final class MButtonOverviewDialog {
                     int idx = p * btnLineCnt * btnHeightCnt + r * btnLineCnt + c;
                     if (idx >= options.length) break;
                     JToggleButton toggle = new JToggleButton(options[idx]);
+
+                    // Hintergrundfarbe im Kachel-Stil setzen
+                    Color bg = tileColors[(idx % tileColors.length)];
+                    toggle.setBackground(bg);
+                    toggle.setForeground(Color.WHITE);
+                    toggle.setOpaque(true);
+                    toggle.setContentAreaFilled(true);
+                    toggle.setFocusPainted(false);
+
                     toggle.addActionListener(e -> {
                         selected.clear();
                         listModel.clear();
@@ -158,4 +179,3 @@ public final class MButtonOverviewDialog {
         System.out.println(chosen != null ? "Ausgewählt: " + chosen : "Abgebrochen");
     }
 }
-
