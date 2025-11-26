@@ -10,7 +10,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-
+/**
+ * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+ */
 public final class MButtonOverviewDialog {
 
     private final String title;
@@ -33,12 +35,16 @@ public final class MButtonOverviewDialog {
     // Buttons pro Seite
     private final int btnLineCnt = 5;
     private final int btnHeightCnt = 5;
-
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public MButtonOverviewDialog(String title, String... options) {
         this.title = title;
         this.options = options;
     }
-
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public Set<String> showAndWait() throws InterruptedException, InvocationTargetException {
         java.util.List<JToggleButton> toggleButtons = new ArrayList<>();
 
@@ -55,7 +61,6 @@ public final class MButtonOverviewDialog {
         // CardPanel mit Seiten
         JPanel cardPanel = new JPanel(new CardLayout());
 
-        // Windows-8 Kachel-Farbpalette (kräftige RGB-Farben)
         Color[] tileColors = {
                 new Color(0, 174, 239),   // Hellblau
                 new Color(0, 153, 68),    // Grün
@@ -166,7 +171,9 @@ public final class MButtonOverviewDialog {
         dialog.showAndWait();
         return selected.isEmpty() ? null : new HashSet<>(selected);
     }
-
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public static void main(String[] args) throws Exception {
         FlatCarbonIJTheme.setup();
         UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 16));
