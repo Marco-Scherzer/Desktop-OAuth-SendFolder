@@ -67,9 +67,7 @@ Contact: fahrservice.1@gmail.com
 
 ### - Sender email address is stored in secure encrypted PKCS#12 database
 
-### - Recipient email address is stored in secure encrypted PKCS#12 database
-
-### - Generates at setup time internal Mail Folder Names using UUIDs.
+### - Uses App Directory UUID-Name Folders as Mail Folder Names
 
 ### - Uses the generated UUID in both the internal client name and default email metadata for additional verifiability
 
