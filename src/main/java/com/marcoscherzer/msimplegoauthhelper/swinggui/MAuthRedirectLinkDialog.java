@@ -30,24 +30,28 @@ public abstract class MAuthRedirectLinkDialog {
     private static final double FONT_SIZE_LINK_FACTOR = 0.030;
 
     // --- Padding für Top-Row (ScrollPane) ---
-    private static final double TOP_ROW_PADDING_VERTICAL_FACTOR = 0.02;
-    private static final double TOP_ROW_PADDING_LEFT_FACTOR     = 0.02;
-    private static final double TOP_ROW_PADDING_RIGHT_FACTOR    = 0.02;
+    private static final double TOP_ROW_PADDING_TOP_FACTOR    = 0.02;
+    private static final double TOP_ROW_PADDING_BOTTOM_FACTOR = 0.02;
+    private static final double TOP_ROW_PADDING_LEFT_FACTOR   = 0.02;
+    private static final double TOP_ROW_PADDING_RIGHT_FACTOR  = 0.02;
 
     // --- Padding für Checkbox-Row (äußere Zeile) ---
-    private static final double CHECK_ROW_PADDING_VERTICAL_FACTOR = 0.025;
-    private static final double CHECK_ROW_PADDING_LEFT_FACTOR     = 0.02;
-    private static final double CHECK_ROW_PADDING_RIGHT_FACTOR    = 0.02;
+    private static final double CHECK_ROW_PADDING_TOP_FACTOR    = 0.00;
+    private static final double CHECK_ROW_PADDING_BOTTOM_FACTOR = 0.00;
+    private static final double CHECK_ROW_PADDING_LEFT_FACTOR   = 0.02;
+    private static final double CHECK_ROW_PADDING_RIGHT_FACTOR  = 0.02;
 
     // --- Interne Paddings für Label in Checkbox-Row ---
-    private static final double LABEL_PADDING_VERTICAL_FACTOR = 0.015;
-    private static final double LABEL_PADDING_LEFT_FACTOR     = 0.03;
-    private static final double LABEL_PADDING_RIGHT_FACTOR    = 0.00;
+    private static final double LABEL_PADDING_TOP_FACTOR    = 0.00;
+    private static final double LABEL_PADDING_BOTTOM_FACTOR = 0.00;
+    private static final double LABEL_PADDING_LEFT_FACTOR   = 0.03;
+    private static final double LABEL_PADDING_RIGHT_FACTOR  = 0.00;
 
     // --- Interne Paddings für Checkbox in Checkbox-Row ---
-    private static final double CHECKBOX_PADDING_VERTICAL_FACTOR = 0.015;
-    private static final double CHECKBOX_PADDING_LEFT_FACTOR     = 0.02;
-    private static final double CHECKBOX_PADDING_RIGHT_FACTOR    = 0.02;
+    private static final double CHECKBOX_PADDING_TOP_FACTOR    = 0.00;
+    private static final double CHECKBOX_PADDING_BOTTOM_FACTOR = 0.00;
+    private static final double CHECKBOX_PADDING_LEFT_FACTOR   = 0.02;
+    private static final double CHECKBOX_PADDING_RIGHT_FACTOR  = 0.00;
 
     private MSimpleDialog dialog;
     private MSpinnerOverlayFrame loginOverlay;
@@ -64,21 +68,25 @@ public abstract class MAuthRedirectLinkDialog {
         int fontSizeLink = (int)(DIALOG_HEIGHT * FONT_SIZE_LINK_FACTOR);
 
         // Padding berechnen
-        int topRowPaddingVertical   = (int)(DIALOG_HEIGHT * TOP_ROW_PADDING_VERTICAL_FACTOR);
-        int topRowPaddingLeft       = (int)(DIALOG_WIDTH  * TOP_ROW_PADDING_LEFT_FACTOR);
-        int topRowPaddingRight      = (int)(DIALOG_WIDTH  * TOP_ROW_PADDING_RIGHT_FACTOR);
+        int topRowPaddingTop    = (int)(DIALOG_HEIGHT * TOP_ROW_PADDING_TOP_FACTOR);
+        int topRowPaddingBottom = (int)(DIALOG_HEIGHT * TOP_ROW_PADDING_BOTTOM_FACTOR);
+        int topRowPaddingLeft   = (int)(DIALOG_WIDTH  * TOP_ROW_PADDING_LEFT_FACTOR);
+        int topRowPaddingRight  = (int)(DIALOG_WIDTH  * TOP_ROW_PADDING_RIGHT_FACTOR);
 
-        int checkRowPaddingVertical = (int)(DIALOG_HEIGHT * CHECK_ROW_PADDING_VERTICAL_FACTOR);
-        int checkRowPaddingLeft     = (int)(DIALOG_WIDTH  * CHECK_ROW_PADDING_LEFT_FACTOR);
-        int checkRowPaddingRight    = (int)(DIALOG_WIDTH  * CHECK_ROW_PADDING_RIGHT_FACTOR);
+        int checkRowPaddingTop    = (int)(DIALOG_HEIGHT * CHECK_ROW_PADDING_TOP_FACTOR);
+        int checkRowPaddingBottom = (int)(DIALOG_HEIGHT * CHECK_ROW_PADDING_BOTTOM_FACTOR);
+        int checkRowPaddingLeft   = (int)(DIALOG_WIDTH  * CHECK_ROW_PADDING_LEFT_FACTOR);
+        int checkRowPaddingRight  = (int)(DIALOG_WIDTH  * CHECK_ROW_PADDING_RIGHT_FACTOR);
 
-        int labelPaddingVertical    = (int)(DIALOG_HEIGHT * LABEL_PADDING_VERTICAL_FACTOR);
-        int labelPaddingLeft        = (int)(DIALOG_WIDTH  * LABEL_PADDING_LEFT_FACTOR);
-        int labelPaddingRight       = (int)(DIALOG_WIDTH  * LABEL_PADDING_RIGHT_FACTOR);
+        int labelPaddingTop    = (int)(DIALOG_HEIGHT * LABEL_PADDING_TOP_FACTOR);
+        int labelPaddingBottom = (int)(DIALOG_HEIGHT * LABEL_PADDING_BOTTOM_FACTOR);
+        int labelPaddingLeft   = (int)(DIALOG_WIDTH  * LABEL_PADDING_LEFT_FACTOR);
+        int labelPaddingRight  = (int)(DIALOG_WIDTH  * LABEL_PADDING_RIGHT_FACTOR);
 
-        int checkboxPaddingVertical = (int)(DIALOG_HEIGHT * CHECKBOX_PADDING_VERTICAL_FACTOR);
-        int checkboxPaddingLeft     = (int)(DIALOG_WIDTH  * CHECKBOX_PADDING_LEFT_FACTOR);
-        int checkboxPaddingRight    = (int)(DIALOG_WIDTH  * CHECKBOX_PADDING_RIGHT_FACTOR);
+        int checkboxPaddingTop    = (int)(DIALOG_HEIGHT * CHECKBOX_PADDING_TOP_FACTOR);
+        int checkboxPaddingBottom = (int)(DIALOG_HEIGHT * CHECKBOX_PADDING_BOTTOM_FACTOR);
+        int checkboxPaddingLeft   = (int)(DIALOG_WIDTH  * CHECKBOX_PADDING_LEFT_FACTOR);
+        int checkboxPaddingRight  = (int)(DIALOG_WIDTH  * CHECKBOX_PADDING_RIGHT_FACTOR);
 
         // HTML Panel
         MSimpleHtmlTextPanel htmlPanel = new MSimpleHtmlTextPanel();
@@ -99,16 +107,16 @@ public abstract class MAuthRedirectLinkDialog {
         gbcCheck.gridx = 0;
         gbcCheck.weightx = 1.0;
         gbcCheck.anchor = GridBagConstraints.EAST;
-        gbcCheck.insets = new Insets(labelPaddingVertical, labelPaddingLeft,
-                labelPaddingVertical, labelPaddingRight);
+        gbcCheck.insets = new Insets(labelPaddingTop, labelPaddingLeft,
+                labelPaddingBottom, labelPaddingRight);
         checkRow.add(dontShowLabel, gbcCheck);
 
         // Checkbox direkt daneben mit eigenem Padding
         gbcCheck.gridx = 1;
         gbcCheck.weightx = 0.0;
         gbcCheck.anchor = GridBagConstraints.WEST;
-        gbcCheck.insets = new Insets(checkboxPaddingVertical, checkboxPaddingLeft,
-                checkboxPaddingVertical, checkboxPaddingRight);
+        gbcCheck.insets = new Insets(checkboxPaddingTop, checkboxPaddingLeft,
+                checkboxPaddingBottom, checkboxPaddingRight);
         checkRow.add(dontShowAgainCheckBox, gbcCheck);
 
         // Hauptcontainer mit GridBagLayout
@@ -118,17 +126,17 @@ public abstract class MAuthRedirectLinkDialog {
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.weightx = 1.0;
-        gbc.weighty = SCROLLPANE_HEIGHT_FACTOR; // 80% für ScrollPane
+        gbc.weighty = SCROLLPANE_HEIGHT_FACTOR;
         gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(topRowPaddingVertical, topRowPaddingLeft,
-                topRowPaddingVertical, topRowPaddingRight);
+        gbc.insets = new Insets(topRowPaddingTop, topRowPaddingLeft,
+                topRowPaddingBottom, topRowPaddingRight);
         contentPanel.add(scrollPane, gbc);
 
         gbc.gridy = 1;
-        gbc.weighty = CHECKROW_HEIGHT_FACTOR; // 5% für Checkbox-Zeile
+        gbc.weighty = CHECKROW_HEIGHT_FACTOR;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(checkRowPaddingVertical, checkRowPaddingLeft,
-                checkRowPaddingVertical, checkRowPaddingRight);
+        gbc.insets = new Insets(checkRowPaddingTop, checkRowPaddingLeft,
+                checkRowPaddingBottom, checkRowPaddingRight);
         contentPanel.add(checkRow, gbc);
 
         dialog = new MSimpleDialog(contentPanel, DIALOG_WIDTH, DIALOG_HEIGHT)
@@ -179,7 +187,10 @@ public abstract class MAuthRedirectLinkDialog {
         });
         loginOverlay.setVisible(true);
     }
-
+    /**
+     * Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
     public final void dispose() {
         dialog.getUIComponent().setVisible(false);
         dialog.getUIComponent().dispose();
@@ -201,6 +212,7 @@ public abstract class MAuthRedirectLinkDialog {
      */
     protected abstract void onDontShowAgainSelected();
 }
+
 
 
 
