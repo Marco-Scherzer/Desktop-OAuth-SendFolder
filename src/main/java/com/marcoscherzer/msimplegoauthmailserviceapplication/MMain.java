@@ -3,7 +3,7 @@ package com.marcoscherzer.msimplegoauthmailserviceapplication;
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.google.api.client.auth.oauth2.Credential;
 import com.marcoscherzer.msimplegoauthhelper.MGWebApis;
-import com.marcoscherzer.msimplegoauthhelper.swinggui.MAuthFlow_SwingGui;
+import com.marcoscherzer.msimplegoauthhelper.swinggui.MAuthDialogsFlow;
 import com.marcoscherzer.msimplegoauthmailservice.MMailService;
 import com.marcoscherzer.msimplegoauthmailservice.MOutgoingMail;
 import com.marcoscherzer.msimplegoauthmailservice.swinggui.MAppSendGui;
@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static com.marcoscherzer.msimplegoauthhelper.MGWebApis.Gmail.GMAIL_SEND;
-import static com.marcoscherzer.msimplegoauthhelper.swinggui.MAuthFlow_SwingGui.createMessageDialogAndWait;
+import static com.marcoscherzer.msimplegoauthhelper.swinggui.MAuthDialogsFlow.createMessageDialogAndWait;
 import static com.marcoscherzer.msimplegoauthmailserviceapplication.util.MUtil.createFolderDesktopLink;
 import static com.marcoscherzer.msimplegoauthmailserviceapplication.util.MUtil.createPathIfNotExists;
 
@@ -35,8 +35,8 @@ public final class MMain {
     private static final String keystorePath = userDir+"\\mystore.p12";
     private static final String mailFoldersPath = userDir + "\\mail";
     private static String trayIconPathWithinResourcesFolder = "/5.png";
-    private static MAuthFlow_SwingGui flow;
-    private static MAuthFlow_SwingGui.MAuthManager mauthManager;
+    private static MAuthDialogsFlow flow;
+    private static MAuthDialogsFlow.MAuthManager mauthManager;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -62,7 +62,7 @@ public final class MMain {
             setupTrayIcon();
             if (isDbg) logFrame.getLogFrame().setVisible(true);// sonst nur im tray sichtbar
 
-       flow = new MAuthFlow_SwingGui(keystorePath){
+       flow = new MAuthDialogsFlow(keystorePath){
            @Override
            protected void onException(Exception exc) {
                exit(exc,1);
@@ -115,7 +115,7 @@ public final class MMain {
             mauthManager.revokeOAuthTokenFromServer();
             if (watcher != null) watcher.shutdown();
         } catch (Exception exc) {
-            System.err.println(exception.getMessage());
+            System.err.println(exc.getMessage());
             if(isDbg) exc.printStackTrace();
         }
         System.out.println("Exiting program with code " + code);
