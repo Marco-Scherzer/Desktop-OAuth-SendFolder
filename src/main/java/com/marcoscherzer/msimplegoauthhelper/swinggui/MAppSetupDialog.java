@@ -54,7 +54,7 @@ public final class MAppSetupDialog {
      */
     private String[] buildAndShowDialog() {
         // Eingabefelder mit Platzhaltertext
-        JTextField fromField = new JTextField("Sender email address");
+        JTextField fromField = new JTextField("Account email address");
         JTextField toField   = new JTextField("Recipient email address");
         JPasswordField pwField = new JPasswordField("Program startup password");
         JTextField jsonPathField = new JTextField("client_secret.json file");
@@ -85,8 +85,8 @@ public final class MAppSetupDialog {
         JLabel spacer = new JLabel(" ");
 
         // Placeholder-Verhalten
-        addPlaceholderBehavior(fromField, "Sender email address");
-        addPlaceholderBehavior(toField, "Recipient email address");
+        addPlaceholderBehavior(fromField, "Email address");
+        addPlaceholderBehavior(toField, "WebApi Scopes");
         addPlaceholderBehavior(pwField, "Program startup password");
 
         // Validierungen
@@ -130,7 +130,7 @@ public final class MAppSetupDialog {
         JPanel senderLabelRow = new JPanel(new GridBagLayout());
         GridBagConstraints l2 = new GridBagConstraints();
         l2.gridx = 0; l2.gridy = 0; l2.weightx = 1.0; l2.fill = GridBagConstraints.HORIZONTAL;
-        JLabel senderLabel = new JLabel("Sender:");
+        JLabel senderLabel = new JLabel("Email address:");
         senderLabel.setFont(labelFont);
         senderLabelRow.add(senderLabel, l2);
         rowsPanel.add(senderLabelRow, rp);
@@ -148,9 +148,9 @@ public final class MAppSetupDialog {
         JPanel recipientLabelRow = new JPanel(new GridBagLayout());
         GridBagConstraints l3 = new GridBagConstraints();
         l3.gridx = 0; l3.gridy = 0; l3.weightx = 1.0; l3.fill = GridBagConstraints.HORIZONTAL;
-        JLabel recipientLabel = new JLabel("Recipient:");
-        recipientLabel.setFont(labelFont);
-        recipientLabelRow.add(recipientLabel, l3);
+        JButton webApiScopesAddButton = new JButton("Add WebApi Scopes");
+        webApiScopesAddButton.setFont(labelFont);
+        recipientLabelRow.add(webApiScopesAddButton, l3);
         rowsPanel.add(recipientLabelRow, rp);
         rp.gridy++;
 
@@ -204,8 +204,8 @@ public final class MAppSetupDialog {
 
             // Validierungen
             List<String> errors = new ArrayList<>();
-            try { checkMailAddress(from); } catch (MMailAdressFormatException e) { errors.add("Sender email invalid: " + e.getMessage()); }
-            try { checkMailAddress(to); } catch (MMailAdressFormatException e) { errors.add("Recipient email invalid: " + e.getMessage()); }
+            try { checkMailAddress(from); } catch (MMailAdressFormatException e) { errors.add("Email address invalid: " + e.getMessage()); }
+            //try { checkMailAddress(to); } catch (MMailAdressFormatException e) { errors.add("Recipient email invalid: " + e.getMessage()); }
             try { checkPasswordComplexity(pw, 15, true, true, true); } catch (MPasswordComplexityException e) { errors.add("Password invalid: " + e.getMessage()); }
             if (jsonPath.equals("") || jsonPath.equals("client_secret.json file")) {
                 errors.add("client_secret.json file not selected.");
