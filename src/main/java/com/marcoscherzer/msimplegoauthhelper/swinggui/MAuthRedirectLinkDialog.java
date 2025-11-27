@@ -20,7 +20,10 @@ public abstract class MAuthRedirectLinkDialog {
     private MSimpleDialog dialog;
     private MSpinnerOverlayFrame loginOverlay;
     private JCheckBox dontShowAgainCheckBox;
-
+    /**
+     * Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
     public final void showAndWait(String oAuthLink, MMutableBoolean continueOAuthOrNot)
             throws InterruptedException, InvocationTargetException {
 
@@ -114,17 +117,29 @@ public abstract class MAuthRedirectLinkDialog {
         });
         loginOverlay.setVisible(true);
     }
-
+    /**
+     * Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
     public final void dispose() {
         dialog.getUIComponent().setVisible(false);
         dialog.getUIComponent().dispose();
         if (loginOverlay != null) loginOverlay.dispose();
     }
-
+    /**
+     * Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
     protected abstract void onException(Exception exc);
-
+    /**
+     * Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
     protected abstract void onCanceled();
-
+    /**
+     * Copyright Marco Scherzer, All rights reserved
+     * unready
+     */
     protected abstract void onDontShowAgainSelected();
 }
 
