@@ -17,78 +17,13 @@ import java.net.URI;
  */
 public abstract class MAuthRedirectLinkDialog {
 
-    // --- Fenstergrößen ---
-    private static final int DIALOG_WIDTH  = 700;
-    private static final int DIALOG_HEIGHT = 400;
-
-    // --- Höhenanteile ---
-    private static final double SCROLLPANE_HEIGHT_FACTOR = 0.95;
-    private static final double CHECKROW_HEIGHT_FACTOR   = 0.05;
-
-    // --- Schriftgrößen ---
-    private static final double FONT_SIZE_FACTOR      = 0.035;
-    private static final double FONT_SIZE_LINK_FACTOR = 0.030;
-
-    // --- Padding für Top-Row (ScrollPane) ---
-    private static final double TOP_ROW_PADDING_TOP_FACTOR    = 0.02;
-    private static final double TOP_ROW_PADDING_BOTTOM_FACTOR = 0.02;
-    private static final double TOP_ROW_PADDING_LEFT_FACTOR   = 0.02;
-    private static final double TOP_ROW_PADDING_RIGHT_FACTOR  = 0.02;
-
-    // --- Padding für Checkbox-Row (äußere Zeile) ---
-    private static final double CHECK_ROW_PADDING_TOP_FACTOR    = 0.00;
-    private static final double CHECK_ROW_PADDING_BOTTOM_FACTOR = 0.00;
-    private static final double CHECK_ROW_PADDING_LEFT_FACTOR   = 0.02;
-    private static final double CHECK_ROW_PADDING_RIGHT_FACTOR  = 0.02;
-
-    // --- Interne Paddings für Label in Checkbox-Row ---
-    private static final double LABEL_PADDING_TOP_FACTOR    = 0.00;
-    private static final double LABEL_PADDING_BOTTOM_FACTOR = 0.00;
-    private static final double LABEL_PADDING_LEFT_FACTOR   = 0.03;
-    private static final double LABEL_PADDING_RIGHT_FACTOR  = 0.00;
-
-    // --- Interne Paddings für Checkbox in Checkbox-Row ---
-    private static final double CHECKBOX_PADDING_TOP_FACTOR    = 0.00;
-    private static final double CHECKBOX_PADDING_BOTTOM_FACTOR = 0.00;
-    private static final double CHECKBOX_PADDING_LEFT_FACTOR   = 0.02;
-    private static final double CHECKBOX_PADDING_RIGHT_FACTOR  = 0.00;
-
     private MSimpleDialog dialog;
     private MSpinnerOverlayFrame loginOverlay;
     private JCheckBox dontShowAgainCheckBox;
-    /**
-     * Copyright Marco Scherzer, All rights reserved
-     * unready
-     */
+
     public final void showAndWait(String oAuthLink, MMutableBoolean continueOAuthOrNot)
             throws InterruptedException, InvocationTargetException {
 
-        // Schriftgrößen berechnen
-        int fontSize     = (int)(DIALOG_HEIGHT * FONT_SIZE_FACTOR);
-        int fontSizeLink = (int)(DIALOG_HEIGHT * FONT_SIZE_LINK_FACTOR);
-
-        // Padding berechnen
-        int topRowPaddingTop    = (int)(DIALOG_HEIGHT * TOP_ROW_PADDING_TOP_FACTOR);
-        int topRowPaddingBottom = (int)(DIALOG_HEIGHT * TOP_ROW_PADDING_BOTTOM_FACTOR);
-        int topRowPaddingLeft   = (int)(DIALOG_WIDTH  * TOP_ROW_PADDING_LEFT_FACTOR);
-        int topRowPaddingRight  = (int)(DIALOG_WIDTH  * TOP_ROW_PADDING_RIGHT_FACTOR);
-
-        int checkRowPaddingTop    = (int)(DIALOG_HEIGHT * CHECK_ROW_PADDING_TOP_FACTOR);
-        int checkRowPaddingBottom = (int)(DIALOG_HEIGHT * CHECK_ROW_PADDING_BOTTOM_FACTOR);
-        int checkRowPaddingLeft   = (int)(DIALOG_WIDTH  * CHECK_ROW_PADDING_LEFT_FACTOR);
-        int checkRowPaddingRight  = (int)(DIALOG_WIDTH  * CHECK_ROW_PADDING_RIGHT_FACTOR);
-
-        int labelPaddingTop    = (int)(DIALOG_HEIGHT * LABEL_PADDING_TOP_FACTOR);
-        int labelPaddingBottom = (int)(DIALOG_HEIGHT * LABEL_PADDING_BOTTOM_FACTOR);
-        int labelPaddingLeft   = (int)(DIALOG_WIDTH  * LABEL_PADDING_LEFT_FACTOR);
-        int labelPaddingRight  = (int)(DIALOG_WIDTH  * LABEL_PADDING_RIGHT_FACTOR);
-
-        int checkboxPaddingTop    = (int)(DIALOG_HEIGHT * CHECKBOX_PADDING_TOP_FACTOR);
-        int checkboxPaddingBottom = (int)(DIALOG_HEIGHT * CHECKBOX_PADDING_BOTTOM_FACTOR);
-        int checkboxPaddingLeft   = (int)(DIALOG_WIDTH  * CHECKBOX_PADDING_LEFT_FACTOR);
-        int checkboxPaddingRight  = (int)(DIALOG_WIDTH  * CHECKBOX_PADDING_RIGHT_FACTOR);
-
-        // HTML Panel
         MSimpleHtmlTextPanel htmlPanel = new MSimpleHtmlTextPanel();
         JScrollPane scrollPane = new JScrollPane(htmlPanel,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -97,26 +32,21 @@ public abstract class MAuthRedirectLinkDialog {
         // Label + Checkbox nebeneinander in einem nested GridBag
         dontShowAgainCheckBox = new JCheckBox();
         JLabel dontShowLabel = new JLabel("Do not show this dialog in the future");
-        dontShowLabel.setFont(new Font("SansSerif", Font.PLAIN, fontSize));
 
         JPanel checkRow = new JPanel(new GridBagLayout());
         GridBagConstraints gbcCheck = new GridBagConstraints();
         gbcCheck.gridy = 0;
 
-        // Label rechtsbündig mit eigenem Padding
+        // Label rechtsbündig
         gbcCheck.gridx = 0;
         gbcCheck.weightx = 1.0;
         gbcCheck.anchor = GridBagConstraints.EAST;
-        gbcCheck.insets = new Insets(labelPaddingTop, labelPaddingLeft,
-                labelPaddingBottom, labelPaddingRight);
         checkRow.add(dontShowLabel, gbcCheck);
 
-        // Checkbox direkt daneben mit eigenem Padding
+        // Checkbox direkt daneben
         gbcCheck.gridx = 1;
         gbcCheck.weightx = 0.0;
         gbcCheck.anchor = GridBagConstraints.WEST;
-        gbcCheck.insets = new Insets(checkboxPaddingTop, checkboxPaddingLeft,
-                checkboxPaddingBottom, checkboxPaddingRight);
         checkRow.add(dontShowAgainCheckBox, gbcCheck);
 
         // Hauptcontainer mit GridBagLayout
@@ -126,20 +56,17 @@ public abstract class MAuthRedirectLinkDialog {
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.weightx = 1.0;
-        gbc.weighty = SCROLLPANE_HEIGHT_FACTOR;
+        gbc.weighty = 0.80; // 80% für ScrollPane
         gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(topRowPaddingTop, topRowPaddingLeft,
-                topRowPaddingBottom, topRowPaddingRight);
         contentPanel.add(scrollPane, gbc);
 
         gbc.gridy = 1;
-        gbc.weighty = CHECKROW_HEIGHT_FACTOR;
+        gbc.weighty = 0.05; // 5% für Checkbox-Zeile
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(checkRowPaddingTop, checkRowPaddingLeft,
-                checkRowPaddingBottom, checkRowPaddingRight);
+        gbc.insets = new Insets(10, 0, 0, 0); // Abstand nach oben
         contentPanel.add(checkRow, gbc);
 
-        dialog = new MSimpleDialog(contentPanel, DIALOG_WIDTH, DIALOG_HEIGHT)
+        dialog = new MSimpleDialog(contentPanel, 700, 400)
                 .setTitle("OAuth login")
                 .setMessageType(JOptionPane.INFORMATION_MESSAGE)
                 .setIcon(null)
@@ -168,10 +95,10 @@ public abstract class MAuthRedirectLinkDialog {
                     onCanceled();
                 }, true);
 
-        htmlPanel.setDialogSize(DIALOG_WIDTH, DIALOG_HEIGHT)
-                .addText("Additional authentication needed.", "white", fontSize, "none")
-                .addText("Please open the following address in your browser:", "white", fontSize, "none")
-                .addHyperlink(oAuthLink, oAuthLink, "#87CEEB", fontSizeLink, "underline",
+        htmlPanel.setDialogSize(700, 400)
+                .addText("Additional authentication needed.", "white", 14, "none")
+                .addText("Please open the following address in your browser:", "white", 14, "none")
+                .addHyperlink(oAuthLink, oAuthLink, "#87CEEB", 11, "underline",
                         e -> dialog.pressButton(0))
                 .create();
 
@@ -187,35 +114,19 @@ public abstract class MAuthRedirectLinkDialog {
         });
         loginOverlay.setVisible(true);
     }
-    /**
-     * Copyright Marco Scherzer, All rights reserved
-     * unready
-     */
+
     public final void dispose() {
         dialog.getUIComponent().setVisible(false);
         dialog.getUIComponent().dispose();
         if (loginOverlay != null) loginOverlay.dispose();
     }
-    /**
-     * Copyright Marco Scherzer, All rights reserved
-     * unready
-     */
+
     protected abstract void onException(Exception exc);
-    /**
-     * Copyright Marco Scherzer, All rights reserved
-     * unready
-     */
+
     protected abstract void onCanceled();
-    /**
-     * Copyright Marco Scherzer, All rights reserved
-     * unready
-     */
+
     protected abstract void onDontShowAgainSelected();
 }
-
-
-
-
 
 
 

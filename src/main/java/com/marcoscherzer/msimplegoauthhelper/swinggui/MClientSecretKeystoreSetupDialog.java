@@ -53,7 +53,6 @@ public final class MClientSecretKeystoreSetupDialog {
     private String[] buildAndShowDialog() {
         // Eingabefelder mit Platzhaltertext
         JTextField fromField = new JTextField("Account email address");
-        JTextField toField   = new JTextField("Recipient email address");
         JPasswordField pwField = new JPasswordField("Program startup password");
         JTextField jsonPathField = new JTextField("client_secret.json file");
         jsonPathField.setEditable(false);
@@ -93,7 +92,6 @@ public final class MClientSecretKeystoreSetupDialog {
         rp.gridx = 0; rp.gridy = 0; rp.weightx = 1.0; rp.fill = GridBagConstraints.HORIZONTAL;
         rp.insets = new Insets(5,5,5,5);
 
-        // Labels fett und kleiner
         Font baseFont = fromField.getFont();
         Font labelFont = baseFont.deriveFont(Font.BOLD, baseFont.getSize() - 2f);
 
@@ -154,7 +152,6 @@ public final class MClientSecretKeystoreSetupDialog {
         );
 
         if (option == JOptionPane.OK_OPTION) {
-            String from = fromField.getText().trim();
             String pw   = new String(pwField.getPassword());
             String jsonPath = jsonPathField.getText().trim();
 
@@ -172,7 +169,7 @@ public final class MClientSecretKeystoreSetupDialog {
                 return new MClientSecretKeystoreSetupDialog().buildAndShowDialog();
             }
 
-            return new String[]{from, pw, jsonPath};
+            return new String[]{pw, jsonPath};
         } else {
             return null;
         }
