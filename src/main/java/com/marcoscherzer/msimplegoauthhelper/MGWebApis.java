@@ -227,7 +227,12 @@ public class MGWebApis {
         public EnumSet<MSupportedLogins> getLoginTypes();
     }
 
+
     // --- Basis / Identity ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Identity implements MScopeEnum {
         PLUS_ME(new MScope(Oauth2Scopes.PLUS_ME, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         PLUS_LOGIN(new MScope(Oauth2Scopes.PLUS_LOGIN, EnumSet.of(MSupportedLogins.OAUTHUSER))),
@@ -241,6 +246,10 @@ public class MGWebApis {
     }
 
     // --- Gmail ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Gmail implements MScopeEnum {
         GMAIL_SEND(new MScope(GmailScopes.GMAIL_SEND, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         GMAIL_READONLY(new MScope(GmailScopes.GMAIL_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
@@ -255,6 +264,10 @@ public class MGWebApis {
     }
 
     // --- Drive ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Drive implements MScopeEnum {
         DRIVE(new MScope(DriveScopes.DRIVE, EnumSet.of(MSupportedLogins.OAUTHUSER, MSupportedLogins.OAUTHSERVICEACCOUNT))),
         DRIVE_FILE(new MScope(DriveScopes.DRIVE_FILE, EnumSet.of(MSupportedLogins.OAUTHUSER))),
@@ -270,6 +283,10 @@ public class MGWebApis {
     }
 
     // --- Calendar ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Calendar implements MScopeEnum {
         CALENDAR_READONLY(new MScope(CalendarScopes.CALENDAR_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         CALENDAR(new MScope(CalendarScopes.CALENDAR, EnumSet.of(MSupportedLogins.OAUTHUSER)));
@@ -281,6 +298,10 @@ public class MGWebApis {
     }
 
     // --- People / Contacts ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum People implements MScopeEnum {
         CONTACTS(new MScope(PeopleServiceScopes.CONTACTS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         CONTACTS_READONLY(new MScope(PeopleServiceScopes.CONTACTS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
@@ -294,6 +315,10 @@ public class MGWebApis {
     }
 
     // --- Tasks ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Tasks implements MScopeEnum {
         TASKS(new MScope(TasksScopes.TASKS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         TASKS_READONLY(new MScope(TasksScopes.TASKS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
@@ -305,6 +330,10 @@ public class MGWebApis {
     }
 
     // --- Classroom ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Classroom implements MScopeEnum {
         CLASSROOM_COURSES(new MScope(ClassroomScopes.CLASSROOM_COURSES, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         CLASSROOM_ROSTERS(new MScope(ClassroomScopes.CLASSROOM_ROSTERS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
@@ -317,6 +346,10 @@ public class MGWebApis {
     }
 
     // --- YouTube ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum YouTube implements MScopeEnum {
         YOUTUBE(new MScope(YouTubeScopes.YOUTUBE, EnumSet.of(MSupportedLogins.OAUTHUSER, MSupportedLogins.APIKEY))),
         YOUTUBE_READONLY(new MScope(YouTubeScopes.YOUTUBE_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER, MSupportedLogins.APIKEY))),
@@ -332,6 +365,10 @@ public class MGWebApis {
     }
 
     // --- YouTube Analytics ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum YouTubeAnalytics implements MScopeEnum {
         YT_ANALYTICS_READONLY(new MScope(YouTubeAnalyticsScopes.YT_ANALYTICS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         YT_ANALYTICS_MONETARY_READONLY(new MScope(YouTubeAnalyticsScopes.YT_ANALYTICS_MONETARY_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
@@ -343,6 +380,10 @@ public class MGWebApis {
     }
 
     // --- Photos ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Photos implements MScopeEnum {
         PHOTOSLIBRARY(new MScope(PhotosLibraryScopes.PHOTOSLIBRARY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         PHOTOSLIBRARY_READONLY(new MScope(PhotosLibraryScopes.PHOTOSLIBRARY_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
@@ -354,6 +395,10 @@ public class MGWebApis {
     }
 
     // --- Analytics ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Analytics implements MScopeEnum {
         ANALYTICS(new MScope(AnalyticsScopes.ANALYTICS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         ANALYTICS_READONLY(new MScope(AnalyticsScopes.ANALYTICS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
@@ -365,7 +410,10 @@ public class MGWebApis {
     }
 
     // --- Cloud Platform ---
-    // --- Cloud Platform ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Cloud implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(CloudResourceManagerScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHUSER, MSupportedLogins.OAUTHSERVICEACCOUNT))),
         BIGQUERY(new MScope(BigqueryScopes.BIGQUERY, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT))),
@@ -381,6 +429,10 @@ public class MGWebApis {
     }
 
     // --- Ads / Monetarisierung ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Ads implements MScopeEnum {
         ADSENSE(new MScope(AdsenseScopes.ADSENSE, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         ADSENSE_READONLY(new MScope(AdsenseScopes.ADSENSE_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
@@ -421,6 +473,10 @@ public class MGWebApis {
     }
 
     // --- Fitness ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Fitness implements MScopeEnum {
         FITNESS_ACTIVITY_READ(new MScope(FitnessScopes.FITNESS_ACTIVITY_READ, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         FITNESS_ACTIVITY_WRITE(new MScope(FitnessScopes.FITNESS_ACTIVITY_WRITE, EnumSet.of(MSupportedLogins.OAUTHUSER))),
@@ -436,6 +492,10 @@ public class MGWebApis {
     }
 
     // --- Tag Manager ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum TagManager implements MScopeEnum {
         TAGMANAGER_EDIT_CONTAINERS(new MScope(TagManagerScopes.TAGMANAGER_EDIT_CONTAINERS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         TAGMANAGER_READONLY(new MScope(TagManagerScopes.TAGMANAGER_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
@@ -450,6 +510,10 @@ public class MGWebApis {
     }
 
     // --- Webmasters ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Webmasters implements MScopeEnum {
         WEBMASTERS(new MScope(WebmastersScopes.WEBMASTERS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         WEBMASTERS_READONLY(new MScope(WebmastersScopes.WEBMASTERS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
@@ -461,6 +525,10 @@ public class MGWebApis {
     }
 
     // --- Produktivität ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Docs implements MScopeEnum {
         DOCUMENTS(new MScope(DocsScopes.DOCUMENTS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         DOCUMENTS_READONLY(new MScope(DocsScopes.DOCUMENTS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
@@ -471,6 +539,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Sheets implements MScopeEnum {
         SPREADSHEETS(new MScope(SheetsScopes.SPREADSHEETS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         SPREADSHEETS_READONLY(new MScope(SheetsScopes.SPREADSHEETS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
@@ -481,6 +553,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Slides implements MScopeEnum {
         PRESENTATIONS(new MScope(SlidesScopes.PRESENTATIONS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         PRESENTATIONS_READONLY(new MScope(SlidesScopes.PRESENTATIONS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
@@ -490,7 +566,10 @@ public class MGWebApis {
         @Override public final String toString() { return info.getUrl(); }
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
-
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Keep implements MScopeEnum {
         KEEP(new MScope(KeepScopes.KEEP, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         KEEP_READONLY(new MScope(KeepScopes.KEEP_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER)));
@@ -502,6 +581,10 @@ public class MGWebApis {
     }
 
     // --- KI / Vision / Übersetzung ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Vision implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(VisionScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
@@ -511,6 +594,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Translate implements MScopeEnum {
         CLOUD_TRANSLATION(new MScope(TranslateScopes.CLOUD_TRANSLATION, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;
@@ -521,6 +608,10 @@ public class MGWebApis {
     }
 
     // --- Cloud Platform ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Pubsub implements MScopeEnum {
         PUBSUB(new MScope(PubsubScopes.PUBSUB, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT))),
         CLOUD_PLATFORM(new MScope(PubsubScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
@@ -531,6 +622,11 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Spanner implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(SpannerScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
@@ -540,6 +636,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum SQLAdmin implements MScopeEnum {
         SQLSERVICE_ADMIN(new MScope(SQLAdminScopes.SQLSERVICE_ADMIN, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
@@ -549,6 +649,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Firestore implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(FirestoreScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
@@ -558,6 +662,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Logging implements MScopeEnum {
         LOGGING_ADMIN(new MScope(LoggingScopes.LOGGING_ADMIN, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT))),
         LOGGING_READ(new MScope(LoggingScopes.LOGGING_READ, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
@@ -568,6 +676,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Monitoring implements MScopeEnum {
         MONITORING(new MScope(MonitoringScopes.MONITORING, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT))),
         MONITORING_READ(new MScope(MonitoringScopes.MONITORING_READ, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
@@ -578,6 +690,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum CloudKMS implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(CloudKMSScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
@@ -587,6 +703,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum CloudIot implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(CloudIotScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
@@ -596,6 +716,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum CloudFunctions implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(CloudFunctionsScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
@@ -605,6 +729,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum CloudRun implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(CloudRunScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
@@ -614,6 +742,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Container implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(ContainerScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
@@ -623,6 +755,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum DeploymentManager implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(DeploymentManagerScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
@@ -632,6 +768,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum ServiceNetworking implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(ServiceNetworkingScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
@@ -641,6 +781,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum CloudIdentity implements MScopeEnum {
         CLOUD_IDENTITY_GROUPS(new MScope(CloudIdentityScopes.CLOUD_IDENTITY_GROUPS, EnumSet.of(MSupportedLogins.OAUTHUSER))),
         CLOUD_IDENTITY_GROUPS_READONLY(new MScope(CloudIdentityScopes.CLOUD_IDENTITY_GROUPS_READONLY, EnumSet.of(MSupportedLogins.OAUTHUSER))),
@@ -652,6 +796,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Iam implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(IamScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
@@ -661,6 +809,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum CloudML implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(CloudMachineLearningEngineScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
@@ -670,6 +822,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Dialogflow implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(DialogflowScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
@@ -679,6 +835,10 @@ public class MGWebApis {
         public final EnumSet<MSupportedLogins> getLoginTypes() { return info.getLoginTypes(); }
     }
 
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Apigee implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(ApigeeScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
         private final MScope info;
@@ -689,6 +849,10 @@ public class MGWebApis {
     }
 
     // --- Cloud Platform / Billing ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Cloudbilling implements MScopeEnum {
         CLOUD_PLATFORM(new MScope(CloudbillingScopes.CLOUD_PLATFORM, EnumSet.of(MSupportedLogins.OAUTHSERVICEACCOUNT)));
 
@@ -700,6 +864,10 @@ public class MGWebApis {
     }
 
     // --- Play Custom App ---
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer
+     * unready
+     */
     public enum Playcustomapp implements MScopeEnum {
         ANDROIDPUBLISHER(new MScope(PlaycustomappScopes.ANDROIDPUBLISHER, EnumSet.of(MSupportedLogins.OAUTHUSER)));
         private final MScope info;

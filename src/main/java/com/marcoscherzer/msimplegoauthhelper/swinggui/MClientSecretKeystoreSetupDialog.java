@@ -19,42 +19,21 @@ import static com.marcoscherzer.msimplekeystore.MSimpleKeystoreUtil.checkPasswor
  */
 public final class MClientSecretKeystoreSetupDialog {
 
+    private JPasswordField pwField;
+    private JTextField jsonPathField;
     private String[] result;
     private Exception capturedException;
+    private Object[] message;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      *   * uready
      */
-    public final String[] showAndWait() throws InterruptedException, InvocationTargetException, Exception {
-        Runnable task = () -> {
-            try {
-                result = buildAndShowDialog();
-            } catch (Exception e) {
-                capturedException = e;
-            }
-        };
-
-        if (SwingUtilities.isEventDispatchThread()) {
-            task.run();
-        } else {
-            SwingUtilities.invokeAndWait(task);
-        }
-
-        if (capturedException != null) {
-            throw capturedException;
-        }
-        return result;
-    }
-
-    /**
-     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    private String[] buildAndShowDialog() {
+    public MClientSecretKeystoreSetupDialog(){
         // Eingabefelder mit Platzhaltertext
         JTextField fromField = new JTextField("Account email address");
-        JPasswordField pwField = new JPasswordField("Program startup password");
-        JTextField jsonPathField = new JTextField("client_secret.json file");
+        pwField = new JPasswordField("Program startup password");
+        jsonPathField = new JTextField("client_secret.json file");
         jsonPathField.setEditable(false);
 
         // FileChooser-Button direkt neben dem JSON-Feld
@@ -136,13 +115,53 @@ public final class MClientSecretKeystoreSetupDialog {
         rp.gridy++;
 
         // Dialog-Inhalt
-        Object[] message = {
-                heading, null,
-                infoLabel, null,
-                spacer, null,
-                rowsPanel
+         message = new Object[]{
+                 heading, null,
+                 infoLabel, null,
+                 spacer, null,
+                 rowsPanel
+         };
+    }
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private MClientSecretKeystoreSetupDialog(char[] pw,String jsonPath){
+        this();
+        pwField.setText(new String(pw));
+        jsonPathField.setText(jsonPath);
+    }
+
+
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     *   * uready
+     */
+    public final String[] showAndWait() throws InterruptedException, InvocationTargetException, Exception {
+        Runnable task = () -> {
+            try {
+                result = buildAndShowDialog();
+            } catch (Exception e) {
+                capturedException = e;
+            }
         };
 
+        if (SwingUtilities.isEventDispatchThread()) {
+            task.run();
+        } else {
+            SwingUtilities.invokeAndWait(task);
+        }
+
+        if (capturedException != null) {
+            throw capturedException;
+        }
+        return result;
+    }
+
+    /**
+     * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private String[] buildAndShowDialog() {
         int option = JOptionPane.showConfirmDialog(
                 null,
                 message,
@@ -150,6 +169,7 @@ public final class MClientSecretKeystoreSetupDialog {
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.INFORMATION_MESSAGE
         );
+
 
         if (option == JOptionPane.OK_OPTION) {
             String pw   = new String(pwField.getPassword());
@@ -166,7 +186,7 @@ public final class MClientSecretKeystoreSetupDialog {
                 StringBuilder sb = new StringBuilder("Invalid format(s):\n");
                 for (String err : errors) sb.append("* ").append(err).append("\n");
                 JOptionPane.showMessageDialog(null, sb.toString(), "Error", JOptionPane.ERROR_MESSAGE);
-                return new MClientSecretKeystoreSetupDialog().buildAndShowDialog();
+                return new MClientSecretKeystoreSetupDialog(pwField.getPassword(),jsonPathField.getText().trim()).buildAndShowDialog();
             }
 
             return new String[]{pw, jsonPath};

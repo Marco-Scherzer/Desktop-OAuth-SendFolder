@@ -141,7 +141,6 @@ public final class MSimpleDialog {
             dialog.setVisible(true);
         };
 
-        // Abfrage: läuft bereits auf dem Swing-Thread?
         if (SwingUtilities.isEventDispatchThread()) {
             task.run();
         } else {
