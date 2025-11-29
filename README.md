@@ -119,6 +119,11 @@ MGWebApis.GMail.GMAIL_SEND, MGWebApis.GMail.GMAIL_READONLY,
 MGWebApis.GMail.GMAIL_COMPOSE, MGWebApis.GMail.GMAIL_MODIFY, MGWebApis.GMail.GMAIL_LABELS
 ```
 
+### Legal Notice
+The constant names listed above refer to publicly documented **Google Web APIs and their services**.  
+They are the property of Google LLC and are used here solely for technical integration and programming purposes.  
+The use of these constants is subject to the [Google API Terms of Service](https://developers.google.com/terms).
+
 
 ## Central class MSimpleOAuthHelper (Implements the whole OAuth flow)
 ### Takes the `.p12` keystore with the clientSecret and the scope constants and performs the OAuth.
