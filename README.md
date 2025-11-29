@@ -28,8 +28,8 @@ this text will also include the license and the exact location where the binarie
 
 ## Repository Sale Notice
 
-This repository is offered for sale at its current code state.  
-If you are interested, please contact me via my listed email address.
+This repository is offered for sale in its current, up‑to‑date code state. 
+If you are interested, please contact me via my listed email address
 
 **Important Notice:** 
 For security reasons, contracts are concluded exclusively after personal identification and presentation of the buyer’s official ID document in the presence of my trusted notary in Karlsruhe, Germany.
