@@ -1,6 +1,10 @@
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer
  * G. Web-API Scopes
+ * ### Legal Notice
+ * The used constant names in this file refer to publicly documented **Google Web APIs and their services**.
+ * They are the property of Google LLC and are used here solely for technical integration and programming purposes.
+ * The use of these names is subject to the [Google API Terms of Service](https://developers.google.com/terms).
  * unready
  */
 package com.marcoscherzer.msimplegoauthhelper;
@@ -76,8 +80,12 @@ import java.util.*;
 
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer
- * G. Web-API Scopes
- * unready
+ *  * ### Legal Notice
+ *  * G. Web-API Scopes
+ *  * unready
+ *  * The used constant names in this file refer to publicly documented **Google Web APIs and their services**.
+ *  * These names are the property of Google LLC and are used here solely for technical integration and programming purposes.
+ *  * The use of these names is subject to the [Google API Terms of Service](https://developers.google.com/terms).
  */
 public class MGWebApis {
 
