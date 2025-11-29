@@ -3,7 +3,6 @@ package com.marcoscherzer.msimplegoauthmailserviceapplication;
 import com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme;
 import com.google.api.client.auth.oauth2.Credential;
 import com.marcoscherzer.msimplegoauthhelper.MGWebApis;
-import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthKeystore;
 import com.marcoscherzer.msimplegoauthhelper.swinggui.MAuthDialogsFlow;
 import com.marcoscherzer.msimplegoauthmailservice.MMailService;
 import com.marcoscherzer.msimplegoauthmailservice.MOutgoingMail;
@@ -14,7 +13,6 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 

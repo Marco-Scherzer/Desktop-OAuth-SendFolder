@@ -1,5 +1,6 @@
-#  Desktop OAuth Send Folder
-## A spontaneous mini project focused on simplicity and security.
+## This is the Page of  
+## OAuth Secure Login Nano Framework (implemented to work with Google Services)
+## Example Implementation: OAuth mail client for sending emails with attachments
 <br>
 <br>
 
@@ -56,7 +57,7 @@ If you find the code or binaries anywhere other than at
 [https://github.com/Marco-Scherzer](https://github.com/Marco-Scherzer),  
 it is abuse, a scam, and theft of law‑protected intellectual property.
 
-In such a case, please inform GitHub and send me an email.
+In such a case, please inform GitHub and email me.
 
 ---
 
@@ -94,83 +95,92 @@ If you have information pointing to criminal acts as described under points 1–
 <br>
 <br>
 <br>
+# OAuth Secure Login Nano Framework (implemented to work with Google Services)
 
-### A simple, security focused OAuth mail client for sending emails with attachments, triggered by a desktop folder icon.
-### Requires an email account (tested with Gmail) and a clientSecret.json file provided by Google.
-### Redirects you to the OAuth login page hosted by Google.
-### Creates a special outgoing mail folder icon linked on the desktop to send mail. 
-### After the folder-icon is clicked or contents are added to the folder by drag and drop or script, an email-send dialog appears to ask the user for consent and to change the recipient, subject or mail text.
-### If the user agrees the mail is sent from the configured sender email address to the receiver email address.
-### Multiple send windows can be opened by using the same simple click or drag-and-drop gesture.
+## Central class MSimpleKeystore / MSimpleOAuthKeystoreManager
+### Creates or uses a password-protected `.p12` database and securely stores `clientSecret.json` in it. Handleable like a map.
 
- ## Features
+## Central class MGWebApis
+### Hierarchic constant class of many web-apis and scope-urls Google offers as a service.
+### (Internally used classes are auto-updatable (with up-to-date URLs) by versions-properties/build script)
+### Current top-level constants: 
+``` 
+Identity, Gmail, Drive, Calendar, People, Tasks, Classroom, YouTube, YouTubeAnalytics
+Photos, Analytics, Cloud, Ads, Admin, Play, Fitness, TagManager, Webmasters, Docs  
+Sheets, Slides, Keep, Vision, Translate, Pubsub, Spanner, SQLAdmin, Firestore, Logging  
+ Monitoring, CloudKMS, CloudIot, CloudFunctions, CloudRun, Container, DeploymentManager  
+ServiceNetworking, CloudIdentity, Iam, CloudML, Dialogflow, Apigee, Cloudbilling, Playcustomapp
+```
 
-### - OAuth 2.0 authentication without persisting OAuth tokens.
-
-### - client_secret.json file is stored in secure encrypted PKCS#12 database
-
-### - Application startup access password protection
-
-### - Attachments Desktop Folder triggerd email window appearance:
-    If attachments are added by drag and drop or script to the special outgoing mail folder icon linked on the Desktop, 
-    this part of the Application sends the links via TCP to the main part of the Application 
-    and an email send-dialog appears to send a mail.
-    Introduced for security reasons, the dialog requests user consent before sending.
-    Additional advantages: The user can also change the the recipient, the subject line or write a simple text message.
-    Multiple send windows can be opened by using the same simple click or drag-and-drop gesture.
-
-### - One time setup of default sender address
-
-### - usable inside of scripts (timed backups,...) but a secure way
-
-### - Sender email address is stored in secure encrypted PKCS#12 database
-
-### - Uses App Directory UUID-Name Folders as Mail Folder Names
-
-### - Uses the generated UUID in both the internal client name and default email metadata for additional verifiability
-
-### - Writes links of sent files to a "Sent Things" Desktop link folder and stores them with a timestamp name.
-
-### - Writes links of not sent files to a "Not Sent Things" Desktop link folder and stores them with a timestamp name.
+### Every top-level constant has one or more selectable scope-urls Google offers as a service:
+### For example:
+```
+MGWebApis.GMail.GMAIL_SEND, MGWebApis.GMail.GMAIL_READONLY, 
+MGWebApis.GMail.GMAIL_COMPOSE, MGWebApis.GMail.GMAIL_MODIFY, MGWebApis.GMail.GMAIL_LABELS
+```
 
 
+## Central class MSimpleOAuthHelper (Implements the whole OAuth flow)
+### Takes the `.p12` keystore with the clientSecret and the scope constants and performs the OAuth.
+### Has an abstract method `onStartOAuth(String oAuthLink, MMutableBoolean continueOAuthOrNot)`
+### to help implement an OAuth Flow user dialog.
+### Has an abstract method  `onOAuthSucceeded(Credential credential, String applicationName)` to easily work with the resulting credential (for example to use it in a service client).
+### Has methods to clean up securely: `revokeOAuthTokenFromServer();` and `removePersistedOAuthToken()`.
 
+```java
+public abstract class MSimpleOAuthHelper {
+    public MSimpleOAuthHelper(MSimpleOAuthKeystoreManager keystore, String applicationName, boolean doNotPersistOAuthToken, String... scopes);
+    protected abstract void onStartOAuth(String oAuthLink, MMutableBoolean continueOAuthOrNot);
+    protected abstract void onOAuthSucceeded(Credential credential, String applicationName);
+    public final void revokeOAuthTokenFromServer();
+    public final void removePersistedOAuthToken();
+    
+}
 
+```
+# In productivity usable Example GUI OAuth-Flow (Example implementation for OAuth Secure Login Nano Framework)
 
-
-<br>
-
-## Runtime Output
-
-### > Please enter your password: testTesttest-123
-
-### loading keystore Z:\OAuth-Desktop-FileSend-Folder\mystore.p12
-
-### Please open the following address in your browser:
-###  https://accounts.google.com/o/oauth2/...
-
-==========================================================================
-##              OAuth Desktop FileSend Folder
-## (A mini project focusing on simplicity and security)
-## Author : Marco Scherzer Copyright: © Marco Scherzer. All rights reserved. 
-==========================================================================
-
-## Welcome Mail Sender!
-
-## Base Path: Z:\MarcoScherzer-Projects\MSendBackupMail\mail
-## Outgoing Folder: 6a132b05-9f36-49f0-8399-301e4692c643
-## Sent Folder: 6a132b05-9f36-49f0-8399-301e4692c643-sent
-
-## Sender Address : fahrservice.1@gmail.com 
-## Receiver Address : fahrservice.1@gmail.com
-
-## New files added to the 'Outgoing Things' folder on your Desktop 
-## will be automatically sent via email.
-## After sending, they will be moved to the 'Sent Things' folder.
-
-
+### 1. Setup dialog for storing `clientSecret.json` in secure `.p12` database  
+### 2.1 OAuth login user info dialog (optionally selectable to show only this time)  
+### 2.2 If set up, a password dialog is shown next time before starting OAuth login  
+### Usable also as general application password dialog (like in OAuth Secure Login Email Client Example)  
+### Waiting-overlay(including blue spinner) for guiding the secure browser login and offering a "back" possibility  
 
 ---
+
+# OAuth Secure Login Email Client for sending emails with attachments (Example Implementation for GUI OAuth-Flow Example Implementation)
+
+### Works file-drop triggered by dropping files on its desktop icon.
+### After the folder-icon is clicked or contents are added to the folder by drag and drop or script, an email-send dialog appears to ask the user for consent and to change the recipient, subject, or mail text
+### Saves the client secret in a secure database  
+### A simple, security-focused OAuth mail client for sending emails with attachments, triggered by a desktop folder icon  
+### Requires an email account (tested with Gmail) and a `clientSecret.json` file provided by Google  
+### Redirects you to the OAuth login page hosted by Google  
+### Creates a special outgoing mail folder icon linked on the desktop to send mail  
+
+### If the user agrees, the mail is sent from the configured sender email address to the receiver email address  
+### Multiple send windows can be opened by using the same simple click or drag-and-drop gesture
+
+## Features
+
+- OAuth 2.0 authentication without persisting OAuth tokens
+- `client_secret.json` file is stored in secure encrypted PKCS#12 database
+- Application startup access password protection
+- Attachments Desktop Folder triggered email window appearance:  
+  If attachments are added by drag and drop or script to the outgoing mail folder icon linked on the Desktop,  
+  this part of the application sends the file-paths via TCP to the main part of the application,  
+  and an email send-dialog appears to send a mail and to request user consent.
+- If the outgoing mail folder icon linked on the Desktop is clicked, just the email send dialog opens.  
+  The user can change the recipient, the subject line, or write a simple text message.  
+  Multiple send windows can be opened by using the same simple click or drag-and-drop gesture.
+- One-time setup of account email address
+- Usable inside of scripts (timed backups, …)
+- Account email address is stored in secure encrypted PKCS#12 database
+- Uses App Directory UUID-Name Folders as Mail Folder Names
+- Writes links of sent files to a "Sent Things" Desktop link folder and stores them with a timestamp name
+- Writes links of not sent files to a "Not Sent Things" Desktop link folder and stores them with a timestamp name
+
+
 <br>
 <br>
 <br>

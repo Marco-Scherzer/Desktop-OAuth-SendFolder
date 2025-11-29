@@ -13,14 +13,14 @@ import java.util.UUID;
 /**
  * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MSimpleOAuthKeystore {
+public final class MSimpleOAuthKeystoreManager {
 
     private MSimpleKeystore keystore;
 
     /**
      * @author Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleOAuthKeystore(String keystorePassword, String clientSecretJsonFile, String keystoreFilePath) throws MKeystoreException, MClientSecretException, MPasswordComplexityException, MPasswordIntegrityException, IOException {
+    public MSimpleOAuthKeystoreManager(String keystorePassword, String clientSecretJsonFile, String keystoreFilePath) throws MKeystoreException, MClientSecretException, MPasswordComplexityException, MPasswordIntegrityException, IOException {
         File jsonFile = new File(clientSecretJsonFile);
         File keyStoreFile = new File(keystoreFilePath);
         keystore = new MSimpleKeystore(keyStoreFile, keystorePassword);

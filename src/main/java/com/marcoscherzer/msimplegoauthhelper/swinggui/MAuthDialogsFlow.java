@@ -2,7 +2,7 @@ package com.marcoscherzer.msimplegoauthhelper.swinggui;
 import com.google.api.client.auth.oauth2.Credential;
 import com.marcoscherzer.msimplegoauthhelper.MMutableBoolean;
 import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthHelper;
-import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthKeystore;
+import com.marcoscherzer.msimplegoauthhelper.MSimpleOAuthKeystoreManager;
 import com.marcoscherzer.msimplekeystore.MSimpleKeystore;
 
 import javax.swing.*;
@@ -19,7 +19,7 @@ import static com.marcoscherzer.msimplegoauthmailserviceapplication.MMain.exit;
 public abstract class MAuthDialogsFlow {
 
     private MSimpleOAuthHelper oAuthHelper;
-    private MSimpleOAuthKeystore store;
+    private MSimpleOAuthKeystoreManager store;
     private MAuthRedirectLinkDialog appRedirectLinkDialog;
     private String keystorePath;
 
@@ -52,7 +52,7 @@ public abstract class MAuthDialogsFlow {
             String pw = setupedValues[0];
             String clientSecretPath = setupedValues[1];
             // Keystore erstellen mit ausgewähltem client_secret.json
-            store = new MSimpleOAuthKeystore(pw, clientSecretPath, keystorePath);
+            store = new MSimpleOAuthKeystoreManager(pw, clientSecretPath, keystorePath);
             statusMsg("Setup completed.");
             System.out.println("setup completed");
         } catch (Exception exc){
@@ -72,7 +72,7 @@ public abstract class MAuthDialogsFlow {
             new MPwDialog()
                     .setOkHandler(pw -> {
                         try {
-                            store = new MSimpleOAuthKeystore(pw, "", keystorePath);
+                            store = new MSimpleOAuthKeystoreManager(pw, "", keystorePath);
                             System.out.println("Access-level 1 granted: Application");
                             //statusMsg("Access-level 1 granted: Application\n");
                         } catch (Exception exc){
