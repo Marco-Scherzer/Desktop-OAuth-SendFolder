@@ -52,11 +52,15 @@ To prevent scamming, theft of intellectual property, and the deception of person
 
 ## 1. Abuse and Phishing
 
-To prevent abuse or phishing, there are no other websites, email addresses, or communication channels connected to the software on this page except the listed official email address.
+To protect against abuse and phishing, please note:
+There are **no other websites, email addresses, or communication channels** associated with this software except the official contact listed here.
 
-If you find the code or binaries anywhere other than at  
-[https://github.com/Marco-Scherzer](https://github.com/Marco-Scherzer),  
-it is abuse, a scam, and theft of law‑protected intellectual property.
+If you encounter the code or binaries anywhere other than:
+
+- [https://github.com/Marco-Scherzer](https://github.com/Marco-Scherzer)
+- The same repository archived in the Wayback Machine (pre‑publication archiving)
+
+then it constitutes **abuse, a scam, and theft of law‑protected intellectual property**.
 
 In such a case, please inform GitHub and email me.
 
